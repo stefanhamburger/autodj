@@ -4,7 +4,7 @@
         startLink.parentNode.removeChild(startLink);
 
         //start new session
-        const response = await fetch('/init');
+        const response = await fetch('init');
         const json = await response.json();
         const { sid } = json;
 

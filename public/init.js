@@ -27,7 +27,7 @@
                     mediaSource,
                     sourceBuffer,
                 });
-            }, 5000);
+            }, 10000);
 
             //for debugging
             window.audioEle = audioEle;

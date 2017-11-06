@@ -1,6 +1,7 @@
 const fs = require('fs');
+const path = require('path');
 
-const PATH_SEPARATOR = '\\';//can also be /
+const PATH_SEPARATOR = path.sep;
 const SUPPORTED_EXTENSIONS = ['mp3', 'wav', 'ogg'];
 
 const getFileStats = async file => new Promise((resolve) => {
@@ -10,13 +11,13 @@ const getFileStats = async file => new Promise((resolve) => {
 });
 
 //returns the list of audio files in the given directory and its subdirectories
-const getFolderContents = async path => new Promise((resolve) => {
-    fs.readdir(path, async (err, files) => {
+const getFolderContents = async dirPath => new Promise((resolve) => {
+    fs.readdir(dirPath, async (err, files) => {
         if (err) {
             resolve([]);
         } else {
             const out = [].concat(...(await Promise.all(files.map(async (file) => {
-                const stats = await getFileStats(path + PATH_SEPARATOR + file);
+                const stats = await getFileStats(dirPath + PATH_SEPARATOR + file);
                 if (stats) {
                     if (stats.isFile()) {
                         const extensionStart = file.lastIndexOf('.');
@@ -28,12 +29,12 @@ const getFolderContents = async path => new Promise((resolve) => {
                                 extension,
                                 size: stats.size,
                                 lastMod: stats.mtime,
-                                path: path + PATH_SEPARATOR + file,
+                                path: dirPath + PATH_SEPARATOR + file,
                             }];
                         }
                     } else if (stats.isDirectory()) {
                         //get all files in this directory
-                        const subfiles = await getFolderContents(path + PATH_SEPARATOR + file);
+                        const subfiles = await getFolderContents(dirPath + PATH_SEPARATOR + file);
                         return subfiles;
                     }
                 }

@@ -14,5 +14,9 @@
     "express": "^4.16.2",
     "ffmpeg-stream": "^0.5.0",
     "mp3": "^0.1.0"
+  },
+  "repository": {
+    "type" : "git",
+    "url" : "https://github.com/stefanhamburger/autodj.git"
   }
 }

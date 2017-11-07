@@ -39,7 +39,7 @@ module.exports.decodeAudio = async path => new Promise((resolve, reject) => {
                 //console.log('Sample rate in ' + path + ' is not 48k Hz but 44.1k Hz so we must resample!');
                 const leftChannel = getChannel({ waveform: waveformBuffer, curChannel: 0 });
                 const rightChannel = getChannel({ waveform: waveformBuffer, curChannel: 1 });
-                waveformBuffer = resample(waveformBuffer, leftChannel, rightChannel);
+                //waveformBuffer = resample(waveformBuffer, leftChannel, rightChannel);
             } else if (asset.format.sampleRate !== 48000) {
                 reject(new Error('Sample rate ' + asset.format.sampleRate + ' Hz not supported.'));
             }

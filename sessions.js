@@ -36,6 +36,7 @@ module.exports.newSession = () => {
     const sessionObj = { sid };
     sessions[sid] = sessionObj;
     module.exports.lifeSign(sessionObj);
+    console.log('[' + sid + '] Starting new session...');
 
     return { sid, obj: sessionObj };
 };

@@ -40,6 +40,9 @@ module.exports.createNewInstance = () => {
             outputBuffer = [];
             return out;
         },
-        killCommand: () => { ffmpegInstance.kill(); },
+        killCommand: () => {
+            outputWritable.end();
+            //ffmpegInstance.kill();
+        },
     };
 };

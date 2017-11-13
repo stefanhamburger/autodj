@@ -46,10 +46,10 @@ const getFolderContents = async dirPath => new Promise((resolve) => {
 });
 
 const getFolders = () => {
-    const buffer = fs.readFileSync('music.json');
+    const buffer = fs.readFileSync('settings.json');
     return JSON.parse(buffer);
 };
 
-const musicFolders = getFolders();
-const files = getFolderContents(musicFolders[1].path);
+const musicFolders = getFolders().collections;
+const files = getFolderContents(musicFolders[Object.keys(musicFolders)[0]]);
 module.exports.getFiles = () => files;

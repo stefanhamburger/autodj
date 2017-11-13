@@ -35,14 +35,15 @@ module.exports.createNewInstance = () => {
     return {
         inputStream,
         getOutputBuffer: () => {
-            //returns the current contents of the output buffer, then clears it
+            //returns copy of the output buffer contents, then clears it
             const out = outputBuffer.slice(0);
             outputBuffer = [];
             return out;
         },
-        killCommand: () => {
+        killCommand: async () => {
             outputWritable.end();
-            //ffmpegInstance.kill();
+            await new Promise(resolve => setTimeout(() => resolve(), 10000));
+            ffmpegInstance.kill();
         },
     };
 };

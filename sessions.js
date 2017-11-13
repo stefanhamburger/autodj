@@ -19,8 +19,8 @@ const generateSID = () => {
     return out;
 };
 
-//set timeout when session obj is deleted to free up memory
-//any further attempt to access the session will reset the timeout timer
+//Indicates that the given session is still active and should not be deleted
+//By default, sessions are automatically deleted after SESSION_TIMEOUT to free up memory
 module.exports.lifeSign = (session) => {
     clearTimeout(session.timeout);
     const { sid } = session;

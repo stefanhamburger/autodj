@@ -3,4 +3,4 @@
 require('./fileManager.js');//start reading list of files
 require('./server.js');//start setting up server
 
-console.log('Server is running!');
+console.log('=== Server is running! ' + new Date().toString() + ' ===');

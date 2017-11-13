@@ -8,37 +8,37 @@ const SESSION_ID_LENGTH = 16;
 
 const hex = '0123456789abcdefghijklmnopqrstuvwxyz';
 const generateSID = () => {
-    let out = '';
-    for (let i = 0; i < SESSION_ID_LENGTH; i++) {
-        out += hex[Math.floor(Math.random() * hex.length)];
-    }
+  let out = '';
+  for (let i = 0; i < SESSION_ID_LENGTH; i++) {
+    out += hex[Math.floor(Math.random() * hex.length)];
+  }
 
-    //if session id is already in use, find another one - highly unlikely, that this happens
-    if (sessions[out] !== undefined) return generateSID();
+  //if session id is already in use, find another one - highly unlikely, that this happens
+  if (sessions[out] !== undefined) return generateSID();
 
-    return out;
+  return out;
 };
 
 //Indicates that the given session is still active and should not be deleted
 //By default, sessions are automatically deleted after SESSION_TIMEOUT to free up memory
 module.exports.lifeSign = (session) => {
-    clearTimeout(session.timeout);
-    const { sid } = session;
-    session.timeout = setTimeout(() => {
-        console.log('[' + sid + '] Session timed out.');
-        session.killCommand();
-        delete sessions[sid];
-    }, SESSION_TIMEOUT);
+  clearTimeout(session.timeout);
+  const { sid } = session;
+  session.timeout = setTimeout(() => {
+    console.log('[' + sid + '] Session timed out.');
+    session.killCommand();
+    delete sessions[sid];
+  }, SESSION_TIMEOUT);
 };
 
 module.exports.newSession = () => {
-    const sid = generateSID();
-    const sessionObj = { sid };
-    sessions[sid] = sessionObj;
-    module.exports.lifeSign(sessionObj);
-    console.log('[' + sid + '] Starting new session...');
+  const sid = generateSID();
+  const sessionObj = { sid };
+  sessions[sid] = sessionObj;
+  module.exports.lifeSign(sessionObj);
+  console.log('[' + sid + '] Starting new session...');
 
-    return { sid, obj: sessionObj };
+  return { sid, obj: sessionObj };
 };
 
 module.exports.getSession = sid => sessions[sid];

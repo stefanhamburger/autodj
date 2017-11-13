@@ -6,28 +6,28 @@
 //Gets a wrapper for the given channel from the waveform data
 module.exports.getChannel =
 ({ waveform, curChannel, numChannels = 2 } = {}) =>
-    ({
-        length: Math.ceil(waveform.length / numChannels),
-        get: index => waveform[numChannels * index + curChannel],
-        set: (index, value) => {
-            waveform[numChannels * index + curChannel] = value;
-        },
-    });
+  ({
+    length: Math.ceil(waveform.length / numChannels),
+    get: index => waveform[numChannels * index + curChannel],
+    set: (index, value) => {
+      waveform[numChannels * index + curChannel] = value;
+    },
+  });
 
 //Gets a wrapper for a mono stream based on the given stereo waveform data
 module.exports.getMono =
 ({ waveform } = {}) =>
-    ({
-        length: Math.ceil(waveform.length / 2),
-        get: index => (waveform[index * 2] + waveform[index * 2 + 1]) / 2,
-    });
+  ({
+    length: Math.ceil(waveform.length / 2),
+    get: index => (waveform[index * 2] + waveform[index * 2 + 1]) / 2,
+  });
 
 //Creates a interlaced stereo waveform from the given mono input
 module.exports.monoToStereo = (waveform) => {
-    const out = new Float32Array(waveform.length * 2);
-    for (let i = 0; i < waveform.length; i++) {
-        out[i * 2] = waveform[i];
-        out[i * 2 + 1] = waveform[i];
-    }
-    return out;
+  const out = new Float32Array(waveform.length * 2);
+  for (let i = 0; i < waveform.length; i++) {
+    out[i * 2] = waveform[i];
+    out[i * 2 + 1] = waveform[i];
+  }
+  return out;
 };

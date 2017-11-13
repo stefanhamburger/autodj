@@ -1,5 +1,5 @@
 const { Writable } = require('stream');
-const { ffmpeg } = require('ffmpeg-stream');
+const ffmpeg = require('./ffmpeg-stream.js');
 
 module.exports.createNewInstance = () => {
     const ffmpegInstance = ffmpeg();

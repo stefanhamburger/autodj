@@ -10,12 +10,12 @@ module.exports = {
     'rules': {
         'indent': [
             'error',
-            4,
+            2,
             { 'SwitchCase': 1 }
         ],
         'linebreak-style': [
             'error',
-            'windows'
+            'unix'
         ],
         'max-len': ['off'],
         'no-bitwise': ['off'],

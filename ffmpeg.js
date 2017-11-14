@@ -1,24 +1,56 @@
-const { Writable } = require('stream');
-const ffmpeg = require('./ffmpeg-stream.js');
+const { PassThrough, Writable } = require('stream');
+const { spawn } = require('child_process');
 
 module.exports.createNewInstance = () => {
-  const ffmpegInstance = ffmpeg();
+  //Create FFmpeg process
+  const process = spawn(
+    'ffmpeg',
+    //Command-line parameters
+    [
+      //input parameters
+      '-f', 'f32le', //our waveform data is an Float32Array, so the input is PCM 32-bit IEEE floating point in little endian
+      '-ar', '48k', //48,000 sample rate for highest quality
+      '-ac', '2', //two channels, stereo input
+      '-i', 'pipe:3',
+      //output parameters
+      '-f', 'webm', //Webm container
+      '-codec:a', 'libopus', //Opus codec
+      '-ar', '48k', //Opus only supports 48,000 sample rate
+      //'-b:a', '128k', //bitrate - TODO: replace this by 'q:a'
+      '-vn', //no video stream
+      '-map_metadata', '-1', //strip metadata
+      'pipe:4',
+    ],
+    //Process options
+    {
+      //ignore stdin + stdout, but pipe stderr + audio input + audio output
+      stdio: ['ignore', 'ignore', 'pipe', 'pipe', 'pipe'],
+    },
+  );
 
-  const inputStream = ffmpegInstance.input({
-    f: 'f32le', //our waveform data is an Float32Array, so the input is PCM 32-bit IEEE floating point in little endian
-    ar: '48k', //48,000 sample rate for highest quality
-    ac: '2', //two channels, stereo input
+  //Handle error messages
+  const errorLog = [];
+  process.stderr.setEncoding('utf8');
+  process.stderr.on('data', (data) => {
+    //FFmpeg has written an error message to the output
+    errorLog.push(data);
+  });
+  process.on('error', (err) => {
+    //There was an error starting/killing the process, or communicating with the process
+    console.log('FFmpeg process error', err);
+  });
+  process.on('exit', (code) => {
+    if (code && code !== 255) {
+      //FFmpeg has exited with an error code
+      console.log('FFmpeg conversion error', errorLog.join());
+    }
   });
 
-  //create an output stream
-  const outputStream = ffmpegInstance.output({
-    f: 'webm', //Webm container
-    'codec:a': 'libopus', //Opus codec
-    ar: '48k', //Opus only supports 48,000 sample rate
-    //'b:a': '128k', //bitrate - TODO: replace this by 'q:a'
-    vn: true, //no video stream
-    map_metadata: '-1', //strip metadata
-  });
+  //Pipe streams
+  const inputStream = new PassThrough();
+  inputStream.pipe(process.stdio[3]);
+  const outputStream = new PassThrough();
+  process.stdio[4].pipe(outputStream);
 
   //create Writable stream that stores the converted data
   let outputBuffer = [];
@@ -29,8 +61,6 @@ module.exports.createNewInstance = () => {
     },
   });
   outputStream.pipe(outputWritable);
-
-  ffmpegInstance.run();
 
   return {
     inputStream,
@@ -46,7 +76,7 @@ module.exports.createNewInstance = () => {
       outputWritable.end();
       await new Promise(resolve => setTimeout(() => resolve(), 10000));
       //Forcefully kill the FFmpeg process
-      ffmpegInstance.kill();
+      process.kill('SIGKILL');
     },
   };
 };

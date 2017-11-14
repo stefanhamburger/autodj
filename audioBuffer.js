@@ -1,5 +1,5 @@
 const fileManager = require('./fileManager.js');
-const ffmpeg = require('./ffmpeg-stream2.js');
+const ffmpeg = require('./ffmpeg.js');
 const { decodeAudio } = require('./audioDecoder.js');
 
 //number of samples to preload - this controls how fast the server can react to input from the client, so should be kept as small as possible

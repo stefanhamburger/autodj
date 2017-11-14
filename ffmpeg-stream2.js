@@ -64,7 +64,7 @@ module.exports.createNewInstance = () => {
 
   return {
     inputStream,
-    getOutputBuffer: () => () => {
+    getOutputBuffer: () => {
       //returns copy of the output buffer contents, then clears it
       const out = outputBuffer.slice(0);
       outputBuffer = [];

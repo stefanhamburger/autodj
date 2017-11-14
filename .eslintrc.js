@@ -15,7 +15,7 @@ module.exports = {
         ],
         'linebreak-style': [
             'error',
-            'windows'
+            'unix'
         ],
         'max-len': ['off'],
         'no-bitwise': ['off'],

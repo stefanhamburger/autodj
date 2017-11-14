@@ -1,4 +1,4 @@
-const { PassThrough, Writable } = require('stream');
+const { Writable } = require('stream');
 const { spawn } = require('child_process');
 
 module.exports.createNewInstance = () => {
@@ -47,10 +47,8 @@ module.exports.createNewInstance = () => {
   });
 
   //Pipe streams
-  const inputStream = new PassThrough();
-  inputStream.pipe(process.stdio[3]);
-  const outputStream = new PassThrough();
-  process.stdio[4].pipe(outputStream);
+  const inputStream = process.stdio[3];
+  const outputStream = process.stdio[4];
 
   //create Writable stream that stores the converted data
   let outputBuffer = [];

@@ -1,4 +1,3 @@
-const { Writable } = require('stream');
 const { spawn } = require('child_process');
 
 module.exports.createNewInstance = () => {
@@ -52,13 +51,9 @@ module.exports.createNewInstance = () => {
 
   //create Writable stream that stores the converted data
   let outputBuffer = [];
-  const outputWritable = new Writable({
-    write(chunk, encoding, callback) {
-      outputBuffer.push(chunk);
-      callback(null);
-    },
+  outputStream.on('data', (chunk) => {
+    outputBuffer.push(chunk);
   });
-  outputStream.pipe(outputWritable);
 
   return {
     inputStream,
@@ -71,7 +66,7 @@ module.exports.createNewInstance = () => {
     killCommand: async () => {
       //Gracefully allow FFmpeg to close the stream
       //We don't really need to do this because by this time, the client has disconnected and there's no one left to receive the stream.
-      outputWritable.end();
+      inputStream.end();
       await new Promise(resolve => setTimeout(() => resolve(), 10000));
       //Forcefully kill the FFmpeg process
       process.kill('SIGKILL');

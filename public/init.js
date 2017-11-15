@@ -47,5 +47,9 @@
     audioEle.preload = 'auto';//otherwise, the file will not autoplay
     audioEle.volume = 0.1;
     document.body.appendChild(audioEle);
+
+    //Remove form
+    const formEle = document.getElementById('form');
+    formEle.parentElement.removeChild(formEle);
   });
 }

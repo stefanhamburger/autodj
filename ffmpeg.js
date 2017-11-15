@@ -42,7 +42,7 @@ module.exports.createNewInstance = () => {
   process.on('exit', (code) => {
     if (code && code !== 255) {
       //FFmpeg has exited with an error code
-      console.log('FFmpeg conversion error', errorLog.join());
+      console.log('FFmpeg conversion error', errorLog.join(''));
     }
   });
 

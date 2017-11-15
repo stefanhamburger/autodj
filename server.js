@@ -17,7 +17,6 @@ app.get('/', async (req, res) => {
   const collectionsString = Object.keys(settings.get().collections).map(key => '<option select>' + key + '</option>').join('');
   output = output.toString().replace(/__INSERT_COLLECTIONS__/, collectionsString);
   res.send(output);
-  //res.send('BLUBB');
 });
 
 //create a new audio stream

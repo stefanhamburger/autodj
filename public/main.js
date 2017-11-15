@@ -7,7 +7,7 @@ const initAudio = async ({
   let curIndex = -1;
   const GetNextMediaSegment = async () => {
     curIndex++;
-    const response = await fetch('part?sid=' + sid + '&id=' + curIndex, { cache: 'no-store', headers: { 'X-Playback-Position': audioEle.currentTime } });
+    const response = await fetch('part?sid=' + encodeURIComponent(sid) + '&id=' + curIndex, { cache: 'no-store', headers: { 'X-Playback-Position': audioEle.currentTime } });
     const segment = response.arrayBuffer();
     return segment;
   };

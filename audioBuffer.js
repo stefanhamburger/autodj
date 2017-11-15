@@ -9,7 +9,7 @@ const BYTES_PER_SAMPLE = 8;
 
 const addFileToStream = async (session) => {
   //wait until list of files was loaded
-  const files = await fileManager.getFiles(session.collection);
+  const files = fileManager.getFiles(session.collection);
 
   const randomFile = files[Math.floor(Math.random() * files.length)];
 
@@ -74,10 +74,12 @@ module.exports.init = async (session) => {
 
 //write output if requested
 module.exports.getBufferContents = (session, newBufferLength) => {
+  //Provide new input to FFmpeg
   if (newBufferLength > 0) {
     const prevLength = session.clientBufferLength;
-    addToBuffer(session, Math.ceil((newBufferLength - prevLength) * 48000));
     session.clientBufferLength = newBufferLength;
+    //schedule function call so that we can immediately send the HTTP response
+    setTimeout(addToBuffer.bind(null, session, Math.ceil((newBufferLength - prevLength) * 48000)));
   }
 
   //send as many bytes as there in session.ffmpegData since last output position

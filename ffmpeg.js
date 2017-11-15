@@ -45,11 +45,11 @@ module.exports.createNewInstance = () => {
     }
   });
 
-  //Pipe streams
+  //Store streams in local variables
   const inputStream = process.stdio[3];
   const outputStream = process.stdio[4];
 
-  //create Writable stream that stores the converted data
+  //Whenever audio is encoded by FFmpeg, store the output
   let outputBuffer = [];
   outputStream.on('data', (chunk) => {
     outputBuffer.push(chunk);

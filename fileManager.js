@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const settings = require('./settings.js');
 
 const PATH_SEPARATOR = path.sep;
 const SUPPORTED_EXTENSIONS = ['mp3', 'wav', 'ogg'];
@@ -45,11 +46,13 @@ const getFolderContents = async dirPath => new Promise((resolve) => {
   });
 });
 
-const getFolders = () => {
-  const buffer = fs.readFileSync('settings.json');
-  return JSON.parse(buffer);
+const files = {};
+
+module.exports.init = async () => {
+  const { collections } = settings.get();
+  await Promise.all(Object.keys(collections).map(async (key) => {
+    files[key] = await getFolderContents(collections[key]);
+  }));
 };
 
-const musicFolders = getFolders().collections;
-const files = getFolderContents(musicFolders[Object.keys(musicFolders)[0]]);
-module.exports.getFiles = () => files;
+module.exports.getFiles = collection => files[collection];

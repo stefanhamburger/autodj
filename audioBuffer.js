@@ -9,7 +9,7 @@ const BYTES_PER_SAMPLE = 8;
 
 const addFileToStream = async (session) => {
   //wait until list of files was loaded
-  const files = await fileManager.getFiles();
+  const files = await fileManager.getFiles(session.collection);
 
   const randomFile = files[Math.floor(Math.random() * files.length)];
 

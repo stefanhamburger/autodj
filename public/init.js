@@ -4,7 +4,9 @@
     startLink.parentNode.removeChild(startLink);
 
     //start new session
-    const response = await fetch('init');
+    const selectCollection = document.getElementById('collection');
+    const collection = selectCollection.options[selectCollection.selectedIndex].value;
+    const response = await fetch('init?collection=' + collection);
     const json = await response.json();
     const { sid } = json;
 

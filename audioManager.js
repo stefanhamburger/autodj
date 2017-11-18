@@ -14,7 +14,7 @@ module.exports.addReference = async (song, session) => {
 };
 
 //Get the waveform data for the given song
-module.exports.getWaveform = song => audioWaveforms[song].buffer;
+module.exports.getWaveform = song => audioWaveforms[song.path].buffer;
 
 //Delete waveform data to free up memory
 module.exports.removeReference = (song, session) => {

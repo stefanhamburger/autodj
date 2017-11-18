@@ -58,17 +58,14 @@ module.exports.createNewInstance = () => {
   return {
     inputStream,
     getOutputBuffer: () => {
-      //returns copy of the output buffer contents, then clears it
+      //Returns a copy of the output buffer contents, then clears it
       const out = outputBuffer.slice(0);
       outputBuffer = [];
       return out;
     },
     killCommand: async () => {
-      //Gracefully allow FFmpeg to close the stream
-      //We don't really need to do this because by this time, the client has disconnected and there's no one left to receive the stream.
-      inputStream.end();
-      await new Promise(resolve => setTimeout(() => resolve(), 10000));
       //Forcefully kill the FFmpeg process
+      //We can safely do this because by this time, the client has disconnected and there's no one left to receive the stream.
       process.kill('SIGKILL');
     },
   };

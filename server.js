@@ -14,7 +14,7 @@ app.use(express.static('public'));
 //main HTML
 app.get('/', async (req, res) => {
   let output = fs.readFileSync('index.html');
-  const collectionsString = Object.keys(settings.get().collections).map(key => '<option select>' + key + '</option>').join('');
+  const collectionsString = Object.keys(settings.get().collections).map(key => '<option>' + key + '</option>').join('');
   output = output.toString().replace(/__INSERT_COLLECTIONS__/, collectionsString);
   res.send(output);
 });

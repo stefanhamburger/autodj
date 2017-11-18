@@ -1,7 +1,9 @@
 {
   const startLink = document.getElementById('startLink');
   startLink.addEventListener('click', async () => {
-    startLink.parentNode.removeChild(startLink);
+    //Remove form
+    const formEle = document.getElementById('form');
+    formEle.parentElement.removeChild(formEle);
 
     //start new session
     const selectCollection = document.getElementById('collection');
@@ -47,9 +49,5 @@
     audioEle.preload = 'auto';//otherwise, the file will not autoplay
     audioEle.volume = 0.1;
     document.body.appendChild(audioEle);
-
-    //Remove form
-    const formEle = document.getElementById('form');
-    formEle.parentElement.removeChild(formEle);
   });
 }

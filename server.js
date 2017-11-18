@@ -32,10 +32,21 @@ app.get('/part', (req, res) => {
   const session = sessions.getSession(req.query.sid);
   if (session && req.query.id && req.query.id.match(/[0-9]+/)) {
     sessions.lifeSign(session);
-    const clientBufferLength = Number(req.get('X-Playback-Position'));
+    let clientBufferLength = Number(req.get('X-Playback-Position'));
+    clientBufferLength = Number.isNaN(clientBufferLength) ? 0 : clientBufferLength;
     res.set('Content-Type', 'audio/webm');
-    res.send(audioBuffer.getBufferContents(session, Number.isNaN(clientBufferLength) ? 0 : clientBufferLength));
+
+    //Get metadata
+    const metadata = { test: '1234' };
+    res.set('X-Metadata', JSON.stringify(metadata));
+
+    //send as many bytes as there in session.ffmpegData since last output position
+    const ffmpegBuffer = session.getOutputBuffer();
+    res.send(Buffer.concat(ffmpegBuffer.buffer, ffmpegBuffer.length));
     //TODO: if length of buffer contents is zero, maybe wait 250ms and try again before sending nothing
+
+    //start converting more audio so that it's ready when the next request arrives
+    audioBuffer.scheduleNewAudio(session, clientBufferLength);
   } else {
     res.status(404).send('Session not found');
   }

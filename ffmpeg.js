@@ -51,16 +51,19 @@ module.exports.createNewInstance = () => {
 
   //Whenever audio is encoded by FFmpeg, store the output
   let outputBuffer = [];
+  let outputBufferLength = 0;
   outputStream.on('data', (chunk) => {
     outputBuffer.push(chunk);
+    outputBufferLength += chunk.byteLength;
   });
 
   return {
     inputStream,
     getOutputBuffer: () => {
       //Returns a copy of the output buffer contents, then clears it
-      const out = outputBuffer.slice(0);
+      const out = { buffer: outputBuffer.slice(0), length: outputBufferLength };
       outputBuffer = [];
+      outputBufferLength = 0;
       return out;
     },
     killCommand: async () => {

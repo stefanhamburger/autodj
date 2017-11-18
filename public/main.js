@@ -7,9 +7,19 @@ const initAudio = async ({
   let curIndex = -1;
   const GetNextMediaSegment = async () => {
     curIndex++;
-    const response = await fetch('part?sid=' + encodeURIComponent(sid) + '&id=' + curIndex, { cache: 'no-store', headers: { 'X-Playback-Position': audioEle.currentTime } });
-    const segment = response.arrayBuffer();
-    return segment;
+    const response = await fetch(
+      'part?sid=' + encodeURIComponent(sid) + '&id=' + curIndex,
+      {
+        cache: 'no-store',
+        headers: { 'X-Playback-Position': audioEle.currentTime },
+      },
+    );
+
+    //Read metadata, e.g. current song
+    const metadata = JSON.parse(response.headers.get('X-Metadata'));
+    //console.log(metadata);
+
+    return response.arrayBuffer();
   };
 
   async function appendNextMediaSegment() {

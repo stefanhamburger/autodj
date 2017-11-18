@@ -1,13 +1,15 @@
 {
   const startLink = document.getElementById('startLink');
   startLink.addEventListener('click', async () => {
-    //Remove form
+    //Get form input
+    const selectCollection = document.getElementById('collection');
+    const collection = selectCollection.options[selectCollection.selectedIndex].value;
+
+    //Remove form from UI
     const formEle = document.getElementById('form');
     formEle.parentElement.removeChild(formEle);
 
     //start new session
-    const selectCollection = document.getElementById('collection');
-    const collection = selectCollection.options[selectCollection.selectedIndex].value;
     const response = await fetch('init?collection=' + encodeURIComponent(collection));
     const json = await response.json();
     const { sid } = json;

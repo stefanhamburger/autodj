@@ -44,9 +44,7 @@ module.exports.decodeAudio = async path => new Promise((resolve, reject) => {
         reject(new Error('Sample rate ' + asset.format.sampleRate + ' Hz not supported.'));
       }
 
-      resolve({
-        waveform: waveformBuffer,
-      });
+      resolve(waveformBuffer.buffer);
     });
 
     //alternatively: use 'data' event and merge packets manually

@@ -8,7 +8,7 @@ const audioWaveforms = {};
 //Mark the given song as being in use by the given session, and load it in memory if needed
 module.exports.addReference = async (song, session) => {
   audioWaveforms[song.path] = {
-    buffer: decodeAudio(song.path).buffer,
+    buffer: decodeAudio(song.path),
     references: [session.sid],
   };
 };

@@ -19,9 +19,10 @@ module.exports.getWaveform = song => audioWaveforms[song.path].buffer;
 //Delete waveform data to free up memory
 module.exports.removeReference = (song, session) => {
   const waveformObj = audioWaveforms[song.path];
+  if (!waveformObj) throw new Error('song not found in memeory');
   //Remove reference
   const sessionReference = waveformObj.references.findIndex(ref => ref === session.sid);
-  if (sessionReference === -1) throw new Error('song not found');
+  if (sessionReference === -1) throw new Error('session reference not found in song');
   waveformObj.references.splice(sessionReference, 1);
 
   //Remove from memory if song is no longer used

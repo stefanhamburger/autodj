@@ -17,6 +17,7 @@ const initAudio = async ({
 
     //Read metadata, e.g. current song
     const metadata = JSON.parse(response.headers.get('X-Metadata'));
+    document.getElementById('metadata').innerHTML = '<b>Currently playing:</b> ' + metadata.song.replace(/&/, '&amp;').replace(/</, '&lt;').replace(/>/, '&gt;');
     //console.log(metadata);
 
     return response.arrayBuffer();

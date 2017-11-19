@@ -6,8 +6,10 @@ const audioManager = require('./audioManager.js');
 const PRELOAD_BUFFER_LENGTH = 5 * 48000;
 //byte length is 8 bytes per sample (2 channels, Float32 format)
 const BYTES_PER_SAMPLE = 8;
+//we never initiate encoding of more than 1 second of samples at once to prevent the app from blocking too long
+const MAX_SAMPLES_PER_LOOP = 2 * 48000;
 
-const addFileToStream = async (session) => {
+const addFileToStream = (session) => {
   //wait until list of files was loaded
   const files = fileManager.getFiles(session.collection);
 
@@ -17,7 +19,7 @@ const addFileToStream = async (session) => {
   console.log('[' + session.sid + '] Adding to playlist: ' + randomFile.name + '...');
 };
 
-//writes the given number of samples to the FFmpeg input stream to start encoding
+//writes some samples to the FFmpeg input stream to start encoding
 const addToBuffer = async (session) => {
   //if we need to write bytes to buffer, write as many samples as possible from the current song
   //if end of song is reached, we will add samples from follow-up song in the next function call
@@ -25,8 +27,14 @@ const addToBuffer = async (session) => {
     const waveform = await audioManager.getWaveform(session.songs[session.curSong]);
 
     const remainingSongLength = waveform.byteLength / BYTES_PER_SAMPLE - session.curSongPosition;
-    const numSamplesToWrite = Math.min(session.samplesToAdd, remainingSongLength);
-    session.inputStream.write(Buffer.from(waveform, session.curSongPosition * BYTES_PER_SAMPLE, numSamplesToWrite * BYTES_PER_SAMPLE));
+    const numSamplesToWrite = Math.min(session.samplesToAdd, remainingSongLength, MAX_SAMPLES_PER_LOOP);
+
+    const tmpBuffer = Buffer.from(waveform, session.curSongPosition * BYTES_PER_SAMPLE, numSamplesToWrite * BYTES_PER_SAMPLE);
+    console.log(numSamplesToWrite);
+    console.time('encodetimer2');
+    session.inputStream.write(tmpBuffer);
+    console.timeEnd('encodetimer2');
+    //session.inputStream.write(Buffer.from(waveform, session.curSongPosition * BYTES_PER_SAMPLE, numSamplesToWrite * BYTES_PER_SAMPLE));
     session.curSongPosition += numSamplesToWrite;
     session.samplesToAdd -= numSamplesToWrite;
 
@@ -41,12 +49,14 @@ const addToBuffer = async (session) => {
 
   //if we need more waveform data, add another song (by starting to decoding it into waveform data)
   if (session.curSong >= session.songs.length - 1) {
-    await addFileToStream(session);
+    addFileToStream(session);
   }
 
   //Stop adding waveform data if it's not yet needed
   if (session.samplesToAdd <= 0) {
-    session.stopEncoding();
+    session.pauseEncoding();
+  } else {
+    setTimeout(addToBuffer.bind(null, session), 1000);
   }
 };
 
@@ -67,17 +77,22 @@ module.exports.init = async (session) => {
 
   //Encoder
   {
-    let encoderTimer;
-    session.startEncoding = () => {
-      encoderTimer = setInterval(addToBuffer.bind(null, session), 100);
+    let isPaused = false;
+    session.pauseEncoding = () => {
+      isPaused = true;
     };
-    session.stopEncoding = () => {
-      clearInterval(encoderTimer);
+    session.resumeEncoding = () => {
+      if (isPaused) {
+        isPaused = false;
+        setTimeout(addToBuffer.bind(null, session));
+      } else {
+        //do nothing
+      }
     };
   }
 
   await addFileToStream(session);
-  session.startEncoding();
+  setTimeout(addToBuffer.bind(null, session));
 };
 
 //Start converting the given amount of audio
@@ -88,6 +103,6 @@ module.exports.scheduleNewAudio = (session, newBufferLength) => {
     session.clientBufferLength = newBufferLength;
     //schedule function call so that we can immediately send the HTTP response
     session.samplesToAdd += Math.ceil((newBufferLength - prevLength) * 48000);
-    session.startEncoding();
+    session.resumeEncoding();
   }
 };

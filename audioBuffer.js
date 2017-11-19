@@ -29,12 +29,7 @@ const addToBuffer = async (session) => {
     const remainingSongLength = waveform.byteLength / BYTES_PER_SAMPLE - session.curSongPosition;
     const numSamplesToWrite = Math.min(session.samplesToAdd, remainingSongLength, MAX_SAMPLES_PER_LOOP);
 
-    const tmpBuffer = Buffer.from(waveform, session.curSongPosition * BYTES_PER_SAMPLE, numSamplesToWrite * BYTES_PER_SAMPLE);
-    console.log(numSamplesToWrite);
-    console.time('encodetimer2');
-    session.inputStream.write(tmpBuffer);
-    console.timeEnd('encodetimer2');
-    //session.inputStream.write(Buffer.from(waveform, session.curSongPosition * BYTES_PER_SAMPLE, numSamplesToWrite * BYTES_PER_SAMPLE));
+    session.inputStream.write(Buffer.from(waveform, session.curSongPosition * BYTES_PER_SAMPLE, numSamplesToWrite * BYTES_PER_SAMPLE));
     session.curSongPosition += numSamplesToWrite;
     session.samplesToAdd -= numSamplesToWrite;
 

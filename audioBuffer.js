@@ -47,7 +47,7 @@ const addToBuffer = async (session) => {
     addFileToStream(session);
   }
 
-  //Stop adding waveform data if it's not yet needed
+  //Only add more waveform data if it's still needed, otherwise pause until we receive message from client
   if (session.samplesToAdd <= 0) {
     session.pauseEncoding();
   } else {

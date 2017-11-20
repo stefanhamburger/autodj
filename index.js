@@ -16,3 +16,9 @@ const server = require('./server.js');
 
   console.log('=== Server is running! ' + new Date().toString() + ' ===');
 })());
+
+//Exit on async error to prevent further bugs and provide better debug messages
+process.on('unhandledRejection', (err) => {
+  console.error(err);
+  process.exit(1);
+});

@@ -7,6 +7,7 @@ const { getChannel, monoToStereo } = require('./waveformWrapper.js');
 const { resample } = require('./audioResampler.js');
 
 //For a given audio file, return duration, sample rate and waveform data
+//See https://github.com/audiocogs/aurora.js/wiki/Asset-Class-Reference for the AuroraJS API
 module.exports.decodeAudio = async path => new Promise((resolve, reject) => {
   fs.readFile(path, async (errFileRead, rawBuffer) => {
     //I/O error when trying to read file from disk
@@ -15,10 +16,26 @@ module.exports.decodeAudio = async path => new Promise((resolve, reject) => {
     }
 
     const asset = AV.Asset.fromBuffer(rawBuffer);
+    const metadata = {};
+    let finalBuffer;
 
     //error when trying to decode
     asset.on('error', (errDecode) => {
       reject(errDecode);
+    });
+
+    asset.on('format', (obj) => {
+      console.log(obj);
+      metadata.numChannels = obj.channelsPerFrame;//1 for mono, 2 for stereo
+      metadata.sampleRate = obj.sampleRate;//44,100 or 48,000 Hz
+    });
+    asset.on('duration', (msecs) => {
+      metadata.duration = msecs;//duration in milliseconds
+      //console.log(msecs);
+    });
+    asset.on('data', (buffer) => {
+      //console.log(buffer.byteLength);//usually 9216 bytes because each MP3 frame contains 1152 samples per channel
+      //...
     });
 
     asset.decodeToBuffer((waveformBufferIn) => {

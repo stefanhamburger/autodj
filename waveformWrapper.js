@@ -3,6 +3,8 @@
 // [Left[0], Right[0], Left[1], Right[1], Left[2], Right[2], ...]
 //This wrapper isolates either the left or right channel, allowing us to not have to worry about interlacing
 
+//TODO: replace this with a Proxy https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy
+
 //Gets a wrapper for the given channel from the waveform data
 module.exports.getChannel =
 ({ waveform, curChannel, numChannels = 2 } = {}) =>

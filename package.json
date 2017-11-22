@@ -11,9 +11,7 @@
   "license": "WTFPL",
   "devDependencies": {},
   "dependencies": {
-    "av": "^0.4.9",
-    "express": "^4.16.2",
-    "mp3": "^0.1.0"
+    "express": "^4.16.2"
   },
   "repository": {
     "type": "git",

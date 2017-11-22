@@ -29,11 +29,7 @@ const addToBuffer = async (session) => {
     const remainingSongLength = waveform.byteLength / BYTES_PER_SAMPLE - session.curSongPosition;
     const numSamplesToWrite = Math.min(session.samplesToAdd, remainingSongLength, MAX_SAMPLES_PER_LOOP);
 
-    //emit warning when inputStream.write() takes longer than 2000ms
-    const time1 = Date.now();
     session.inputStream.write(Buffer.from(waveform, session.curSongPosition * BYTES_PER_SAMPLE, numSamplesToWrite * BYTES_PER_SAMPLE));
-    const time2 = Date.now();
-    if (time2 - time1 > 1000) console.log('WARNING: inputStream.write() took ' + (time2 - time1) + 'ms!');
     session.curSongPosition += numSamplesToWrite;
     session.samplesToAdd -= numSamplesToWrite;
 

@@ -22,7 +22,7 @@ module.exports.decodeAudio = async path => new Promise((resolve, reject) => {
     },
     (error, stdout) => {
       if (error) reject(error);
-      resolve(stdout);
+      resolve(stdout.buffer);
     },
   );
 });

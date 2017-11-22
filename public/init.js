@@ -1,3 +1,5 @@
+let view;
+
 {
   const startLink = document.getElementById('startLink');
   startLink.addEventListener('click', async () => {
@@ -51,5 +53,7 @@
     audioEle.preload = 'auto';//otherwise, the file will not autoplay
     audioEle.volume = 0.1;
     document.body.appendChild(audioEle);
+
+    view = initView();
   });
 }

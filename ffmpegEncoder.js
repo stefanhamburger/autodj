@@ -71,6 +71,6 @@ module.exports.createEncoder = () => {
     },
     //Forcefully kill the FFmpeg process
     //We can safely do this because by this time, the client has disconnected and there's no one left to receive the stream.
-    killCommand: process.kill.bind(null, 'SIGKILL'),
+    killCommand: process.kill.bind(process, 'SIGKILL'),
   };
 };

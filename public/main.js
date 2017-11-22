@@ -16,9 +16,8 @@ const initAudio = async ({
     );
 
     //Read metadata, e.g. current song
-    const metadata = JSON.parse(response.headers.get('X-Metadata'));
-    document.getElementById('metadata').innerHTML = '<b>Currently playing:</b> ' + metadata.song.replace(/&/, '&amp;').replace(/</, '&lt;').replace(/>/, '&gt;');
-    //console.log(metadata);
+    const metadata = JSON.parse(decodeURI(response.headers.get('X-Metadata')));
+    view.updateMetadata(metadata);
 
     return response.arrayBuffer();
   };
@@ -44,7 +43,7 @@ const initAudio = async ({
 
     if (mediaSegment.byteLength === 0) {
       //mediaSource.endOfStream();
-      setTimeout(() => appendNextMediaSegment(), 1000);
+      //setTimeout(() => appendNextMediaSegment(), 1000);
       return;
     }
 
@@ -55,9 +54,9 @@ const initAudio = async ({
   }
 
 
-  audioEle.addEventListener('progress', () => {
+  /*audioEle.addEventListener('progress', () => {
     appendNextMediaSegment();
-  });
+  });*/
 
   //Load first segment
   {
@@ -81,5 +80,7 @@ const initAudio = async ({
     };
     sourceBuffer.addEventListener('updateend', firstAppendHandler);
     sourceBuffer.appendBuffer(initSegment);
+
+    setInterval(appendNextMediaSegment, 1000);
   }
 };

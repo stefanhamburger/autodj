@@ -38,7 +38,7 @@ app.get('/part', (req, res) => {
 
     //Get metadata
     const metadata = { song: session.songs[session.curSong].name };
-    res.set('X-Metadata', JSON.stringify(metadata));
+    res.set('X-Metadata', encodeURI(JSON.stringify(metadata)));
 
     //send as many bytes as there in session.ffmpegData since last output position
     const ffmpegBuffer = session.getOutputBuffer();

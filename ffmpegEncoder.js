@@ -1,6 +1,6 @@
 const { spawn } = require('child_process');
 
-module.exports.createNewInstance = () => {
+module.exports.createEncoder = () => {
   //Create FFmpeg process
   const process = spawn(
     'ffmpeg',

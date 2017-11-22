@@ -1,7 +1,7 @@
 //Wrapper around storing waveform data for the audio files
 //Ensures waveform data is kept in memory as long as needed, and cleaned up as soon as possible
 
-const { decodeAudio } = require('./audioDecoder.js');
+const { decodeAudio } = require('./ffmpegDecoder.js');
 
 const audioWaveforms = {};
 

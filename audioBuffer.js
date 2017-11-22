@@ -1,5 +1,5 @@
 const fileManager = require('./fileManager.js');
-const ffmpeg = require('./ffmpeg.js');
+const ffmpeg = require('./ffmpegEncoder.js');
 const audioManager = require('./audioManager.js');
 
 //number of samples to preload - this controls how fast the server can react to input from the client, so should be kept as small as possible
@@ -58,7 +58,7 @@ const addToBuffer = async (session) => {
 //initializes audio buffer
 module.exports.init = async (session) => {
   //create new FFmpeg process
-  const { inputStream, getOutputBuffer, killCommand } = ffmpeg.createNewInstance();
+  const { inputStream, getOutputBuffer, killCommand } = ffmpeg.createEncoder();
   session.inputStream = inputStream;
   session.getOutputBuffer = getOutputBuffer;
   session.killCommand = killCommand;

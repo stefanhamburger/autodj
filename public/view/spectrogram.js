@@ -30,15 +30,16 @@ const spectrogram = (canvas) => {
       const pixelsToMove = Math.round((newTime - lastTime) / 1000 * SPECTROGRAM_SPEED);//TODO: we probably should not round here
 
       //move existing graph to the left
-      const imageData = ctx.getImageData(pixelsToMove, 0, oldWidth - pixelsToMove, oldHeight);
-      ctx.putImageData(imageData, 0, 0, 0, 0, oldWidth - pixelsToMove, oldHeight);
+      //getImageData()/putImageData() takes 8-16 ms which is too slow, so we use drawImage() which takes <0.2ms
+      ctx.drawImage(canvas, -pixelsToMove, 0);
 
       //add new pixels on the right side based on input data
       ctx.fillStyle = 'black';
       ctx.fillRect(oldWidth - pixelsToMove, 0, pixelsToMove, oldHeight);
-      for (let i = 0; i < data.length; i++) {
-        ctx.fillStyle = 'rgb(' + getViridisColor(data[i]).map(val => Math.round(val * 255)).join(',') + ')';
-        ctx.fillRect(oldWidth - pixelsToMove, i / data.length * oldHeight, pixelsToMove, 1 / data.length * oldHeight);
+      const heightPerData = 1 / data.length * oldHeight;
+      for (let i = 0, il = data.length; i < il; i++) {
+        ctx.fillStyle = getViridisColor(data[i]);
+        ctx.fillRect(oldWidth - pixelsToMove, i * heightPerData, pixelsToMove, heightPerData);
       }
 
       lastTime = newTime;

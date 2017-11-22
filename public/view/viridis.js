@@ -283,13 +283,21 @@ const getViridisColor = ((() => {
     [0.97441665, 0.90358991, 0.13021494],
     [0.98386829, 0.90486726, 0.13689671],
     [0.99324789, 0.90615657, 0.1439362],
-  ];
+  ].map(arr => 'rgb(' + arr.map(val => Math.round(val * 255)).join(',') + ')');
 
-  const lerp = (min, max, frac) => min + (max - min) * frac;
 
   return (fracIn) => {
     //clamp fractional value into [0, 1] range
     const frac = Math.max(Math.min(fracIn, 1.0), 0.0);
+
+    //return value from color map
+    const index = Math.round(frac * (colorMap.length - 1));
+    return colorMap[index];
+
+    //Alternatively, we could interpolate between the two closest values from the color map
+    //However, the color map is already so detailed that this will only have a minor benefit but will reduce performance
+    /*
+    const lerp = (min, max, frac) => min + (max - min) * frac;
     if (frac === 1) return colorMap[colorMap.length - 1];
 
     //calculate first index for interpolation
@@ -302,5 +310,6 @@ const getViridisColor = ((() => {
       lerp(colorMap[indexInt][1], colorMap[indexInt + 1][1], indexFrac),
       lerp(colorMap[indexInt][2], colorMap[indexInt + 1][2], indexFrac),
     ];
+    */
   };
 })());

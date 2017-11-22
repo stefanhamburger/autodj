@@ -33,7 +33,7 @@
           mediaSource,
           sourceBuffer,
         });
-      }, 10000);
+      }, 5000);
 
       //for debugging
       window.audioEle = audioEle;

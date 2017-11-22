@@ -1,12 +1,15 @@
 const sessions = {};
 
-//after how much time a session times out (because we haven't received any more client requests for it)
-//this will free up resources and kill the FFmpeg process. Set to 5 minutes.
-const SESSION_TIMEOUT = 5 * 60000;
-//length of the session id. Doesn't need to be too long for our use case
+/**
+ * after how much time a session times out (because we haven't received any more client requests for it)
+ * This will free up resources and kill the FFmpeg process. Set to 5 minutes.
+ */
+const SESSION_TIMEOUT = 1 * 60000;
+/** length of the session id. Doesn't need to be too long for our use case */
 const SESSION_ID_LENGTH = 16;
 
 const hex = '0123456789abcdefghijklmnopqrstuvwxyz';
+/** generates a new random session id */
 const generateSID = () => {
   let out = '';
   for (let i = 0; i < SESSION_ID_LENGTH; i++) {
@@ -19,8 +22,11 @@ const generateSID = () => {
   return out;
 };
 
-//Indicates that the given session is still active and should not be deleted
-//By default, sessions are automatically deleted after SESSION_TIMEOUT to free up memory
+/**
+ * Indicates that the given session is still active and should not be deleted
+ * By default, sessions are automatically deleted after SESSION_TIMEOUT to free up memory
+ * @param {*} session - The session we want to extend
+ */
 module.exports.lifeSign = (session) => {
   clearTimeout(session.timeout);
   const { sid } = session;
@@ -31,6 +37,9 @@ module.exports.lifeSign = (session) => {
   }, SESSION_TIMEOUT);
 };
 
+/**
+ * Creates a new session
+ */
 module.exports.newSession = () => {
   const sid = generateSID();
   const sessionObj = { sid };
@@ -41,4 +50,8 @@ module.exports.newSession = () => {
   return { sid, obj: sessionObj };
 };
 
+/**
+ * Gets a session with the given session id
+ * @param {string} sid - The id of the requested session
+ */
 module.exports.getSession = sid => sessions[sid];

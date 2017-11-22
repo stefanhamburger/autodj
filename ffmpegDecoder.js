@@ -2,6 +2,8 @@
 
 const { execFile } = require('child_process');
 
+const MAX_FFMPEG_BUFFER = 8 * 48000 * 60 * 20;//up to 20 minutes of audio, or 460.8 MB
+
 module.exports.decodeAudio = async path => new Promise((resolve, reject) => {
   //Create FFmpeg process
   execFile(
@@ -18,7 +20,7 @@ module.exports.decodeAudio = async path => new Promise((resolve, reject) => {
     ],
     {
       encoding: 'buffer', //output as Buffer, not as string
-      maxBuffer: 8 * 48000 * 60 * 20, //up to 20 minutes of audio, or 460.8 MB
+      maxBuffer: MAX_FFMPEG_BUFFER, //maximum buffer size, affects the longest audio duration that we accept
     },
     (error, stdout) => {
       if (error) reject(error);

@@ -59,17 +59,15 @@ module.exports.createEncoder = () => {
 
   return {
     inputStream,
+    //Returns a copy of the output buffer contents, then clears it
     getOutputBuffer: () => {
-      //Returns a copy of the output buffer contents, then clears it
       const out = { buffer: outputBuffer.slice(0), length: outputBufferLength };
       outputBuffer = [];
       outputBufferLength = 0;
       return out;
     },
-    killCommand: async () => {
-      //Forcefully kill the FFmpeg process
-      //We can safely do this because by this time, the client has disconnected and there's no one left to receive the stream.
-      process.kill('SIGKILL');
-    },
+    //Forcefully kill the FFmpeg process
+    //We can safely do this because by this time, the client has disconnected and there's no one left to receive the stream.
+    killCommand: process.kill.bind(null, 'SIGKILL'),
   };
 };

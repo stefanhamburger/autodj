@@ -36,11 +36,6 @@ let view;
           sourceBuffer,
         });
       }, 5000);
-
-      //for debugging
-      window.audioEle = audioEle;
-      window.mediaSource = mediaSource;
-      window.sourceBuffer = sourceBuffer;
     });
 
     try {
@@ -51,9 +46,31 @@ let view;
     audioEle.autoplay = true;
     audioEle.controls = true;
     audioEle.preload = 'auto';//otherwise, the file will not autoplay
-    audioEle.volume = 0.1;
+    audioEle.volume = 1;
     document.body.appendChild(audioEle);
+    //TODO: don't add <audio> element to DOM but add UI elements to see elapsed time and to change volume
 
     view = initView();
+
+    //Set up Web Audio API to create volume slider and generate FFT data
+    const audioCtx = new AudioContext();
+    const audioSourceNode = audioCtx.createMediaElementSource(audioEle);
+    const analyserNode = audioCtx.createAnalyser();
+    analyserNode.smoothingTimeConstant = 0;
+    analyserNode.fftSize = 2048;
+    const gainNode = audioCtx.createGain();
+    gainNode.gain.value = 0.1;
+
+    audioSourceNode.connect(gainNode);
+    gainNode.connect(analyserNode);
+    analyserNode.connect(audioCtx.destination);
+
+    const spectrumData = new Uint8Array(analyserNode.frequencyBinCount);
+    const redrawSpectrogram = () => {
+      requestAnimationFrame(redrawSpectrogram);
+      analyserNode.getByteFrequencyData(spectrumData);
+      view.updateSpectrogram(spectrumData);
+    };
+    requestAnimationFrame(redrawSpectrogram);
   });
 }

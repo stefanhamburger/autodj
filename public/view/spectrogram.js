@@ -1,7 +1,9 @@
-//The height in pixels of the top navigation, the spectrogram is drawn below it
+/** The height in pixels of the top navigation, the spectrogram is drawn below it */
 const TOP_NAVIGATION_HEIGHT = 100;
-//How fast the spectrogram moves to the left, in pixels per second
-const SPECTROGRAM_SPEED = 20;
+/** How fast the spectrogram moves to the left, in pixels per second. This number should be a multiple of 60 because we redraw up to 60Hz */
+const SPECTROGRAM_SPEED = 120;
+/** The background color of the spectrogram is purple by default, rgb(68,1,84), which equals 0 in the Viridis color map */
+const SPECTROGRAM_BACKGROUND = getViridisColor(0);
 
 /**
  * A spectrogram of the audio stream. Left to right is time, bottom to top is frequency.
@@ -20,11 +22,14 @@ const spectrogram = (canvas) => {
   canvas.width = oldWidth;
   canvas.height = oldHeight;
 
-  ctx.fillStyle = 'black';
+  ctx.fillStyle = SPECTROGRAM_BACKGROUND;
   ctx.fillRect(0, 0, oldWidth, oldHeight);
 
   return {
-    /** Upon new data, moves the graph to the left and inserts the input on the right side */
+    /**
+     * Upon new data, moves the graph to the left and inserts the input on the right side
+     * @param {Uint8Array} data
+     */
     addData: (data) => {
       const newTime = Date.now();
       const pixelsToMove = Math.round((newTime - lastTime) / 1000 * SPECTROGRAM_SPEED);//TODO: we probably should not round here
@@ -34,12 +39,14 @@ const spectrogram = (canvas) => {
       ctx.drawImage(canvas, -pixelsToMove, 0);
 
       //add new pixels on the right side based on input data
-      ctx.fillStyle = 'black';
+      ctx.fillStyle = SPECTROGRAM_BACKGROUND;
       ctx.fillRect(oldWidth - pixelsToMove, 0, pixelsToMove, oldHeight);
       const heightPerData = 1 / data.length * oldHeight;
       for (let i = 0, il = data.length; i < il; i++) {
-        ctx.fillStyle = getViridisColor(data[i]);
-        ctx.fillRect(oldWidth - pixelsToMove, i * heightPerData, pixelsToMove, heightPerData);
+        //TODO: This causes a grid because certain pixels are drawn twice. We will need to round to integers
+        //TODO: Frequencies should use a logarithmic scale
+        ctx.fillStyle = getViridisColor(data[i] / 255);
+        ctx.fillRect(oldWidth - pixelsToMove, oldHeight - i * heightPerData, pixelsToMove, heightPerData);
       }
 
       lastTime = newTime;
@@ -60,7 +67,7 @@ const spectrogram = (canvas) => {
       canvas.width = newWidth;
       canvas.height = newHeight;
       //fill with black pixels
-      ctx.fillStyle = 'black';
+      ctx.fillStyle = SPECTROGRAM_BACKGROUND;
       ctx.fillRect(0, 0, newWidth, newHeight);
 
       //putImageData() does not allow scaling, so we put the ImageData into a temporary canvas and use drawImage()

@@ -3,7 +3,7 @@ const ffmpeg = require('./ffmpegEncoder.js');
 const audioManager = require('./audioManager.js');
 
 /** number of samples to preload - this controls how fast the server can react to input from the client, so should be kept as small as possible */
-const PRELOAD_BUFFER_LENGTH = 4 * 48000;
+const PRELOAD_BUFFER_LENGTH = 5 * 48000;
 /** byte length is 8 bytes per sample (2 channels, Float32 format) */
 const BYTES_PER_SAMPLE = 8;
 /** we never initiate encoding of more than 2 seconds of samples at once to prevent the app from blocking too long */

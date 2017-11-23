@@ -18,7 +18,7 @@ module.exports.createEncoder = () => {
       '-f', 'webm', //Webm container
       '-codec:a', 'libopus', //Opus codec
       '-ar', '48k', //Opus only supports 48,000 sample rate
-      //'-b:a', '128k', //bitrate - TODO: replace this by 'q:a'
+      '-b:a', '128k', //bitrate: 128k bits per second
       '-vn', //no video stream
       '-map_metadata', '-1', //strip metadata
       'pipe:4',

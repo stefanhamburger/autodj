@@ -71,7 +71,7 @@ let view;
     const redrawSpectrogram = () => {
       requestAnimationFrame(redrawSpectrogram);
       analyserNode.getByteFrequencyData(spectrumData);
-      view.updateSpectrogram(spectrumData, audioCtx.currentTime);
+      view.updateSpectrogram(spectrumData, audioEle.currentTime);
     };
     requestAnimationFrame(redrawSpectrogram);
   });

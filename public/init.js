@@ -56,14 +56,16 @@ let view;
     const audioCtx = new AudioContext();
     const audioSourceNode = audioCtx.createMediaElementSource(audioEle);
     const analyserNode = audioCtx.createAnalyser();
-    analyserNode.smoothingTimeConstant = 0;
     analyserNode.fftSize = 2048;
+    analyserNode.minDecibels = -100;
+    analyserNode.maxDecibels = -30;
+    analyserNode.smoothingTimeConstant = 0;
     const gainNode = audioCtx.createGain();
     gainNode.gain.value = 0.1;
 
-    audioSourceNode.connect(gainNode);
-    gainNode.connect(analyserNode);
-    analyserNode.connect(audioCtx.destination);
+    audioSourceNode.connect(analyserNode);
+    analyserNode.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
 
     const spectrumData = new Uint8Array(analyserNode.frequencyBinCount);
     const redrawSpectrogram = () => {

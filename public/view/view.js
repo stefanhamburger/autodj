@@ -13,15 +13,6 @@ const initView = () => {
   window.addEventListener('resize', spectrogramFunctions.resize);
   rootEle.appendChild(canvas);
 
-  setInterval(() => {
-    const data = new Float32Array(200);
-    for (let i = 0; i < data.length; i++) {
-      data[i] = Math.random();
-    }
-    spectrogramFunctions.addData(data);
-  }, 100);
-
-  //...
   return {
     updateMetadata: ({ song }) => {
       metadataEle.innerHTML = '<b>Currently playing:</b> ' + song.replace(/&/, '&amp;').replace(/</, '&lt;').replace(/>/, '&gt;');

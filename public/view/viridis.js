@@ -1,5 +1,5 @@
 /*
-Viridis color map from matplotlib (https://cran.r-project.org/web/packages/viridis/)
+Viridis color map from matplotlib, a Python library (https://cran.r-project.org/web/packages/viridis/)
 Copyright (c) 2015, Simon Garnier
 
 Permission is hereby granted, free of charge, to any person obtaining

@@ -35,7 +35,7 @@ let view;
           mediaSource,
           sourceBuffer,
         });
-      }, 5000);
+      }, 2000);
     });
 
     try {
@@ -69,7 +69,7 @@ let view;
     const redrawSpectrogram = () => {
       requestAnimationFrame(redrawSpectrogram);
       analyserNode.getByteFrequencyData(spectrumData);
-      view.updateSpectrogram(spectrumData);
+      view.updateSpectrogram(spectrumData, audioCtx.currentTime);
     };
     requestAnimationFrame(redrawSpectrogram);
   });

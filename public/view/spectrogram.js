@@ -15,32 +15,33 @@ const spectrogram = (canvas) => {
   canvas.style.right = '0';
   canvas.style.bottom = '0';
   canvas.style.left = '0';
-  const ctx = canvas.getContext('2d');
-  let lastTime = Date.now();
+
   let oldWidth = window.innerWidth;
   let oldHeight = window.innerHeight - TOP_NAVIGATION_HEIGHT;
   canvas.width = oldWidth;
   canvas.height = oldHeight;
 
+  const ctx = canvas.getContext('2d');
+  ctx.imageSmoothingEnabled = false;
   ctx.fillStyle = SPECTROGRAM_BACKGROUND;
   ctx.fillRect(0, 0, oldWidth, oldHeight);
+
+  let prevTime = 0;
 
   return {
     /**
      * Upon new data, moves the graph to the left and inserts the input on the right side
      * @param {Uint8Array} data
      */
-    addData: (data) => {
-      const newTime = Date.now();
-      const pixelsToMove = Math.round((newTime - lastTime) / 1000 * SPECTROGRAM_SPEED);//TODO: we probably should not round here
+    addData: (data, newTime) => {
+      const pixelsToMove = (prevTime === 0) ? 0 : Math.floor((newTime - prevTime) * SPECTROGRAM_SPEED);
+      prevTime = newTime;
 
       //move existing graph to the left
       //getImageData()/putImageData() takes 8-16 ms which is too slow, so we use drawImage() which takes <0.2ms
       ctx.drawImage(canvas, -pixelsToMove, 0);
 
       //add new pixels on the right side based on input data
-      ctx.fillStyle = SPECTROGRAM_BACKGROUND;
-      ctx.fillRect(oldWidth - pixelsToMove, 0, pixelsToMove, oldHeight);
       const heightPerData = 1 / data.length * oldHeight;
       for (let i = 0, il = data.length; i < il; i++) {
         //TODO: This causes a grid because certain pixels are drawn twice. We will need to round to integers
@@ -48,8 +49,6 @@ const spectrogram = (canvas) => {
         ctx.fillStyle = getViridisColor(data[i] / 255);
         ctx.fillRect(oldWidth - pixelsToMove, oldHeight - i * heightPerData, pixelsToMove, heightPerData);
       }
-
-      lastTime = newTime;
     },
     /**
      * Gets called whenever the window size has changed, and translates and resizes the currently drawn spectrogram accordingly to match

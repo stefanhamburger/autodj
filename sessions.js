@@ -50,14 +50,20 @@ module.exports.lifeSign = (session) => {
  */
 module.exports.newSession = () => {
   const sid = generateSID();
-  const sessionObj = { sid };
-  sessionObj.events = [];
+  const session = { sid };
+  session.events = [];
+  session.emitEvent = event => session.events.push(event);
+  session.flushEvents = () => {
+    const eventsCopy = session.events.slice(0);
+    session.events = [];
+    return eventsCopy;
+  };
 
-  sessions[sid] = sessionObj;
-  module.exports.lifeSign(sessionObj);
+  sessions[sid] = session;
+  module.exports.lifeSign(session);
   console.log('[' + sid + '] Starting new session...');
 
-  return { sid, obj: sessionObj };
+  return { sid, obj: session };
 };
 
 /**

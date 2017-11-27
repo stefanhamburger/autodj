@@ -5,7 +5,11 @@ const { decodeAudio } = require('./ffmpegDecoder.js');
 
 const audioWaveforms = {};
 
-//Mark the given song as being in use by the given session, and load it in memory if needed
+/**
+ * Mark the given song as being in use by the given session, and load it in memory if needed
+ * @param {*} song The song to use
+ * @param {*} session The session to use
+ */
 module.exports.addReference = async (song, session) => {
   audioWaveforms[song.path] = {
     buffer: decodeAudio(song.path),
@@ -13,10 +17,23 @@ module.exports.addReference = async (song, session) => {
   };
 };
 
-//Get the waveform data for the given song
+/**
+ * Get the waveform data for the given song
+ * @param {*} song The song to use
+ */
 module.exports.getWaveform = song => audioWaveforms[song.path].buffer;
 
-//Delete waveform data to free up memory
+/**
+ * Gets the number of samples of the given song
+ * @param {*} song The song to use
+ */
+module.exports.getDuration = async song => (await audioWaveforms[song.path].buffer).byteLength / 8;
+
+/**
+ * Delete waveform data to free up memory
+ * @param {*} song The song to use
+ * @param {*} session The session to use
+ */
 module.exports.removeReference = (song, session) => {
   const waveformObj = audioWaveforms[song.path];
   if (!waveformObj) throw new Error('song not found in memeory');

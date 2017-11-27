@@ -17,6 +17,7 @@ const initView = () => {
     updateMetadata: events => events.forEach((event) => {
       switch (event.type) {
         case 'SONG_START':
+          //TODO: only update view when audio playback has gotten to event.time
           metadataEle.innerHTML = '<b>Currently playing:</b> ' + event.songName.replace(/&/, '&amp;').replace(/</, '&lt;').replace(/>/, '&gt;');
           break;
         default:

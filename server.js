@@ -37,8 +37,7 @@ app.get('/part', (req, res) => {
     res.set('Content-Type', 'audio/webm');
 
     //Get metadata
-    const metadata = session.events.slice(0);
-    session.events = [];
+    const metadata = session.flushEvents();
     res.set('X-Metadata', encodeURI(JSON.stringify(metadata)));
 
     //send as many bytes as there in session.ffmpegData since last output position

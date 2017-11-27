@@ -12,15 +12,25 @@ const MAX_SAMPLES_PER_LOOP = 2 * 48000;
 /**
  * @param {module:session.Session} session
 */
-const addFileToStream = (session) => {
+const addFileToStream = async (session) => {
   //wait until list of files was loaded
   const files = fileManager.getFiles(session.collection);
 
   const randomFile = files[Math.floor(Math.random() * files.length)];
-  session.songs.push(randomFile);
-  session.events.push({ type: 'SONG_START', songName: randomFile.name, time: 0 });
+  const songWrapper = { songRef: randomFile };
+  session.songs.push(songWrapper);
   audioManager.addReference(randomFile, session);
   console.log('[' + session.sid + '] Adding to playlist: ' + randomFile.name + '...');
+
+  //append new song at the end of the previous song
+  //TODO: we need to implement mixing and cross-fade between songs
+  const startTime = (session.songs.length === 0)
+    ? 0
+    : session.songs[session.songs.length - 1].startTime + session.songs[session.songs.length - 1].totalLength;
+  session.emitEvent({ type: 'SONG_START', songName: randomFile.name, time: startTime });
+  songWrapper.startTime = startTime;//the time in samples at which to start adding this song to the stream
+  songWrapper.offset = 0;//the offset into the song at which to start mixing, e.g. to skip silence at the beginning
+  songWrapper.totalLength = await audioManager.getDuration(songWrapper.songRef);//how long we want to play this song, e.g. to skip the ending
 };
 
 //writes some samples to the FFmpeg input stream to start encoding
@@ -28,18 +38,19 @@ const addToBuffer = async (session) => {
   //if we need to write bytes to buffer, write as many samples as possible from the current song
   //if end of song is reached, we will add samples from follow-up song in the next function call
   if (session.samplesToAdd > 0) {
-    const waveform = await audioManager.getWaveform(session.songs[session.curSong]);
+    const curSong = session.songs[session.curSong];
+    const waveform = await audioManager.getWaveform(curSong.songRef);
 
-    const remainingSongLength = waveform.byteLength / BYTES_PER_SAMPLE - session.curSongPosition;
+    const remainingSongLength = curSong.totalLength - session.curSongPosition;
     const numSamplesToWrite = Math.min(session.samplesToAdd, remainingSongLength, MAX_SAMPLES_PER_LOOP);
 
-    session.inputStream.write(Buffer.from(waveform, session.curSongPosition * BYTES_PER_SAMPLE, numSamplesToWrite * BYTES_PER_SAMPLE));
+    session.inputStream.write(Buffer.from(waveform, (curSong.offset + session.curSongPosition) * BYTES_PER_SAMPLE, numSamplesToWrite * BYTES_PER_SAMPLE));
     session.curSongPosition += numSamplesToWrite;
     session.samplesToAdd -= numSamplesToWrite;
 
     if (session.curSongPosition >= waveform.byteLength / BYTES_PER_SAMPLE) {
       //delete previous song from memory
-      audioManager.removeReference(session.songs[session.curSong], session);
+      audioManager.removeReference(curSong.songRef, session);
       //start encoding next song
       session.curSong++;
       session.curSongPosition = 0;

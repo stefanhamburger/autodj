@@ -15,7 +15,7 @@ const initView = () => {
 
   return {
     setSong: (songName) => {
-      metadataEle.innerHTML = '<b>Currently playing:</b> ' + songName.replace(/&/, '&amp;').replace(/</, '&lt;').replace(/>/, '&gt;');
+      metadataEle.innerHTML = '<b>Currently playing:</b> ' + songName.replace(/&/g, '&amp;').replace(/ - /g, ' &ndash; ').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     },
     updateSpectrogram: spectrogramFunctions.addData,
   };

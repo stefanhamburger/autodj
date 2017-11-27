@@ -7,10 +7,10 @@ const SPECTROGRAM_BACKGROUND = getViridisColor(0);
 
 //We center the spectrogram at the pitch standard A4 = 440 Hz
 const SPECTROGRAM_TUNING = 440;
-//We go down to A1 = 55 Hz
-const SPECTROGRAM_OCTAVES_DOWN = 3;
-//We go up to A8 = 7,040 Hz
-const SPECTROGRAM_OCTAVES_UP = 4;
+//We go down to A0 = 27.5 Hz
+const SPECTROGRAM_OCTAVES_DOWN = 4;
+//We go up to A7 = 3,520 Hz
+const SPECTROGRAM_OCTAVES_UP = 3;
 //Calculate lowest and highest frequency based on this data
 const SPECTROGRAM_LOWEST_FREQUENCY = SPECTROGRAM_TUNING * (2 ** -SPECTROGRAM_OCTAVES_DOWN);
 const SPECTROGRAM_HIGHEST_FREQUENCY = SPECTROGRAM_TUNING * (2 ** SPECTROGRAM_OCTAVES_UP);
@@ -40,7 +40,7 @@ const spectrogram = (canvas) => {
     if (freq <= SPECTROGRAM_LOWEST_FREQUENCY) return 0;
     if (freq >= SPECTROGRAM_HIGHEST_FREQUENCY) return 1;
     const ratio = freq / SPECTROGRAM_LOWEST_FREQUENCY;
-    const ratioLog = Math.log2(ratio) / (SPECTROGRAM_OCTAVES_DOWN + 1 + SPECTROGRAM_OCTAVES_UP);
+    const ratioLog = Math.log2(ratio) / (SPECTROGRAM_OCTAVES_DOWN + SPECTROGRAM_OCTAVES_UP);
     return ratioLog;
   };
 
@@ -51,7 +51,7 @@ const spectrogram = (canvas) => {
      * Upon new data, moves the graph to the left and inserts the input on the right side
      * @param {Uint8Array} data
      */
-    addData: (data, binSize, newTime) => {
+    addData: (spectrumDataHi, binSizeHi, spectrumDataLo, binSizeLo, newTime) => {
       const pixelsToMove = (prevTime === 0) ? 0 : Math.floor((newTime - prevTime) * SPECTROGRAM_SPEED);
       prevTime = newTime;
 
@@ -60,15 +60,39 @@ const spectrogram = (canvas) => {
       ctx.drawImage(canvas, -pixelsToMove, 0);
 
       //add new pixels on the right side based on input data
-      for (let i = 0, il = data.length; i < il; i++) {
-        const frequency = i * binSize;
-        const amplitude = data[i];
+      for (let i = 0, il = spectrumDataLo.length; i < il; i++) {
+        const frequency = i * binSizeLo;
+        const amplitude = spectrumDataLo[i];
         //Convert frequency to logarithmic scale
         const logFrequency = frequencyToLogFrequency(frequency);
-        const logNextFrequency = frequencyToLogFrequency(frequency + binSize);
+        const logNextFrequency = frequencyToLogFrequency(frequency + binSizeLo);
+        //calculate position and height of the rectangle we want to draw
+        const rectPosition = logFrequency * oldHeight;
+        let rectHeight = (logNextFrequency - logFrequency) * oldHeight;
+        if (rectPosition >= oldHeight * 0.3) {
+          continue;
+        } else if (rectPosition + rectHeight >= oldHeight * 0.5) {
+          rectHeight = oldHeight * 0.3 - rectPosition;
+        }
+        //set background color based on amplitude
+        ctx.fillStyle = getViridisColor(amplitude / 255);
+        //We need to invert y axis since frequencies are ordered from bottom to top
+        ctx.fillRect(oldWidth - pixelsToMove, oldHeight - rectPosition - rectHeight, pixelsToMove, rectHeight);
+      }
+
+      //add new pixels on the right side based on input data
+      for (let i = 0, il = spectrumDataHi.length; i < il; i++) {
+        const frequency = i * binSizeHi;
+        const amplitude = spectrumDataHi[i];
+        //Convert frequency to logarithmic scale
+        const logFrequency = frequencyToLogFrequency(frequency);
+        const logNextFrequency = frequencyToLogFrequency(frequency + binSizeHi);
         //calculate position and height of the rectangle we want to draw
         const rectPosition = logFrequency * oldHeight;
         const rectHeight = (logNextFrequency - logFrequency) * oldHeight;
+        if (rectPosition < oldHeight * 0.3) {
+          continue;
+        }
         //set background color based on amplitude
         ctx.fillStyle = getViridisColor(amplitude / 255);
         //We need to invert y axis since frequencies are ordered from bottom to top

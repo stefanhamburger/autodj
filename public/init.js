@@ -62,27 +62,38 @@ let model;
     const audioCtx = new AudioContext({
       sampleRate: 44100, //ideally, we'd use a 48,000 sample rate but this is not yet supported by browsers
     });
-    const audioSourceNode = audioCtx.createMediaElementSource(audioEle);
-    const analyserNode = audioCtx.createAnalyser();
-    analyserNode.fftSize = 4096;
-    analyserNode.minDecibels = -60;
-    analyserNode.maxDecibels = -20;
-    analyserNode.smoothingTimeConstant = 0;
+    const audioSourceNode = new MediaElementAudioSourceNode(audioCtx, { mediaElement: audioEle });
+    const analyserNodeHi = new AnalyserNode(audioCtx, {
+      fftSize: 4096,
+      maxDecibels: -25,
+      minDecibels: -70,
+      smoothingTimeConstant: 0,
+    });
+    const analyserNodeLo = new AnalyserNode(audioCtx, {
+      fftSize: 16384,
+      maxDecibels: -25,
+      minDecibels: -70,
+      smoothingTimeConstant: 0,
+    });
     const gainNode = audioCtx.createGain();
     gainNode.gain.value = 0.1;
 
-    audioSourceNode.connect(analyserNode);
-    analyserNode.connect(gainNode);
+    audioSourceNode.connect(analyserNodeHi);
+    analyserNodeHi.connect(analyserNodeLo);
+    analyserNodeLo.connect(gainNode);
     gainNode.connect(audioCtx.destination);
 
     //Perform a FFT on the input stream, returns 1024 bins
     //Bin at index i corresponds to frequency i / 2048 * 44100
-    const binSize = audioCtx.sampleRate / analyserNode.fftSize;
-    const spectrumData = new Uint8Array(analyserNode.frequencyBinCount);
+    const binSizeHi = audioCtx.sampleRate / analyserNodeHi.fftSize;
+    const spectrumDataHi = new Uint8Array(analyserNodeHi.frequencyBinCount);
+    const binSizeLo = audioCtx.sampleRate / analyserNodeLo.fftSize;
+    const spectrumDataLo = new Uint8Array(analyserNodeLo.frequencyBinCount);
     const redrawSpectrogram = () => {
       requestAnimationFrame(redrawSpectrogram);
-      analyserNode.getByteFrequencyData(spectrumData);
-      view.updateSpectrogram(spectrumData, binSize, audioEle.currentTime);
+      analyserNodeHi.getByteFrequencyData(spectrumDataHi);
+      analyserNodeLo.getByteFrequencyData(spectrumDataLo);
+      view.updateSpectrogram(spectrumDataHi, binSizeHi, spectrumDataLo, binSizeLo, audioEle.currentTime);
     };
     requestAnimationFrame(redrawSpectrogram);
   });

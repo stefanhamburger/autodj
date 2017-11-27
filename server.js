@@ -1,10 +1,10 @@
 //This file creates a web server for serving the static files in the public/ folder as well as providing endpoints for the APIs
 
-import * as express from 'express';
-import * as fs from 'fs';
-import * as audioBuffer from './audioBuffer.mjs';
-import * as sessions from './sessions.mjs';
-import { get as getSettings } from './settings.mjs';
+const express = require('express');
+const fs = require('fs');
+const audioBuffer = require('./audioBuffer.js');
+const sessions = require('./sessions.js');
+const settings = require('./settings.js');
 
 const app = express();
 
@@ -14,7 +14,7 @@ app.use(express.static('public'));
 //main HTML
 app.get('/', async (req, res) => {
   let output = fs.readFileSync('index.html');
-  const collectionsString = Object.keys(getSettings().collections).map(key => '<option>' + key + '</option>').join('');
+  const collectionsString = Object.keys(settings.get().collections).map(key => '<option>' + key + '</option>').join('');
   output = output.toString().replace(/__INSERT_COLLECTIONS__/, collectionsString);
   res.send(output);
 });
@@ -53,8 +53,8 @@ app.get('/part', (req, res) => {
   }
 });
 
-export default function () {
+module.exports.init = () => {
   //Only accept connections from localhost on port 3000
   //can be accessed with http://localhost:3000/
   app.listen(3000, '127.0.0.1');
-}
+};

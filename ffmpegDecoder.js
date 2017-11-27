@@ -1,6 +1,6 @@
 //Audio decoder - from any format to 32-bit floating point PCM
 
-import { execFile } from 'child_process';
+const { execFile } = require('child_process');
 
 /** How much buffer we read from FFmpeg */
 const MAX_FFMPEG_BUFFER = 8 * 48000 * 60 * 20;//up to 20 minutes of audio, or 460.8 MB
@@ -10,7 +10,7 @@ const MAX_FFMPEG_BUFFER = 8 * 48000 * 60 * 20;//up to 20 minutes of audio, or 46
  * @param {string} path - The path of the audio file we want to decode
  * @return {Promise<ArrayBuffer>}
  */
-export const decodeAudio = async path => new Promise((resolve, reject) => {
+module.exports.decodeAudio = async path => new Promise((resolve, reject) => {
   //Create FFmpeg process
   execFile(
     'ffmpeg',

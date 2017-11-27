@@ -1,9 +1,9 @@
-import { spawn } from 'child_process';
+const { spawn } = require('child_process');
 
 /**
  * Launches a new FFmpeg process that can encode from 32-bit floating point PCM to Webm Opus
  */
-export const createEncoder = () => {
+module.exports.createEncoder = () => {
   //Create FFmpeg process
   const process = spawn(
     'ffmpeg',

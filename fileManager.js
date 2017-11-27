@@ -1,6 +1,6 @@
-import * as fs from 'fs';
-import * as path from 'path';
-import * as settings from './settings.mjs';
+const fs = require('fs');
+const path = require('path');
+const settings = require('./settings.js');
 
 /** The OS-dependent directory separator (/ on Linux, \ on Windows) */
 const PATH_SEPARATOR = path.sep;
@@ -68,11 +68,11 @@ const getFolderContents = async dirPath => new Promise((resolve) => {
 
 const files = {};
 
-export const init = async () => {
+module.exports.init = async () => {
   const { collections } = settings.get();
   await Promise.all(Object.keys(collections).map(async (key) => {
     files[key] = await getFolderContents(collections[key]);
   }));
 };
 
-export const getFiles = collection => files[collection];
+module.exports.getFiles = collection => files[collection];

@@ -1,35 +1,23 @@
 //Wrapper around storing waveform data for the audio files
 //Ensures waveform data is kept in memory as long as needed, and cleaned up as soon as possible
 
-import { decodeAudio } from './ffmpegDecoder.mjs';
+const { decodeAudio } = require('./ffmpegDecoder.js');
 
 const audioWaveforms = {};
 
-/**
- * Mark the given song as being in use by the given session, and load it in memory if needed
- * @param {*} song The song to use
- * @param {*} session The session to use
- */
-//
-export const addReference = async (song, session) => {
+//Mark the given song as being in use by the given session, and load it in memory if needed
+module.exports.addReference = async (song, session) => {
   audioWaveforms[song.path] = {
     buffer: decodeAudio(song.path),
     references: [session.sid],
   };
 };
 
-/**
- * Get the waveform data for the given song
- * @param {*} song The song to use
- */
-export const getWaveform = song => audioWaveforms[song.path].buffer;
+//Get the waveform data for the given song
+module.exports.getWaveform = song => audioWaveforms[song.path].buffer;
 
-/**
- * Delete waveform data to free up memory
- * @param {*} song The song to use
- * @param {*} session The session to use
- */
-export const removeReference = (song, session) => {
+//Delete waveform data to free up memory
+module.exports.removeReference = (song, session) => {
   const waveformObj = audioWaveforms[song.path];
   if (!waveformObj) throw new Error('song not found in memeory');
   //Remove reference

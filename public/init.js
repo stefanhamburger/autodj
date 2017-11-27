@@ -55,16 +55,18 @@ let model;
     model = initModel();
 
     audioEle.addEventListener('progress', () => {
-      model.heartbeat(audioEle.currentTime * 48000);
+      model.heartbeat(audioEle.currentTime);
     });
 
     //Set up Web Audio API to create volume slider and generate FFT data
-    const audioCtx = new AudioContext();
+    const audioCtx = new AudioContext({
+      sampleRate: 44100, //ideally, we'd use a 48,000 sample rate but this is not yet supported by browsers
+    });
     const audioSourceNode = audioCtx.createMediaElementSource(audioEle);
     const analyserNode = audioCtx.createAnalyser();
     analyserNode.fftSize = 2048;
-    analyserNode.minDecibels = -100;
-    analyserNode.maxDecibels = -30;
+    analyserNode.minDecibels = -60;
+    analyserNode.maxDecibels = -10;
     analyserNode.smoothingTimeConstant = 0;
     const gainNode = audioCtx.createGain();
     gainNode.gain.value = 0.1;
@@ -73,11 +75,14 @@ let model;
     analyserNode.connect(gainNode);
     gainNode.connect(audioCtx.destination);
 
+    //Perform a FFT on the input stream, returns 1024 bins
+    //Bin at index i corresponds to frequency i / 2048 * 44100
+    const binSize = audioCtx.sampleRate / analyserNode.fftSize;
     const spectrumData = new Uint8Array(analyserNode.frequencyBinCount);
     const redrawSpectrogram = () => {
       requestAnimationFrame(redrawSpectrogram);
       analyserNode.getByteFrequencyData(spectrumData);
-      view.updateSpectrogram(spectrumData, audioEle.currentTime);
+      view.updateSpectrogram(spectrumData, binSize, audioEle.currentTime);
     };
     requestAnimationFrame(redrawSpectrogram);
   });

@@ -5,6 +5,16 @@ const SPECTROGRAM_SPEED = 120;
 /** The background color of the spectrogram is purple by default, rgb(68,1,84), which equals 0 in the Viridis color map */
 const SPECTROGRAM_BACKGROUND = getViridisColor(0);
 
+//We center the spectrogram at the pitch standard A4 = 440 Hz
+const SPECTROGRAM_TUNING = 440;
+//We go down to A0 = 27.5 Hz
+const SPECTROGRAM_OCTAVES_DOWN = 4;
+//We go up to A9 = 14,080 Hz
+const SPECTROGRAM_OCTAVES_UP = 5;
+//Calculate lowest and highest frequency based on this data
+const SPECTROGRAM_LOWEST_FREQUENCY = SPECTROGRAM_TUNING * (2 ** -SPECTROGRAM_OCTAVES_DOWN);
+const SPECTROGRAM_HIGHEST_FREQUENCY = SPECTROGRAM_TUNING * (2 ** SPECTROGRAM_OCTAVES_UP);
+
 /**
  * A spectrogram of the audio stream. Left to right is time, bottom to top is frequency.
  * @param {HTMLCanvasElement} canvas
@@ -26,6 +36,14 @@ const spectrogram = (canvas) => {
   ctx.fillStyle = SPECTROGRAM_BACKGROUND;
   ctx.fillRect(0, 0, oldWidth, oldHeight);
 
+  const frequencyToLogFrequency = (freq) => {
+    if (freq <= SPECTROGRAM_LOWEST_FREQUENCY) return 0;
+    if (freq >= SPECTROGRAM_HIGHEST_FREQUENCY) return 1;
+    const ratio = freq / SPECTROGRAM_LOWEST_FREQUENCY;
+    const ratioLog = Math.log2(ratio) / (SPECTROGRAM_OCTAVES_DOWN + 1 + SPECTROGRAM_OCTAVES_UP);
+    return ratioLog;
+  };
+
   let prevTime = 0;
 
   return {
@@ -33,7 +51,7 @@ const spectrogram = (canvas) => {
      * Upon new data, moves the graph to the left and inserts the input on the right side
      * @param {Uint8Array} data
      */
-    addData: (data, newTime) => {
+    addData: (data, binSize, newTime) => {
       const pixelsToMove = (prevTime === 0) ? 0 : Math.floor((newTime - prevTime) * SPECTROGRAM_SPEED);
       prevTime = newTime;
 
@@ -42,12 +60,19 @@ const spectrogram = (canvas) => {
       ctx.drawImage(canvas, -pixelsToMove, 0);
 
       //add new pixels on the right side based on input data
-      const heightPerData = 1 / data.length * oldHeight;
       for (let i = 0, il = data.length; i < il; i++) {
-        //TODO: This causes a grid because certain pixels are drawn twice. We will need to round to integers
-        //TODO: Frequencies should use a logarithmic scale
-        ctx.fillStyle = getViridisColor(data[i] / 255);
-        ctx.fillRect(oldWidth - pixelsToMove, oldHeight - i * heightPerData, pixelsToMove, heightPerData);
+        const frequency = i * binSize;
+        const amplitude = data[i];
+        //Convert frequency to logarithmic scale
+        const logFrequency = frequencyToLogFrequency(frequency);
+        const logNextFrequency = frequencyToLogFrequency(frequency + binSize);
+        //calculate position and height of the rectangle we want to draw
+        const rectPosition = logFrequency * oldHeight;
+        const rectHeight = (logNextFrequency - logFrequency) * oldHeight;
+        //set background color based on amplitude
+        ctx.fillStyle = getViridisColor(amplitude / 255);
+        //We need to invert y axis since frequencies are ordered from bottom to top
+        ctx.fillRect(oldWidth - pixelsToMove, oldHeight - rectPosition - rectHeight, pixelsToMove, rectHeight);
       }
     },
     /**

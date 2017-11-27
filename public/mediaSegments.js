@@ -53,11 +53,6 @@ const initAudio = async ({
     sourceBuffer.appendBuffer(mediaSegment);
   }
 
-
-  /*audioEle.addEventListener('progress', () => {
-    appendNextMediaSegment();
-  });*/
-
   //Load first segment
   {
     const initSegment = await GetNextMediaSegment();

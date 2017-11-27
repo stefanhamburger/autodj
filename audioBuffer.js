@@ -45,7 +45,7 @@ const addFileToStream = (session) => {
         : prevSongWrapper.startTime + prevSongWrapper.totalLength;
       songWrapper.startTime = startTime;//the time in samples at which to start adding this song to the stream
       songWrapper.offset = 0;//the offset into the song at which to start mixing, e.g. to skip silence at the beginning
-      session.emitEvent({ type: 'SONG_START', songName: songWrapper.songRef.name, time: startTime });
+      session.emitEvent({ type: 'SONG_START', songName: songWrapper.songRef.name, time: startTime / 48000 });
       songWrapper.totalLength = await audioManager.getDuration(songWrapper.songRef);//how long we want to play this song, e.g. to skip the ending
       resolve();
     });

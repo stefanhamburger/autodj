@@ -22,15 +22,29 @@ const addFileToStream = async (session) => {
   audioManager.addReference(randomFile, session);
   console.log('[' + session.sid + '] Adding to playlist: ' + randomFile.name + '...');
 
-  //append new song at the end of the previous song
-  //TODO: we need to implement mixing and cross-fade between songs
-  const startTime = (session.songs.length === 1)
-    ? 0
-    : session.songs[session.songs.length - 2].startTime + session.songs[session.songs.length - 2].totalLength;
-  session.emitEvent({ type: 'SONG_START', songName: randomFile.name, time: startTime });
-  songWrapper.startTime = startTime;//the time in samples at which to start adding this song to the stream
-  songWrapper.offset = 0;//the offset into the song at which to start mixing, e.g. to skip silence at the beginning
-  songWrapper.totalLength = await audioManager.getDuration(songWrapper.songRef);//how long we want to play this song, e.g. to skip the ending
+  //If this is the first song in the stream, start playing immediately without worrying about mixing
+  if (session.songs.length === 1) {
+    songWrapper.startTime = 0;
+    songWrapper.offset = 0;
+    songWrapper.totalLength = 30 * 48000;//we assume the song is at least 30 seconds long, this will be overwritten as soon as we have the correct duration
+    session.emitEvent({ type: 'SONG_START', songName: songWrapper.songRef.name, time: 0 });
+    songWrapper.totalLength = await audioManager.getDuration(songWrapper.songRef);
+  } else {
+    //append new song at the end of the previous song
+
+    //wait until previous song has finished processing
+    //TODO: this may be bugged because even though Promise resolved there's no guarantee songWrapper.totalLength is set
+    await audioManager.getDuration(session.songs[session.songs.length - 2].songRef);
+
+    //TODO: we need to implement mixing and cross-fade between songs
+    const startTime = (session.songs.length === 1)
+      ? 0
+      : session.songs[session.songs.length - 2].startTime + session.songs[session.songs.length - 2].totalLength;
+    songWrapper.startTime = startTime;//the time in samples at which to start adding this song to the stream
+    songWrapper.offset = 0;//the offset into the song at which to start mixing, e.g. to skip silence at the beginning
+    session.emitEvent({ type: 'SONG_START', songName: songWrapper.songRef.name, time: startTime });
+    songWrapper.totalLength = await audioManager.getDuration(songWrapper.songRef);//how long we want to play this song, e.g. to skip the ending
+  }
 };
 
 //writes some samples to the FFmpeg input stream to start encoding
@@ -40,16 +54,15 @@ const addToBuffer = async (session) => {
   if (session.samplesToAdd > 0) {
     const curSong = session.songs[session.curSong];
     const waveform = await audioManager.getWaveform(curSong.songRef);
-    const totalLength = (curSong.totalLength) ? curSong.totalLength : waveform.byteLength / BYTES_PER_SAMPLE;
 
-    const remainingSongLength = totalLength - session.curSongPosition;
+    const remainingSongLength = curSong.totalLength - session.curSongPosition;
     const numSamplesToWrite = Math.min(session.samplesToAdd, remainingSongLength, MAX_SAMPLES_PER_LOOP);
 
     session.inputStream.write(Buffer.from(waveform, (curSong.offset + session.curSongPosition) * BYTES_PER_SAMPLE, numSamplesToWrite * BYTES_PER_SAMPLE));
     session.curSongPosition += numSamplesToWrite;
     session.samplesToAdd -= numSamplesToWrite;
 
-    if (session.curSongPosition >= totalLength) {
+    if (session.curSongPosition >= curSong.totalLength) {
       //delete previous song from memory
       audioManager.removeReference(curSong.songRef, session);
       //start encoding next song

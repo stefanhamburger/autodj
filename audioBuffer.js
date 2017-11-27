@@ -40,15 +40,16 @@ const addToBuffer = async (session) => {
   if (session.samplesToAdd > 0) {
     const curSong = session.songs[session.curSong];
     const waveform = await audioManager.getWaveform(curSong.songRef);
+    const totalLength = (curSong.totalLength) ? curSong.totalLength : waveform.byteLength / BYTES_PER_SAMPLE;
 
-    const remainingSongLength = curSong.totalLength - session.curSongPosition;
+    const remainingSongLength = totalLength - session.curSongPosition;
     const numSamplesToWrite = Math.min(session.samplesToAdd, remainingSongLength, MAX_SAMPLES_PER_LOOP);
 
     session.inputStream.write(Buffer.from(waveform, (curSong.offset + session.curSongPosition) * BYTES_PER_SAMPLE, numSamplesToWrite * BYTES_PER_SAMPLE));
     session.curSongPosition += numSamplesToWrite;
     session.samplesToAdd -= numSamplesToWrite;
 
-    if (session.curSongPosition >= waveform.byteLength / BYTES_PER_SAMPLE) {
+    if (session.curSongPosition >= totalLength) {
       //delete previous song from memory
       audioManager.removeReference(curSong.songRef, session);
       //start encoding next song

@@ -54,7 +54,7 @@ module.exports.newSession = () => {
   session.events = [];
   session.emitEvent = event => session.events.push(event);
   session.flushEvents = () => {
-    const eventsCopy = session.events.slice(0);
+    const eventsCopy = session.events.slice();
     session.events = [];
     return eventsCopy;
   };

@@ -12,7 +12,7 @@ const MAX_SAMPLES_PER_LOOP = 2 * 48000;
 /**
  * @param {module:session.Session} session
 */
-const addFileToStream = async (session) => {
+const addFileToStream = (session) => {
   //wait until list of files was loaded
   const files = fileManager.getFiles(session.collection);
 
@@ -28,22 +28,27 @@ const addFileToStream = async (session) => {
     songWrapper.offset = 0;
     songWrapper.totalLength = 30 * 48000;//we assume the song is at least 30 seconds long, this will be overwritten as soon as we have the correct duration
     session.emitEvent({ type: 'SONG_START', songName: songWrapper.songRef.name, time: 0 });
-    songWrapper.totalLength = await audioManager.getDuration(songWrapper.songRef);
+    songWrapper.ready = new Promise(async (resolve) => {
+      songWrapper.totalLength = await audioManager.getDuration(songWrapper.songRef);
+      resolve();
+    });
   } else {
     //append new song at the end of the previous song
+    const prevSongWrapper = session.songs[session.songs.length - 2];
+    songWrapper.ready = new Promise(async (resolve) => {
+      //wait until previous song has finished processing
+      await prevSongWrapper.ready;
 
-    //wait until previous song has finished processing
-    //TODO: this may be bugged because even though Promise resolved there's no guarantee songWrapper.totalLength is set
-    await audioManager.getDuration(session.songs[session.songs.length - 2].songRef);
-
-    //TODO: we need to implement mixing and cross-fade between songs
-    const startTime = (session.songs.length === 1)
-      ? 0
-      : session.songs[session.songs.length - 2].startTime + session.songs[session.songs.length - 2].totalLength;
-    songWrapper.startTime = startTime;//the time in samples at which to start adding this song to the stream
-    songWrapper.offset = 0;//the offset into the song at which to start mixing, e.g. to skip silence at the beginning
-    session.emitEvent({ type: 'SONG_START', songName: songWrapper.songRef.name, time: startTime });
-    songWrapper.totalLength = await audioManager.getDuration(songWrapper.songRef);//how long we want to play this song, e.g. to skip the ending
+      //TODO: we need to implement mixing and cross-fade between songs
+      const startTime = (session.songs.length === 1)
+        ? 0
+        : prevSongWrapper.startTime + prevSongWrapper.totalLength;
+      songWrapper.startTime = startTime;//the time in samples at which to start adding this song to the stream
+      songWrapper.offset = 0;//the offset into the song at which to start mixing, e.g. to skip silence at the beginning
+      session.emitEvent({ type: 'SONG_START', songName: songWrapper.songRef.name, time: startTime });
+      songWrapper.totalLength = await audioManager.getDuration(songWrapper.songRef);//how long we want to play this song, e.g. to skip the ending
+      resolve();
+    });
   }
 };
 

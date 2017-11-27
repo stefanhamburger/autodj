@@ -14,16 +14,9 @@ const initView = () => {
   rootEle.appendChild(canvas);
 
   return {
-    updateMetadata: events => events.forEach((event) => {
-      switch (event.type) {
-        case 'SONG_START':
-          //TODO: only update view when audio playback has gotten to event.time
-          metadataEle.innerHTML = '<b>Currently playing:</b> ' + event.songName.replace(/&/, '&amp;').replace(/</, '&lt;').replace(/>/, '&gt;');
-          break;
-        default:
-          console.error('Metadata event not recognized', event);
-      }
-    }),
+    setSong: (songName) => {
+      metadataEle.innerHTML = '<b>Currently playing:</b> ' + songName.replace(/&/, '&amp;').replace(/</, '&lt;').replace(/>/, '&gt;');
+    },
     updateSpectrogram: spectrogramFunctions.addData,
   };
 };

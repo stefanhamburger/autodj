@@ -17,7 +17,7 @@ const initAudio = async ({
 
     //Read metadata, e.g. current song
     const metadataEvents = JSON.parse(decodeURI(response.headers.get('X-Metadata')));
-    if (typeof metadataEvents === 'object') view.updateMetadata(metadataEvents);
+    if (typeof metadataEvents === 'object') model.processEvents(metadataEvents);
 
     return response.arrayBuffer();
   };

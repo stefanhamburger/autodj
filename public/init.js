@@ -1,4 +1,5 @@
 let view;
+let model;
 
 {
   const startLink = document.getElementById('startLink');
@@ -51,6 +52,11 @@ let view;
     //TODO: don't add <audio> element to DOM but add UI elements to see elapsed time and to change volume
 
     view = initView();
+    model = initModel();
+
+    audioEle.addEventListener('progress', () => {
+      model.heartbeat(audioEle.currentTime * 48000);
+    });
 
     //Set up Web Audio API to create volume slider and generate FFT data
     const audioCtx = new AudioContext();

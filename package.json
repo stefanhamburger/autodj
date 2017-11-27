@@ -2,9 +2,9 @@
   "name": "autodj",
   "version": "1.0.0",
   "description": "Given a list of input tracks, streams an output audio mix",
-  "main": "index.js",
+  "main": "index.mjs",
   "scripts": {
-    "start": "node index.js",
+    "start": "node index.mjs",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Stefan Hamburger",

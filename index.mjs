@@ -1,7 +1,7 @@
 //Main entrypoint for this program
-const settings = require('./settings.js');
-const fileManager = require('./fileManager.js');
-const server = require('./server.js');
+import * as settings from './settings.mjs';
+import * as fileManager from './fileManager.js';
+import * as server from './server.mjs';
 
 //Exit on async error to prevent further bugs and provide better debug messages
 process.on('unhandledRejection', (err) => {

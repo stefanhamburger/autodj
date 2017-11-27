@@ -1,6 +1,6 @@
-const fileManager = require('./fileManager.js');
-const ffmpeg = require('./ffmpegEncoder.js');
-const audioManager = require('./audioManager.js');
+import * as fileManager from './fileManager.mjs';
+import * as ffmpeg from './ffmpegEncoder.mjs';
+import * as audioManager from './audioManager.mjs';
 
 /** number of samples to preload - this controls how fast the server can react to input from the client, so should be kept as small as possible */
 const PRELOAD_BUFFER_LENGTH = 5 * 48000;
@@ -60,7 +60,7 @@ const addToBuffer = async (session) => {
 };
 
 //initializes audio buffer
-module.exports.init = async (session) => {
+export const init = async (session) => {
   //create new FFmpeg process
   const { inputStream, getOutputBuffer, killCommand } = ffmpeg.createEncoder();
   session.inputStream = inputStream;
@@ -95,7 +95,7 @@ module.exports.init = async (session) => {
 };
 
 //Start converting the given amount of audio
-module.exports.scheduleNewAudio = (session, newBufferLength) => {
+export const scheduleNewAudio = (session, newBufferLength) => {
   //Provide new input to FFmpeg
   if (newBufferLength > 0) {
     const prevLength = session.clientBufferLength;

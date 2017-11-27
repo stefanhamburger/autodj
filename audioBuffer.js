@@ -24,9 +24,9 @@ const addFileToStream = async (session) => {
 
   //append new song at the end of the previous song
   //TODO: we need to implement mixing and cross-fade between songs
-  const startTime = (session.songs.length === 0)
+  const startTime = (session.songs.length === 1)
     ? 0
-    : session.songs[session.songs.length - 1].startTime + session.songs[session.songs.length - 1].totalLength;
+    : session.songs[session.songs.length - 2].startTime + session.songs[session.songs.length - 2].totalLength;
   session.emitEvent({ type: 'SONG_START', songName: randomFile.name, time: startTime });
   songWrapper.startTime = startTime;//the time in samples at which to start adding this song to the stream
   songWrapper.offset = 0;//the offset into the song at which to start mixing, e.g. to skip silence at the beginning

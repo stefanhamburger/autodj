@@ -9,12 +9,16 @@ const BYTES_PER_SAMPLE = 8;
 /** we never initiate encoding of more than 2 seconds of samples at once to prevent the app from blocking too long */
 const MAX_SAMPLES_PER_LOOP = 2 * 48000;
 
+/**
+ * @param {module:session.Session} session
+*/
 const addFileToStream = (session) => {
   //wait until list of files was loaded
   const files = fileManager.getFiles(session.collection);
 
   const randomFile = files[Math.floor(Math.random() * files.length)];
   session.songs.push(randomFile);
+  session.events.push({ type: 'SONG_START', songName: randomFile.name, time: 0 });
   audioManager.addReference(randomFile, session);
   console.log('[' + session.sid + '] Adding to playlist: ' + randomFile.name + '...');
 };

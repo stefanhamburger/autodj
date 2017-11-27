@@ -16,8 +16,8 @@ const initAudio = async ({
     );
 
     //Read metadata, e.g. current song
-    const metadata = JSON.parse(decodeURI(response.headers.get('X-Metadata')));
-    if (typeof metadata === 'object') view.updateMetadata(metadata);
+    const metadataEvents = JSON.parse(decodeURI(response.headers.get('X-Metadata')));
+    if (typeof metadataEvents === 'object') view.updateMetadata(metadataEvents);
 
     return response.arrayBuffer();
   };

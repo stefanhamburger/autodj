@@ -14,9 +14,15 @@ const initView = () => {
   rootEle.appendChild(canvas);
 
   return {
-    updateMetadata: ({ song }) => {
-      metadataEle.innerHTML = '<b>Currently playing:</b> ' + song.replace(/&/, '&amp;').replace(/</, '&lt;').replace(/>/, '&gt;');
-    },
+    updateMetadata: events => events.forEach((event) => {
+      switch (event.type) {
+        case 'SONG_START':
+          metadataEle.innerHTML = '<b>Currently playing:</b> ' + event.songName.replace(/&/, '&amp;').replace(/</, '&lt;').replace(/>/, '&gt;');
+          break;
+        default:
+          console.error('Metadata event not recognized', event);
+      }
+    }),
     updateSpectrogram: spectrogramFunctions.addData,
   };
 };

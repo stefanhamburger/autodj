@@ -1,4 +1,11 @@
+/** @module session */
+
 const sessions = {};
+
+/**
+ * @typedef {Object} module:session.Session
+ * @property {string} sid - session id
+ */
 
 /**
  * after how much time a session times out (because we haven't received any more client requests for it)
@@ -39,10 +46,13 @@ module.exports.lifeSign = (session) => {
 
 /**
  * Creates a new session
+ * @returns {module:session.Session}
  */
 module.exports.newSession = () => {
   const sid = generateSID();
   const sessionObj = { sid };
+  sessionObj.events = [];
+
   sessions[sid] = sessionObj;
   module.exports.lifeSign(sessionObj);
   console.log('[' + sid + '] Starting new session...');

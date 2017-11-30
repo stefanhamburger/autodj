@@ -8,11 +8,11 @@ const SPECTROGRAM_BACKGROUND = getViridisColor(0);
 //We center the spectrogram at the pitch standard A4 = 440 Hz
 const SPECTROGRAM_TUNING = 440;
 //We go down to A0 = 27.5 Hz
-const SPECTROGRAM_OCTAVES_DOWN = 4;
-//We go up to A7 = 3,520 Hz
-const SPECTROGRAM_OCTAVES_UP = 3;
+const SPECTROGRAM_OCTAVES_DOWN = -4;
+//We go up to A7 = 1,760 Hz
+const SPECTROGRAM_OCTAVES_UP = 2;
 //Calculate lowest and highest frequency based on this data
-const SPECTROGRAM_LOWEST_FREQUENCY = SPECTROGRAM_TUNING * (2 ** -SPECTROGRAM_OCTAVES_DOWN);
+const SPECTROGRAM_LOWEST_FREQUENCY = SPECTROGRAM_TUNING * (2 ** SPECTROGRAM_OCTAVES_DOWN);
 const SPECTROGRAM_HIGHEST_FREQUENCY = SPECTROGRAM_TUNING * (2 ** SPECTROGRAM_OCTAVES_UP);
 
 /**
@@ -40,7 +40,7 @@ const spectrogram = (canvas) => {
     if (freq <= SPECTROGRAM_LOWEST_FREQUENCY) return 0;
     if (freq >= SPECTROGRAM_HIGHEST_FREQUENCY) return 1;
     const ratio = freq / SPECTROGRAM_LOWEST_FREQUENCY;
-    const ratioLog = Math.log2(ratio) / (SPECTROGRAM_OCTAVES_DOWN + SPECTROGRAM_OCTAVES_UP);
+    const ratioLog = Math.log2(ratio) / (SPECTROGRAM_OCTAVES_UP - SPECTROGRAM_OCTAVES_DOWN);
     return ratioLog;
   };
 

@@ -66,13 +66,13 @@ let model;
     const analyserNodeHi = new AnalyserNode(audioCtx, {
       fftSize: 4096,
       maxDecibels: -25,
-      minDecibels: -70,
+      minDecibels: -60,
       smoothingTimeConstant: 0,
     });
     const analyserNodeLo = new AnalyserNode(audioCtx, {
       fftSize: 16384,
       maxDecibels: -25,
-      minDecibels: -70,
+      minDecibels: -60,
       smoothingTimeConstant: 0,
     });
     const gainNode = audioCtx.createGain();

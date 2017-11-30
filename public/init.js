@@ -91,8 +91,16 @@ let model;
     let doubleBuffer = false;
     const binSizeLo = audioCtx.sampleRate / analyserNodeLo.fftSize;
     const spectrumDataLo = new Uint8Array(analyserNodeLo.frequencyBinCount);
+    let lastRedraw = 0;
     const redrawSpectrogram = () => {
       requestAnimationFrame(redrawSpectrogram);
+
+      //only redraw if our AnalyserNode actually has new data
+      if (audioCtx.currentTime - lastRedraw < 4096 / 44100) {
+        return;
+      }
+      lastRedraw = audioCtx.currentTime;
+
       if (doubleBuffer) {
         analyserNodeHi.getByteFrequencyData(spectrumDataHi1);
         analyserNodeLo.getByteFrequencyData(spectrumDataLo);

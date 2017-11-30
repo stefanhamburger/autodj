@@ -86,14 +86,23 @@ let model;
     //Perform a FFT on the input stream, returns 1024 bins
     //Bin at index i corresponds to frequency i / 2048 * 44100
     const binSizeHi = audioCtx.sampleRate / analyserNodeHi.fftSize;
-    const spectrumDataHi = new Uint8Array(analyserNodeHi.frequencyBinCount);
+    const spectrumDataHi1 = new Uint8Array(analyserNodeHi.frequencyBinCount);
+    const spectrumDataHi2 = new Uint8Array(analyserNodeHi.frequencyBinCount);
+    let doubleBuffer = false;
     const binSizeLo = audioCtx.sampleRate / analyserNodeLo.fftSize;
     const spectrumDataLo = new Uint8Array(analyserNodeLo.frequencyBinCount);
     const redrawSpectrogram = () => {
       requestAnimationFrame(redrawSpectrogram);
-      analyserNodeHi.getByteFrequencyData(spectrumDataHi);
-      analyserNodeLo.getByteFrequencyData(spectrumDataLo);
-      view.updateSpectrogram(spectrumDataHi, binSizeHi, spectrumDataLo, binSizeLo, audioEle.currentTime);
+      if (doubleBuffer) {
+        analyserNodeHi.getByteFrequencyData(spectrumDataHi1);
+        analyserNodeLo.getByteFrequencyData(spectrumDataLo);
+        view.updateSpectrogram(spectrumDataHi2, binSizeHi, spectrumDataLo, binSizeLo, audioEle.currentTime);
+      } else {
+        analyserNodeHi.getByteFrequencyData(spectrumDataHi2);
+        analyserNodeLo.getByteFrequencyData(spectrumDataLo);
+        view.updateSpectrogram(spectrumDataHi1, binSizeHi, spectrumDataLo, binSizeLo, audioEle.currentTime);
+      }
+      doubleBuffer = !doubleBuffer;
     };
     requestAnimationFrame(redrawSpectrogram);
   });

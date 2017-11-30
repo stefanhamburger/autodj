@@ -48,15 +48,16 @@ let model;
     audioEle.controls = true;
     audioEle.preload = 'auto';//otherwise, the file will not autoplay
     audioEle.volume = 1;
-    document.body.appendChild(audioEle);
+    const onPause = () => {
+      if (audioEle.paused) {
+        audioEle.play();
+      } else {
+        audioEle.pause();
+      }
+    };
     //TODO: don't add <audio> element to DOM but add UI elements to see elapsed time and to change volume
 
-    view = initView();
     model = initModel();
-
-    audioEle.addEventListener('progress', () => {
-      model.heartbeat(audioEle.currentTime);
-    });
 
     //Set up Web Audio API to create volume slider and generate FFT data
     const audioCtx = new AudioContext({
@@ -77,40 +78,49 @@ let model;
     });
     const gainNode = audioCtx.createGain();
     gainNode.gain.value = 0.1;
+    const onVolumChange = (newVolume) => {
+      gainNode.gain.value = newVolume;
+    };
+    /*const delayNode = new DelayNode(audioCtx, {
+      delayTime: (4096 + 16384) / 44100,
+      maxDelayTime: (4096 + 16384) / 44100,
+    });*/
 
     audioSourceNode.connect(analyserNodeHi);
     analyserNodeHi.connect(analyserNodeLo);
     analyserNodeLo.connect(gainNode);
+    //analyserNodeLo.connect(delayNode);
+    //delayNode.connect(gainNode);
     gainNode.connect(audioCtx.destination);
+
+    //Create view
+    view = initView(onVolumChange, onPause);
+    audioEle.addEventListener('progress', () => {
+      model.heartbeat(audioEle.currentTime);
+      view.updateTime(audioEle.currentTime);
+    });
 
     //Perform a FFT on the input stream, returns 1024 bins
     //Bin at index i corresponds to frequency i / 2048 * 44100
     const binSizeHi = audioCtx.sampleRate / analyserNodeHi.fftSize;
-    const spectrumDataHi1 = new Uint8Array(analyserNodeHi.frequencyBinCount);
-    const spectrumDataHi2 = new Uint8Array(analyserNodeHi.frequencyBinCount);
-    let doubleBuffer = false;
+    const fftManagerHi = fftDataManager(analyserNodeHi.frequencyBinCount);
     const binSizeLo = audioCtx.sampleRate / analyserNodeLo.fftSize;
-    const spectrumDataLo = new Uint8Array(analyserNodeLo.frequencyBinCount);
-    let lastRedraw = 0;
+    const fftManagerLo = fftDataManager(analyserNodeLo.frequencyBinCount);
     const redrawSpectrogram = () => {
       requestAnimationFrame(redrawSpectrogram);
 
-      //only redraw if our AnalyserNode actually has new data
-      if (audioCtx.currentTime - lastRedraw < 4096 / 44100) {
-        return;
-      }
-      lastRedraw = audioCtx.currentTime;
+      const bufferHi = fftManagerHi.getNewBuffer(audioEle.currentTime * 44100 + 4096);
+      analyserNodeHi.getByteFrequencyData(bufferHi);//TODO: need to use getFloatFrequencyData
 
-      if (doubleBuffer) {
-        analyserNodeHi.getByteFrequencyData(spectrumDataHi1);
-        analyserNodeLo.getByteFrequencyData(spectrumDataLo);
-        view.updateSpectrogram(spectrumDataHi2, binSizeHi, spectrumDataLo, binSizeLo, audioEle.currentTime);
-      } else {
-        analyserNodeHi.getByteFrequencyData(spectrumDataHi2);
-        analyserNodeLo.getByteFrequencyData(spectrumDataLo);
-        view.updateSpectrogram(spectrumDataHi1, binSizeHi, spectrumDataLo, binSizeLo, audioEle.currentTime);
-      }
-      doubleBuffer = !doubleBuffer;
+      const bufferLo = fftManagerLo.getNewBuffer(audioEle.currentTime * 44100);
+      analyserNodeLo.getByteFrequencyData(bufferLo);
+
+      const nearestBuffersHi = fftManagerHi.getNearestBuffers(audioEle.currentTime * 44100);//TODO: we need to call this function once for each pixel
+      const nearestBuffersLo = fftManagerLo.getNearestBuffers(audioEle.currentTime * 44100);
+      view.updateSpectrogram(nearestBuffersHi, binSizeHi, nearestBuffersLo, binSizeLo, audioEle.currentTime);
+
+      fftManagerHi.garbageCollection(audioEle.currentTime * 44100);
+      fftManagerLo.garbageCollection(audioEle.currentTime * 44100);
     };
     requestAnimationFrame(redrawSpectrogram);
   });

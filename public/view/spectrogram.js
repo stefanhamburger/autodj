@@ -51,7 +51,7 @@ const spectrogram = (canvas) => {
      * Upon new data, moves the graph to the left and inserts the input on the right side
      * @param {Uint8Array} data
      */
-    addData: (spectrumDataHi, binSizeHi, spectrumDataLo, binSizeLo, newTime) => {
+    addData: (spectrumBuffersHi, binSizeHi, spectrumBuffersLo, binSizeLo, newTime) => {
       const pixelsToMove = (prevTime === 0) ? 0 : Math.floor((newTime - prevTime) * SPECTROGRAM_SPEED);
       prevTime = newTime;
 
@@ -60,9 +60,9 @@ const spectrogram = (canvas) => {
       ctx.drawImage(canvas, -pixelsToMove, 0);
 
       //add new pixels on the right side based on input data
-      for (let i = 0, il = spectrumDataLo.length; i < il; i++) {
+      for (let i = 0, il = spectrumBuffersLo.minArray.length; i < il; i++) {
         const frequency = i * binSizeLo;
-        const amplitude = spectrumDataLo[i];
+        const amplitude = spectrumBuffersLo.minWeight * spectrumBuffersLo.minArray[i] + spectrumBuffersLo.maxWeight * spectrumBuffersLo.maxArray[i];
         //Convert frequency to logarithmic scale
         const logFrequency = frequencyToLogFrequency(frequency);
         const logNextFrequency = frequencyToLogFrequency(frequency + binSizeLo);
@@ -81,9 +81,9 @@ const spectrogram = (canvas) => {
       }
 
       //add new pixels on the right side based on input data
-      for (let i = 0, il = spectrumDataHi.length; i < il; i++) {
+      for (let i = 0, il = spectrumBuffersHi.minArray.length; i < il; i++) {
         const frequency = i * binSizeHi;
-        const amplitude = spectrumDataHi[i];
+        const amplitude = spectrumBuffersHi.minWeight * spectrumBuffersHi.minArray[i] + spectrumBuffersHi.maxWeight * spectrumBuffersHi.maxArray[i];
         //Convert frequency to logarithmic scale
         const logFrequency = frequencyToLogFrequency(frequency);
         const logNextFrequency = frequencyToLogFrequency(frequency + binSizeHi);

@@ -115,9 +115,7 @@ let model;
       const bufferLo = fftManagerLo.getNewBuffer(audioEle.currentTime * 44100);
       analyserNodeLo.getByteFrequencyData(bufferLo);
 
-      const nearestBuffersHi = fftManagerHi.getNearestBuffers(audioEle.currentTime * 44100);//TODO: we need to call this function once for each pixel
-      const nearestBuffersLo = fftManagerLo.getNearestBuffers(audioEle.currentTime * 44100);
-      view.updateSpectrogram(nearestBuffersHi, binSizeHi, nearestBuffersLo, binSizeLo, audioEle.currentTime);
+      view.updateSpectrogram(fftManagerHi, binSizeHi, fftManagerLo, binSizeLo, audioEle.currentTime);
 
       fftManagerHi.garbageCollection(audioEle.currentTime * 44100);
       fftManagerLo.garbageCollection(audioEle.currentTime * 44100);

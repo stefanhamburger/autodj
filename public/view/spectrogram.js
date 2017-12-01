@@ -62,6 +62,8 @@ const spectrogram = (canvas) => {
         const nearestBuffersHi = fftManagerHi.getNearestBuffers(prevTime * 44100);
         const nearestBuffersLo = fftManagerLo.getNearestBuffers(prevTime * 44100);
         prevTime += 1 / SPECTROGRAM_SPEED;
+        //If user tabbed out and returns, skip older pixels for better performance
+        if (pixelsToMove > 50 && i < pixelsToMove - 20) continue;
 
         //add new pixels on the right side based on input data
         for (let j = 0, jl = nearestBuffersLo.minArray.length; j < jl; j++) {

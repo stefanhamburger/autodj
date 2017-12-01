@@ -21,6 +21,9 @@ const initView = (onVolumeChange, onPause) => {
   rootEle.appendChild(btnPause);
 
   //volume control
+  const volumeLabel = document.createElement('span');
+  volumeLabel.innerHTML = 'Volume:&nbsp;';
+  rootEle.appendChild(volumeLabel);
   const volumeSlider = document.createElement('input');
   volumeSlider.type = 'range';
   volumeSlider.min = 0;

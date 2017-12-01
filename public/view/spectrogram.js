@@ -63,46 +63,40 @@ const spectrogram = (canvas) => {
         const nearestBuffersLo = fftManagerLo.getNearestBuffers(prevTime * 44100);
         prevTime += 1 / SPECTROGRAM_SPEED;
         //If user tabbed out and returns, skip older pixels for better performance
-        if (pixelsToMove > 50 && i < pixelsToMove - 20) continue;
+        if (pixelsToMove > 50 && i < pixelsToMove - 20) continue;//TODO: we can do a better job than this
 
         //add new pixels on the right side based on input data
-        for (let j = 0, jl = nearestBuffersLo.minArray.length; j < jl; j++) {
-          const frequency = j * binSizeLo;
-          const amplitude = nearestBuffersLo.minWeight * nearestBuffersLo.minArray[j] + nearestBuffersLo.maxWeight * nearestBuffersLo.maxArray[j];
-          //Convert frequency to logarithmic scale
-          const logFrequency = frequencyToLogFrequency(frequency);
-          const logNextFrequency = frequencyToLogFrequency(frequency + binSizeLo);
-          //calculate position and height of the rectangle we want to draw
-          const rectPosition = logFrequency * oldHeight;
-          let rectHeight = (logNextFrequency - logFrequency) * oldHeight;
-          if (rectPosition >= oldHeight * 0.3) {
-            continue;
-          } else if (rectPosition + rectHeight >= oldHeight * 0.5) {
-            rectHeight = oldHeight * 0.3 - rectPosition;
-          }
-          //set background color based on amplitude
-          ctx.fillStyle = getViridisColor(amplitude / 255);
-          //We need to invert y axis since frequencies are ordered from bottom to top
-          ctx.fillRect(oldWidth - pixelsToMove + i, oldHeight - rectPosition - rectHeight, 1, rectHeight);
-        }
+        for (let j = oldHeight - 1; j >= 0; j--) {
+          //convert y axis (log frequency) to frequency
+          const frequency = SPECTROGRAM_LOWEST_FREQUENCY * 2 ** (j / oldHeight * (SPECTROGRAM_OCTAVES_UP - SPECTROGRAM_OCTAVES_DOWN));
+          //find closest indices in nearestBuffersHi and nearestBuffersLo
+          const freqLoRatio = frequency / binSizeLo;
+          const freqLoIndex = Math.floor(freqLoRatio);
+          const freqLoWeight = 1.0 - (freqLoRatio % 1);
+          const freqHiRatio = frequency / binSizeHi;
+          const freqHiIndex = Math.floor(freqHiRatio);
+          const freqHiWeight = 1.0 - (freqHiRatio % 1);
+          //interpolate between previous and current time, and interpolate between current frequency and subsequent frequency
+          const amplitudeLo =
+            (nearestBuffersLo.minWeight * (freqLoWeight * nearestBuffersLo.minArray[freqLoIndex] + (1.0 - freqLoWeight) * nearestBuffersLo.minArray[freqLoIndex + 1]) +
+            nearestBuffersLo.maxWeight * (freqLoWeight * nearestBuffersLo.maxArray[freqLoIndex] + (1.0 - freqLoWeight) * nearestBuffersLo.maxArray[freqLoIndex + 1])) / 255;
+          const amplitudeHi =
+            (nearestBuffersHi.minWeight * (freqHiWeight * nearestBuffersHi.minArray[freqHiIndex] + (1.0 - freqHiWeight) * nearestBuffersHi.minArray[freqHiIndex + 1]) +
+            nearestBuffersHi.maxWeight * (freqHiWeight * nearestBuffersHi.maxArray[freqHiIndex] + (1.0 - freqHiWeight) * nearestBuffersHi.maxArray[freqHiIndex + 1])) / 255;
 
-        //add new pixels on the right side based on input data
-        for (let j = 0, jl = nearestBuffersHi.minArray.length; j < jl; j++) {
-          const frequency = j * binSizeHi;
-          const amplitude = nearestBuffersHi.minWeight * nearestBuffersHi.minArray[j] + nearestBuffersHi.maxWeight * nearestBuffersHi.maxArray[j];
-          //Convert frequency to logarithmic scale
-          const logFrequency = frequencyToLogFrequency(frequency);
-          const logNextFrequency = frequencyToLogFrequency(frequency + binSizeHi);
-          //calculate position and height of the rectangle we want to draw
-          const rectPosition = logFrequency * oldHeight;
-          const rectHeight = (logNextFrequency - logFrequency) * oldHeight;
-          if (rectPosition < oldHeight * 0.3) {
-            continue;
-          }
+          //interpolate between low and high frequency FFT data
+          //const amplitude = ((1.0 - j / oldHeight) * amplitudeLo + (j / oldHeight) * amplitudeHi) / 255;
+          //alternatively:
+          //const amplitude = Math.sqrt(Math.max(amplitudeLo / 255, 0.1) * Math.max(amplitudeHi / 255, 0.1));
+          const amplitude =
+            0.1 * amplitudeLo +
+            0.1 * amplitudeHi +
+            0.8 * ((amplitudeLo + 0.1) * (amplitudeHi + 0.1) - 0.01) / 1.20;
+
           //set background color based on amplitude
-          ctx.fillStyle = getViridisColor(amplitude / 255);
-          //We need to invert y axis since frequencies are ordered from bottom to top
-          ctx.fillRect(oldWidth - pixelsToMove + i, oldHeight - rectPosition - rectHeight, 1, rectHeight);
+          ctx.fillStyle = getViridisColor(amplitude);
+          //fill this pixel
+          ctx.fillRect(oldWidth - pixelsToMove + i, oldHeight - j, 1, 1);
         }
       }
     },

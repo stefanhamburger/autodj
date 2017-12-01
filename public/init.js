@@ -95,10 +95,10 @@ let model;
 
     //Create view
     view = initView(onVolumChange, onPause);
-    audioEle.addEventListener('progress', () => {
+    /*audioEle.addEventListener('progress', () => {
       model.heartbeat(audioEle.currentTime);
       view.updateTime(audioEle.currentTime);
-    });
+    });*/
 
     //Perform a FFT on the input stream, returns 1024 bins
     //Bin at index i corresponds to frequency i / 2048 * 44100
@@ -108,6 +108,8 @@ let model;
     const fftManagerLo = fftDataManager(analyserNodeLo.frequencyBinCount);
     const redrawSpectrogram = () => {
       requestAnimationFrame(redrawSpectrogram);
+      model.heartbeat(audioEle.currentTime);
+      view.updateTime(audioEle.currentTime);
 
       const bufferHi = fftManagerHi.getNewBuffer(audioEle.currentTime * 44100 + 4096);
       analyserNodeHi.getByteFrequencyData(bufferHi);//TODO: need to use getFloatFrequencyData

@@ -68,19 +68,36 @@ import fftDataManager from './fftDataManager.mjs';
     const audioCtx = new AudioContext({
       sampleRate: 44100, //ideally, we'd use a 48,000 sample rate but this is not yet supported by browsers
     });
-    const audioSourceNode = new MediaElementAudioSourceNode(audioCtx, { mediaElement: audioEle });
-    const analyserNodeHi = new AnalyserNode(audioCtx, {
+
+    //Microsoft Edge does not support the constructors, so we need to call the factory methods instead
+
+    //const audioSourceNode = new MediaElementAudioSourceNode(audioCtx, { mediaElement: audioEle });
+    const audioSourceNode = audioCtx.createMediaElementSource(audioEle);
+
+    /*const analyserNodeHi = new AnalyserNode(audioCtx, {
       fftSize: 4096,
       maxDecibels: -25,
       minDecibels: -60,
       smoothingTimeConstant: 0,
-    });
-    const analyserNodeLo = new AnalyserNode(audioCtx, {
+    });*/
+    const analyserNodeHi = audioCtx.createAnalyser();
+    analyserNodeHi.fftSize = 4096;
+    analyserNodeHi.maxDecibels = -25;
+    analyserNodeHi.minDecibels = -60;
+    analyserNodeHi.smoothingTimeConstant = 0;
+
+    /*const analyserNodeLo = new AnalyserNode(audioCtx, {
       fftSize: 16384,
       maxDecibels: -25,
       minDecibels: -60,
       smoothingTimeConstant: 0,
-    });
+    });*/
+    const analyserNodeLo = audioCtx.createAnalyser();
+    analyserNodeHi.fftSize = 16384;
+    analyserNodeHi.maxDecibels = -25;
+    analyserNodeHi.minDecibels = -60;
+    analyserNodeHi.smoothingTimeConstant = 0;
+
     const gainNode = audioCtx.createGain();
     gainNode.gain.value = 0.1;
     const onVolumChange = (newVolume) => {

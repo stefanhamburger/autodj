@@ -21,7 +21,6 @@ const SPECTROGRAM_HIGHEST_FREQUENCY = SPECTROGRAM_TUNING * (2 ** SPECTROGRAM_OCT
 
 let oldWidth;
 let oldHeight;
-let canvas;
 let ctx;
 let prevTime = 0;
 
@@ -29,8 +28,7 @@ let prevTime = 0;
  * A spectrogram of the audio stream. Left to right is time, bottom to top is frequency.
  * @param {HTMLCanvasElement} canvas
 */
-const init = (canvasIn) => {
-  canvas = canvasIn;
+const init = (canvas) => {
   canvas.style.position = 'absolute';
   canvas.style.top = TOP_NAVIGATION_HEIGHT + 'px';
   canvas.style.right = '0';
@@ -57,12 +55,12 @@ const addData = (fftManagerHi, binSizeHi, fftManagerLo, binSizeLo, newTime) => {
 
   //move existing graph to the left
   //getImageData()/putImageData() takes 8-16 ms which is too slow, so we use drawImage() which takes <0.2ms
-  ctx.drawImage(canvas, -pixelsToMove, 0);
+  ctx.drawImage(ctx.canvas, -pixelsToMove, 0);
 
   //If user tabbed out and returns, skip older pixels for better performance
   let startPixel = 0;
   if (pixelsToMove > 50) {
-    ctx.fillStyle = getViridisColor(0);
+    ctx.fillStyle = SPECTROGRAM_BACKGROUND;
     ctx.fillRect(oldWidth - pixelsToMove, 0, pixelsToMove - 20, oldHeight);
     startPixel = pixelsToMove - 20;
     prevTime += startPixel * SPECTROGRAM_SAMPLES_PER_PIXEL;
@@ -122,8 +120,8 @@ const resize = () => {
     ctx.getImageData(0, 0, oldWidth, oldHeight);
 
   //resize canvas
-  canvas.width = newWidth;
-  canvas.height = newHeight;
+  ctx.canvas.width = newWidth;
+  ctx.canvas.height = newHeight;
   //fill with black pixels
   ctx.fillStyle = SPECTROGRAM_BACKGROUND;
   ctx.fillRect(0, 0, newWidth, newHeight);

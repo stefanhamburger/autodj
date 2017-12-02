@@ -94,10 +94,10 @@ import fftDataManager from './fftDataManager.mjs';
       smoothingTimeConstant: 0,
     });*/
     const analyserNodeLo = audioCtx.createAnalyser();
-    analyserNodeHi.fftSize = 16384;
-    analyserNodeHi.maxDecibels = -25;
-    analyserNodeHi.minDecibels = -60;
-    analyserNodeHi.smoothingTimeConstant = 0;
+    analyserNodeLo.fftSize = 16384;
+    analyserNodeLo.maxDecibels = -25;
+    analyserNodeLo.minDecibels = -60;
+    analyserNodeLo.smoothingTimeConstant = 0;
 
     const gainNode = audioCtx.createGain();
     gainNode.gain.value = 0.1;

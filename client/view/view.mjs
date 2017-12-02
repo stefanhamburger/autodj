@@ -1,3 +1,5 @@
+import spectrogram from './spectrogram.mjs';
+
 //Initializes the view
 
 const initView = (onVolumeChange, onPause) => {
@@ -47,6 +49,8 @@ const initView = (onVolumeChange, onPause) => {
     updateTime: (newTime) => {
       const seconds = Math.floor(newTime) % 60;
       totalTimeEle.innerHTML = '<b>Total time:</b> ' + Math.floor(newTime / 60) + ':' + ((seconds < 10) ? '0' : '') + seconds;
-    }
+    },
   };
 };
+
+export default initView;

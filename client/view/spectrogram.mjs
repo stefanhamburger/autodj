@@ -1,3 +1,5 @@
+import getViridisColor from './viridis.mjs';
+
 /** The height in pixels of the top navigation, the spectrogram is drawn below it */
 const TOP_NAVIGATION_HEIGHT = 100;
 /** How fast the spectrogram moves to the left, in pixels per second. This number should be a multiple of 60 because we redraw up to 60Hz */
@@ -37,14 +39,6 @@ const spectrogram = (canvas) => {
   ctx.imageSmoothingEnabled = false;
   ctx.fillStyle = SPECTROGRAM_BACKGROUND;
   ctx.fillRect(0, 0, oldWidth, oldHeight);
-
-  const frequencyToLogFrequency = (freq) => {
-    if (freq <= SPECTROGRAM_LOWEST_FREQUENCY) return 0;
-    if (freq >= SPECTROGRAM_HIGHEST_FREQUENCY) return 1;
-    const ratio = freq / SPECTROGRAM_LOWEST_FREQUENCY;
-    const ratioLog = Math.log2(ratio) / (SPECTROGRAM_OCTAVES_UP - SPECTROGRAM_OCTAVES_DOWN);
-    return ratioLog;
-  };
 
   let prevTime = 0;
 
@@ -143,3 +137,5 @@ const spectrogram = (canvas) => {
     },
   };
 };
+
+export default spectrogram;

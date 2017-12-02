@@ -12,5 +12,5 @@
   }
 }
 ```
-6. Start the server by running `node index.js`
+6. Start the server by running `npm start`
 7. Open http://localhost:3000/ in your browser

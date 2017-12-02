@@ -78,3 +78,5 @@ const fftDataManager = (windowSize) => {
     },
   };
 };
+
+export default fftDataManager;

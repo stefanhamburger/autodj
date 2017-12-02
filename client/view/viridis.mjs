@@ -313,3 +313,5 @@ const getViridisColor = ((() => {
     */
   };
 })());
+
+export default getViridisColor;

@@ -1,5 +1,9 @@
+import initAudio from './mediaSegments.mjs';
+import model from './model.mjs';
+import initView from './view/view.mjs';
+import fftDataManager from './fftDataManager.mjs';
+
 let view;
-let model;
 
 {
   const startLink = document.getElementById('startLink');
@@ -57,7 +61,10 @@ let model;
     };
     //TODO: don't add <audio> element to DOM but add UI elements to see elapsed time and to change volume
 
-    model = initModel();
+    const setSong = (songName) => {
+      view.setSong(songName);
+    };
+    model.init(setSong);
 
     //Set up Web Audio API to create volume slider and generate FFT data
     const audioCtx = new AudioContext({

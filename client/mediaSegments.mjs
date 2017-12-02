@@ -1,3 +1,5 @@
+import model from './model.mjs';
+
 const initAudio = async ({
   sid,
   audioEle,
@@ -79,3 +81,5 @@ const initAudio = async ({
     setInterval(appendNextMediaSegment, 1000);
   }
 };
+
+export default initAudio;

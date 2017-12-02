@@ -58,12 +58,18 @@ const spectrogram = (canvas) => {
       //getImageData()/putImageData() takes 8-16 ms which is too slow, so we use drawImage() which takes <0.2ms
       ctx.drawImage(canvas, -pixelsToMove, 0);
 
-      for (let i = 0; i < pixelsToMove; i++) {
+      //If user tabbed out and returns, skip older pixels for better performance
+      let startPixel = 0;
+      if (pixelsToMove > 50) {
+        ctx.fillStyle = getViridisColor(0);
+        ctx.fillRect(oldWidth - pixelsToMove, 0, pixelsToMove - 20, oldHeight);
+        startPixel = pixelsToMove - 20;
+      }
+
+      for (let i = startPixel; i < pixelsToMove; i++) {
         const nearestBuffersHi = fftManagerHi.getNearestBuffers(prevTime * 44100);
         const nearestBuffersLo = fftManagerLo.getNearestBuffers(prevTime * 44100);
         prevTime += 1 / SPECTROGRAM_SPEED;
-        //If user tabbed out and returns, skip older pixels for better performance
-        if (pixelsToMove > 50 && i < pixelsToMove - 20) continue;//TODO: we can do a better job than this
 
         //add new pixels on the right side based on input data
         for (let j = oldHeight - 1; j >= 0; j--) {

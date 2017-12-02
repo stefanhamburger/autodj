@@ -11,7 +11,7 @@ const sessions = {};
  * after how much time a session times out (because we haven't received any more client requests for it)
  * This will free up resources and kill the FFmpeg process. Set to 5 minutes.
  */
-const SESSION_TIMEOUT = 1 * 60000;
+const SESSION_TIMEOUT = 1 * 15000;
 /** length of the session id. Doesn't need to be too long for our use case */
 const SESSION_ID_LENGTH = 16;
 

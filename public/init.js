@@ -81,16 +81,10 @@ let model;
     const onVolumChange = (newVolume) => {
       gainNode.gain.value = newVolume;
     };
-    /*const delayNode = new DelayNode(audioCtx, {
-      delayTime: (4096 + 16384) / 44100,
-      maxDelayTime: (4096 + 16384) / 44100,
-    });*/
 
     audioSourceNode.connect(analyserNodeHi);
     analyserNodeHi.connect(analyserNodeLo);
     analyserNodeLo.connect(gainNode);
-    //analyserNodeLo.connect(delayNode);
-    //delayNode.connect(gainNode);
     gainNode.connect(audioCtx.destination);
 
     //Create view

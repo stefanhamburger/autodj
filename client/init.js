@@ -11,12 +11,15 @@ import fftDataManager from './fftDataManager.mjs';
     const selectCollection = document.getElementById('collection');
     const collection = selectCollection.options[selectCollection.selectedIndex].value;
 
+    const channelsCollection = document.getElementById('channels');
+    const channels = channelsCollection.options[channelsCollection.selectedIndex].value;
+
     //Remove form from UI
     const formEle = document.getElementById('form');
     formEle.parentElement.removeChild(formEle);
 
     //start new session
-    const response = await fetch('init?collection=' + encodeURIComponent(collection));
+    const response = await fetch('init?collection=' + encodeURIComponent(collection) + '&numChannels=' + encodeURIComponent(channels));
     const json = await response.json();
     const { sid } = json;
 

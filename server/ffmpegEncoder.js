@@ -3,7 +3,7 @@ const { spawn } = require('child_process');
 /**
  * Launches a new FFmpeg process that can encode from 32-bit floating point PCM to Webm Opus
  */
-module.exports.createEncoder = () => {
+module.exports.createEncoder = (numChannels) => {
   //Create FFmpeg process
   const process = spawn(
     'ffmpeg',
@@ -12,7 +12,7 @@ module.exports.createEncoder = () => {
       //input parameters
       '-f', 'f32le', //our waveform data is an Float32Array, so the input is PCM 32-bit IEEE floating point in little endian
       '-ar', '48k', //48,000 sample rate for highest quality
-      '-ac', '2', //two channels, stereo input
+      '-ac', numChannels.toString(), //two channels, stereo input
       '-i', 'pipe:3',
       //output parameters
       '-f', 'webm', //Webm container

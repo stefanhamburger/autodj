@@ -92,7 +92,7 @@ const addToBuffer = async (session) => {
 //initializes audio buffer
 module.exports.init = async (session) => {
   //create new FFmpeg process
-  const { inputStream, getOutputBuffer, killCommand } = ffmpeg.createEncoder();
+  const { inputStream, getOutputBuffer, killCommand } = ffmpeg.createEncoder(session.numChannels);
   session.inputStream = inputStream;
   session.getOutputBuffer = getOutputBuffer;
   session.killCommand = killCommand;

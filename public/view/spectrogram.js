@@ -64,6 +64,7 @@ const spectrogram = (canvas) => {
         ctx.fillStyle = getViridisColor(0);
         ctx.fillRect(oldWidth - pixelsToMove, 0, pixelsToMove - 20, oldHeight);
         startPixel = pixelsToMove - 20;
+        prevTime += startPixel / SPECTROGRAM_SPEED;
       }
 
       for (let i = startPixel; i < pixelsToMove; i++) {

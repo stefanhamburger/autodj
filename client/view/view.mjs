@@ -2,7 +2,6 @@ import spectrogram from './spectrogram.mjs';
 
 let metadataEle;
 let totalTimeEle;
-let localSpectogramFunc;
 
 //Initializes the view
 
@@ -41,17 +40,14 @@ const init = (onVolumeChange, onPause) => {
 
   //show spectrogram as canvas
   const canvas = document.createElement('canvas');
-  const spectrogramFunctions = spectrogram(canvas);
-  window.addEventListener('resize', spectrogramFunctions.resize);
-  localSpectogramFunc = spectrogramFunctions.addData;
+  spectrogram.init(canvas);
+  window.addEventListener('resize', spectrogram.resize);
   rootEle.appendChild(canvas);
 };
 
 const setSong = (songName) => {
   metadataEle.innerHTML = '<b>Currently playing:</b> ' + songName.replace(/&/g, '&amp;').replace(/ - /g, ' &ndash; ').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 };
-
-const updateSpectrogram = (...args) => localSpectogramFunc(...args);
 
 const updateTime = (newTime) => {
   const seconds = Math.floor(newTime) % 60;
@@ -61,6 +57,5 @@ const updateTime = (newTime) => {
 export default {
   init,
   setSong,
-  updateSpectrogram,
   updateTime,
 };

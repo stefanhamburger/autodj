@@ -1,6 +1,7 @@
 import initAudio from './mediaSegments.mjs';
 import model from './model.mjs';
 import view from './view/view.mjs';
+import spectrogram from './view/spectrogram.mjs';
 import fftDataManager from './fftDataManager.mjs';
 
 {
@@ -133,7 +134,7 @@ import fftDataManager from './fftDataManager.mjs';
       const bufferLo = fftManagerLo.getNewBuffer(audioEle.currentTime * 44100);
       analyserNodeLo.getByteFrequencyData(bufferLo);
 
-      view.updateSpectrogram(fftManagerHi, binSizeHi, fftManagerLo, binSizeLo, audioEle.currentTime * 44100);
+      spectrogram.addData(fftManagerHi, binSizeHi, fftManagerLo, binSizeLo, audioEle.currentTime * 44100);
 
       fftManagerHi.garbageCollection(audioEle.currentTime * 44100);
       fftManagerLo.garbageCollection(audioEle.currentTime * 44100);

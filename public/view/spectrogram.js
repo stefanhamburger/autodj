@@ -2,6 +2,8 @@
 const TOP_NAVIGATION_HEIGHT = 100;
 /** How fast the spectrogram moves to the left, in pixels per second. This number should be a multiple of 60 because we redraw up to 60Hz */
 const SPECTROGRAM_SPEED = 120;
+/** How many samples are in one pixel */
+const SPECTROGRAM_SAMPLES_PER_PIXEL = 44100 / SPECTROGRAM_SPEED;
 /** The background color of the spectrogram is purple by default, rgb(68,1,84), which equals 0 in the Viridis color map */
 const SPECTROGRAM_BACKGROUND = getViridisColor(0);
 
@@ -52,7 +54,7 @@ const spectrogram = (canvas) => {
      * @param {Uint8Array} data
      */
     addData: (fftManagerHi, binSizeHi, fftManagerLo, binSizeLo, newTime) => {
-      const pixelsToMove = Math.floor((newTime - prevTime) * SPECTROGRAM_SPEED);
+      const pixelsToMove = Math.floor((newTime - prevTime) / SPECTROGRAM_SAMPLES_PER_PIXEL);
 
       //move existing graph to the left
       //getImageData()/putImageData() takes 8-16 ms which is too slow, so we use drawImage() which takes <0.2ms
@@ -64,13 +66,13 @@ const spectrogram = (canvas) => {
         ctx.fillStyle = getViridisColor(0);
         ctx.fillRect(oldWidth - pixelsToMove, 0, pixelsToMove - 20, oldHeight);
         startPixel = pixelsToMove - 20;
-        prevTime += startPixel / SPECTROGRAM_SPEED;
+        prevTime += startPixel * SPECTROGRAM_SAMPLES_PER_PIXEL;
       }
 
       for (let i = startPixel; i < pixelsToMove; i++) {
-        const nearestBuffersHi = fftManagerHi.getNearestBuffers(prevTime * 44100);
-        const nearestBuffersLo = fftManagerLo.getNearestBuffers(prevTime * 44100);
-        prevTime += 1 / SPECTROGRAM_SPEED;
+        const nearestBuffersHi = fftManagerHi.getNearestBuffers(prevTime);
+        const nearestBuffersLo = fftManagerLo.getNearestBuffers(prevTime);
+        prevTime += SPECTROGRAM_SAMPLES_PER_PIXEL;
 
         //add new pixels on the right side based on input data
         for (let j = oldHeight - 1; j >= 0; j--) {

@@ -111,7 +111,7 @@ let model;
       const bufferLo = fftManagerLo.getNewBuffer(audioEle.currentTime * 44100);
       analyserNodeLo.getByteFrequencyData(bufferLo);
 
-      view.updateSpectrogram(fftManagerHi, binSizeHi, fftManagerLo, binSizeLo, audioEle.currentTime);
+      view.updateSpectrogram(fftManagerHi, binSizeHi, fftManagerLo, binSizeLo, audioEle.currentTime * 44100);
 
       fftManagerHi.garbageCollection(audioEle.currentTime * 44100);
       fftManagerLo.garbageCollection(audioEle.currentTime * 44100);

@@ -1,16 +1,20 @@
 import spectrogram from './spectrogram.mjs';
 
+let metadataEle;
+let totalTimeEle;
+let localSpectogramFunc;
+
 //Initializes the view
 
-const initView = (onVolumeChange, onPause) => {
+const init = (onVolumeChange, onPause) => {
   const rootEle = document.getElementById('view');
 
   //show currently playing song
-  const metadataEle = document.createElement('div');
+  metadataEle = document.createElement('div');
   rootEle.appendChild(metadataEle);
 
   //show total time (for long we have been playing audio)
-  const totalTimeEle = document.createElement('div');
+  totalTimeEle = document.createElement('div');
   totalTimeEle.innerHTML = '<b>Total time:</b> 00:00';
   rootEle.appendChild(totalTimeEle);
 
@@ -39,18 +43,24 @@ const initView = (onVolumeChange, onPause) => {
   const canvas = document.createElement('canvas');
   const spectrogramFunctions = spectrogram(canvas);
   window.addEventListener('resize', spectrogramFunctions.resize);
+  localSpectogramFunc = spectrogramFunctions.addData;
   rootEle.appendChild(canvas);
-
-  return {
-    setSong: (songName) => {
-      metadataEle.innerHTML = '<b>Currently playing:</b> ' + songName.replace(/&/g, '&amp;').replace(/ - /g, ' &ndash; ').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-    },
-    updateSpectrogram: spectrogramFunctions.addData,
-    updateTime: (newTime) => {
-      const seconds = Math.floor(newTime) % 60;
-      totalTimeEle.innerHTML = '<b>Total time:</b> ' + Math.floor(newTime / 60) + ':' + ((seconds < 10) ? '0' : '') + seconds;
-    },
-  };
 };
 
-export default initView;
+const setSong = (songName) => {
+  metadataEle.innerHTML = '<b>Currently playing:</b> ' + songName.replace(/&/g, '&amp;').replace(/ - /g, ' &ndash; ').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+};
+
+const updateSpectrogram = (...args) => localSpectogramFunc(...args);
+
+const updateTime = (newTime) => {
+  const seconds = Math.floor(newTime) % 60;
+  totalTimeEle.innerHTML = '<b>Total time:</b> ' + Math.floor(newTime / 60) + ':' + ((seconds < 10) ? '0' : '') + seconds;
+};
+
+export default {
+  init,
+  setSong,
+  updateSpectrogram,
+  updateTime,
+};

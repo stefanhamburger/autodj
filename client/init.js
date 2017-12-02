@@ -1,9 +1,7 @@
 import initAudio from './mediaSegments.mjs';
 import model from './model.mjs';
-import initView from './view/view.mjs';
+import view from './view/view.mjs';
 import fftDataManager from './fftDataManager.mjs';
-
-let view;
 
 {
   const startLink = document.getElementById('startLink');
@@ -95,7 +93,7 @@ let view;
     gainNode.connect(audioCtx.destination);
 
     //Create view
-    view = initView(onVolumChange, onPause);
+    view.init(onVolumChange, onPause);
     /*audioEle.addEventListener('progress', () => {
       model.heartbeat(audioEle.currentTime);
       view.updateTime(audioEle.currentTime);

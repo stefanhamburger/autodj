@@ -1,6 +1,6 @@
 const upcomingSongs = [];
 let setSong;
-//...
+
 const init = (setSongIn) => {
   setSong = setSongIn;
 };

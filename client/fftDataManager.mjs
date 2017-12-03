@@ -8,7 +8,7 @@ const fftDataManager = (windowSize) => {
 
   return {
     getNewBuffer(curTime) {
-      const curArray = (unusedArrays.length === 0) ? new Uint8Array(windowSize) : unusedArrays.splice(0, 1)[0];
+      const curArray = (unusedArrays.length === 0) ? new Uint8Array(windowSize) : unusedArrays.pop();
       fftArrays.push({ time: curTime, data: curArray });
       return curArray;
     },
@@ -68,8 +68,8 @@ const fftDataManager = (windowSize) => {
       //go through fftArrays, remove all entries where time is more than 3 seconds ago, and move array into unusedArrays
       while (fftArrays[0]) {
         if (curTime - fftArrays[0].time > 3 * 44100) {
-          unusedArrays.push(fftArrays[0].data);
-          fftArrays.splice(0, 1);
+          const removedElement = fftArrays.shift();
+          unusedArrays.push(removedElement.data);
         } else {
           //If at least one entry is new enough, any follow-up entries will be even newer and can be ignored
           break;

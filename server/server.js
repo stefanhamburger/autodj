@@ -22,7 +22,9 @@ app.get('/', async (req, res) => {
 //create a new audio stream
 app.get('/init', async (req, res) => {
   const { sid, obj: session } = sessions.newSession();
-  session.numChannels = Math.min(2, Math.max(1, Math.round(Number(req.query.numChannels))));
+  let numChannels = Number(req.query.numChannels);
+  if (!Number.isInteger(numChannels)) numChannels = 2;
+  session.numChannels = Math.min(2, Math.max(1, numChannels));
   session.collection = req.query.collection;
   res.send(JSON.stringify({ sid }));
 

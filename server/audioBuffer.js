@@ -19,7 +19,7 @@ const addFileToStream = (session) => {
   const randomFile = files[Math.floor(Math.random() * files.length)];
   const songWrapper = { songRef: randomFile };
   session.songs.push(songWrapper);
-  audioManager.addReference(randomFile, session);
+  audioManager.addReference(randomFile, { sid: session.sid, index: (session.songs.length - 1) });
   console.log('[' + session.sid + '] Adding to playlist: ' + randomFile.name + '...');
 
   //If this is the first song in the stream, start playing immediately without worrying about mixing
@@ -69,7 +69,7 @@ const addToBuffer = async (session) => {
 
     if (session.curSongPosition >= curSong.totalLength) {
       //delete previous song from memory
-      audioManager.removeReference(curSong.songRef, session);
+      audioManager.removeReference(curSong.songRef, { sid: session.sid, index: session.curSong });
       //start encoding next song
       session.curSong++;
       session.curSongPosition = 0;

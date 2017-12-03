@@ -12,11 +12,12 @@ module.exports.createEncoder = (numChannels) => {
       //input parameters
       '-f', 'f32le', //our waveform data is an Float32Array, so the input is PCM 32-bit IEEE floating point in little endian
       '-ar', '48k', //48,000 sample rate for highest quality
-      '-ac', numChannels.toString(), //two channels, stereo input
+      '-ac', '2', //two channels, stereo input
       '-i', 'pipe:3',
       //output parameters
       '-f', 'webm', //Webm container
       '-codec:a', 'libopus', //Opus codec
+      '-ac', numChannels.toString(), //either mono or stereo, depending on the session parameter
       '-ar', '48k', //Opus only supports 48,000 sample rate
       '-b:a', '128k', //bitrate: 128k bits per second
       '-vn', //no video stream

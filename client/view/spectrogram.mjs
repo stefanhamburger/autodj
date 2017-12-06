@@ -17,7 +17,7 @@ const SPECTROGRAM_OCTAVES_DOWN = -4;
 const SPECTROGRAM_OCTAVES_UP = 2;
 //Calculate lowest and highest frequency based on this data
 const SPECTROGRAM_LOWEST_FREQUENCY = SPECTROGRAM_TUNING * (2 ** SPECTROGRAM_OCTAVES_DOWN);
-const SPECTROGRAM_HIGHEST_FREQUENCY = SPECTROGRAM_TUNING * (2 ** SPECTROGRAM_OCTAVES_UP);
+//const SPECTROGRAM_HIGHEST_FREQUENCY = SPECTROGRAM_TUNING * (2 ** SPECTROGRAM_OCTAVES_UP);
 
 let oldWidth;
 let oldHeight;
@@ -30,7 +30,7 @@ let prevTime = 0;
 */
 const init = (canvas) => {
   canvas.style.position = 'absolute';
-  canvas.style.top = TOP_NAVIGATION_HEIGHT + 'px';
+  canvas.style.top = `${TOP_NAVIGATION_HEIGHT}px`;
   canvas.style.right = '0';
   canvas.style.bottom = '0';
   canvas.style.left = '0';

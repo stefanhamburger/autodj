@@ -10,7 +10,7 @@ const initAudio = async ({
   const GetNextMediaSegment = async () => {
     curIndex++;
     const response = await fetch(
-      'part?sid=' + encodeURIComponent(sid) + '&id=' + curIndex,
+      `part?sid=${encodeURIComponent(sid)}&id=${curIndex}`,
       {
         cache: 'no-store',
         headers: { 'X-Playback-Position': audioEle.currentTime },

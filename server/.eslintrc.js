@@ -27,7 +27,6 @@ module.exports = {
     'no-plusplus': ['off'],
     'no-undef': ['warn'],
     'no-unused-vars': ['warn'],
-    'prefer-template': ['off'],
     'spaced-comment': ['off'],
   },
 };

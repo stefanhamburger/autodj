@@ -19,7 +19,7 @@ import fftDataManager from './fftDataManager.mjs';
     formEle.parentElement.removeChild(formEle);
 
     //start new session
-    const response = await fetch('init?collection=' + encodeURIComponent(collection) + '&numChannels=' + encodeURIComponent(channels));
+    const response = await fetch(`init?collection=${encodeURIComponent(collection)}&numChannels=${encodeURIComponent(channels)}`);
     const json = await response.json();
     const { sid } = json;
 

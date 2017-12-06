@@ -20,5 +20,5 @@ process.on('unhandledRejection', (err) => {
   //start setting up server
   server.init();
 
-  console.log('=== Server is running! ' + new Date().toString() + ' ===');
+  console.log(`=== Server is running! ${new Date().toString()} ===`);
 })());

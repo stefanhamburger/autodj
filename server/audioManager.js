@@ -13,7 +13,7 @@ const audioWaveforms = {};
 module.exports.addReference = async (song, { sid, index }) => {
   audioWaveforms[song.path] = {
     buffer: decodeAudio(song.path),
-    references: [sid + '#' + index],
+    references: [`${sid}#${index}`],
   };
 };
 
@@ -38,7 +38,7 @@ module.exports.removeReference = (song, { sid, index }) => {
   const waveformObj = audioWaveforms[song.path];
   if (!waveformObj) throw new Error('song not found in memeory');
   //Remove reference
-  const sessionReference = waveformObj.references.findIndex(ref => ref === sid + '#' + index);
+  const sessionReference = waveformObj.references.findIndex(ref => ref === `${sid}#${index}`);
   if (sessionReference === -1) throw new Error('session reference not found in song');
   waveformObj.references.splice(sessionReference, 1);
 

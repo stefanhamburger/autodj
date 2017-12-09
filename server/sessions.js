@@ -19,7 +19,7 @@ const hex = '0123456789abcdefghijklmnopqrstuvwxyz';
 /** generates a new random session id */
 const generateSID = () => {
   let out = '';
-  for (let i = 0; i < SESSION_ID_LENGTH; i++) {
+  for (let i = 0; i < SESSION_ID_LENGTH; i += 1) {
     out += hex[Math.floor(Math.random() * hex.length)];
   }
 
@@ -38,7 +38,7 @@ module.exports.lifeSign = (session) => {
   clearTimeout(session.timeout);
   const { sid } = session;
   session.timeout = setTimeout(() => {
-    console.log('[' + sid + '] Session timed out.');
+    console.log(`[${sid}] Session timed out.`);
     session.killCommand();
     delete sessions[sid];
   }, SESSION_TIMEOUT);

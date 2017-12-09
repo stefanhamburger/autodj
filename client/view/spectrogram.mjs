@@ -66,13 +66,13 @@ const addData = (fftManagerHi, binSizeHi, fftManagerLo, binSizeLo, newTime) => {
     prevTime += startPixel * SPECTROGRAM_SAMPLES_PER_PIXEL;
   }
 
-  for (let i = startPixel; i < pixelsToMove; i++) {
+  for (let i = startPixel; i < pixelsToMove; i += 1) {
     const nearestBuffersHi = fftManagerHi.getNearestBuffers(prevTime);
     const nearestBuffersLo = fftManagerLo.getNearestBuffers(prevTime);
     prevTime += SPECTROGRAM_SAMPLES_PER_PIXEL;
 
     //add new pixels on the right side based on input data
-    for (let j = oldHeight - 1; j >= 0; j--) {
+    for (let j = oldHeight - 1; j >= 0; j -= 1) {
       //convert y axis (log frequency) to frequency
       const frequency = SPECTROGRAM_LOWEST_FREQUENCY * 2 ** (j / oldHeight * (SPECTROGRAM_OCTAVES_UP - SPECTROGRAM_OCTAVES_DOWN));
       //find closest indices in nearestBuffersHi and nearestBuffersLo

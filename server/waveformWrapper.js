@@ -27,7 +27,7 @@ module.exports.getMono =
 //Creates a interlaced stereo waveform from the given mono input
 module.exports.monoToStereo = (waveform) => {
   const out = new Float32Array(waveform.length * 2);
-  for (let i = 0; i < waveform.length; i++) {
+  for (let i = 0; i < waveform.length; i += 1) {
     out[i * 2] = waveform[i];
     out[i * 2 + 1] = waveform[i];
   }

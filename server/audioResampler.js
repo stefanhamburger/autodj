@@ -8,7 +8,7 @@ const resampleChannel = (origChannel, resampledChannel) => {
   let posResampled = 0;//sample position in the resampled buffer (48,000 sample rate)
   while (posResampled < resampledChannel.length) {
     //the lowest common denominator of 44,100 / 48,000 is 147 / 160.
-    for (let i = 0; i < 160; i++) {
+    for (let i = 0; i < 160; i += 1) {
       const firstIndex = posOriginal + Math.floor(i * 147 / 160);
       const firstWeight = 1 - ((i * 147 / 160) % 1);
       resampledChannel.set(posResampled + i, firstWeight * origChannel.get(firstIndex) + (1.0 - firstWeight) * origChannel.get(firstIndex + 1));

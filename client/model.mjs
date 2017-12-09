@@ -16,7 +16,7 @@ const processEvents = events => events.forEach((event) => {
 });
 
 const heartbeat = (time) => {
-  for (let i = upcomingSongs.length - 1; i >= 0; i--) {
+  for (let i = upcomingSongs.length - 1; i >= 0; i -= 1) {
     const song = upcomingSongs[i];
     if (song.time <= time) {
       setSong(song.name);

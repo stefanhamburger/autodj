@@ -24,7 +24,6 @@ module.exports = {
     'no-lonely-if': ['off'],
     'no-mixed-operators': ['off'],
     'no-param-reassign': ["error", { "props": false }],
-    'no-plusplus': ['off'],
     'no-undef': ['warn'],
     'no-unused-vars': ['warn'],
     'spaced-comment': ['off'],

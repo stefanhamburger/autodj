@@ -71,7 +71,7 @@ const addToBuffer = async (session) => {
       //delete previous song from memory
       audioManager.removeReference(curSong.songRef, { sid: session.sid, index: session.curSong });
       //start encoding next song
-      session.curSong++;
+      session.curSong += 1;
       session.curSongPosition = 0;
     }
   }

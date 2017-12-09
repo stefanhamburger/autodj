@@ -279,7 +279,7 @@ const colorMap = [
   [0.97441665, 0.90358991, 0.13021494],
   [0.98386829, 0.90486726, 0.13689671],
   [0.99324789, 0.90615657, 0.1439362],
-].map(arr => 'rgb(' + arr.map(val => Math.round(val * 255)).join(',') + ')');
+].map(arr => `rgb(${arr.map(val => Math.round(val * 255)).join(',')})`);
 
 /**
  * Given a float in [0, 1], returns the closest RBG color associated with it

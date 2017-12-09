@@ -1,3 +1,4 @@
+/** Tau is more intuitive than Pi per the Tau Manifesto */
 Math.TAU = 2 * Math.PI;
 
 /**
@@ -6,10 +7,12 @@ Math.TAU = 2 * Math.PI;
  * Set to 20ms, which equals a 1/96 note at 120bpm
  */
 const WINDOW_SIZE = 960;
+
 /**
  * How far we want to move the window each time. Should be <= WINDOW_SIZE, a small overlap improves recognition
 */
 const HOP_SIZE = 480;
+
 /**
  * The window function we apply to the waveform data to amplify sounds at the center of the window, while reducing beginning and end
 */
@@ -20,7 +23,7 @@ const BLACKMAN_WINDOW = new Float32Array(WINDOW_SIZE);
   const a1 = 0.5;
   const a2 = a / 2;
   const w = n => a0 - a1 * Math.cos(Math.TAU * n / (WINDOW_SIZE - 1)) + a2 * Math.cos(2 * Math.TAU * n / (WINDOW_SIZE - 1));
-  for (let i = 0; i < WINDOW_SIZE; i++) {
+  for (let i = 0; i < WINDOW_SIZE; i += 1) {
     BLACKMAN_WINDOW[i] = w(i);
   }
 }
@@ -28,7 +31,7 @@ const BLACKMAN_WINDOW = new Float32Array(WINDOW_SIZE);
 /** Extract a window from the waveform signal */
 const getWindow = (waveform, position) => {
   const buffer = new Float32Array(WINDOW_SIZE);
-  for (let i = 0; i < WINDOW_SIZE; i++) {
+  for (let i = 0; i < WINDOW_SIZE; i += 1) {
     const index = position - (WINDOW_SIZE / 2) + i;
     if (index < 0 || index >= waveform.length) {
       //use 0 if outside of waveform bounds

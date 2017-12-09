@@ -8,7 +8,7 @@ const initAudio = async ({
 } = {}) => {
   let curIndex = -1;
   const GetNextMediaSegment = async () => {
-    curIndex++;
+    curIndex += 1;
     const response = await fetch(
       `part?sid=${encodeURIComponent(sid)}&id=${curIndex}`,
       {

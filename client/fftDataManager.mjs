@@ -24,7 +24,7 @@ const fftDataManager = (windowSize) => {
       }
 
       let indexBeforeTime = -1;
-      for (let i = 0, il = fftArrays.length; i < il; i++) {
+      for (let i = 0, il = fftArrays.length; i < il; i += 1) {
         if (fftArrays[i].time <= requestedTime) {
           indexBeforeTime = i;
         } else {

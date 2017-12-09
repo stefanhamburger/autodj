@@ -1,5 +1,5 @@
 /** Tau is more intuitive than Pi per the Tau Manifesto */
-Math.TAU = 2 * Math.PI;
+if (!Math.TAU) Math.TAU = 2 * Math.PI;
 
 /**
  * The window size. This should be equal to or less than the smallest unit we want to recognize.
@@ -47,7 +47,7 @@ const getWindow = (waveform, position) => {
 /**
  * Process other events before continuing execution,
  * mimicing .NET's System.Windows.Forms.Application.DoEvents()
- * There's probably a better way better to do this via iterators/generators.
+ * There's probably a better way to do this via iterators/generators or web workers.
 */
 const processEvents = async () => new Promise(resolve => setTimeout(resolve));
 

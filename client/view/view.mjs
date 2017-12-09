@@ -46,12 +46,28 @@ const init = (onVolumeChange, onPause) => {
 };
 
 const setSong = (songName) => {
-  metadataEle.innerHTML = '<b>Currently playing:</b> ' + songName.replace(/&/g, '&amp;').replace(/ - /g, ' &ndash; ').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  metadataEle.innerHTML = `<b>Currently playing:</b> ${songName.replace(/&/g, '&amp;').replace(/ - /g, ' &ndash; ').replace(/</g, '&lt;').replace(/>/g, '&gt;')}`;
 };
 
 const updateTime = (newTime) => {
+  //Calculate HH:MM:SS
   const seconds = Math.floor(newTime) % 60;
-  totalTimeEle.innerHTML = '<b>Total time:</b> ' + Math.floor(newTime / 60) + ':' + ((seconds < 10) ? '0' : '') + seconds;
+  let minutes = Math.floor(newTime / 60);
+  let hours = 0;
+  if (minutes >= 60) {
+    hours = Math.floor(minutes / 60);
+    minutes %= 60;
+  }
+  //Create string
+  let out = '<b>Total time:</b> ';
+  if (hours > 0) {
+    out += `${hours}:`;
+    if (minutes < 10) out += '0';
+  }
+  out += `${minutes}:`;
+  if (seconds < 10) out += '0';
+  out += String(seconds);
+  totalTimeEle.innerHTML = out;
 };
 
 export default {

@@ -13,8 +13,8 @@ const SPECTROGRAM_BACKGROUND = getViridisColor(0);
 const SPECTROGRAM_TUNING = 440;
 //We go down to A0 = 27.5 Hz
 const SPECTROGRAM_OCTAVES_DOWN = -4;
-//We go up to A7 = 1,760 Hz
-const SPECTROGRAM_OCTAVES_UP = 2;
+//We go up to A8 = 7,040 Hz
+const SPECTROGRAM_OCTAVES_UP = 4;
 //Calculate lowest and highest frequency based on this data
 const SPECTROGRAM_LOWEST_FREQUENCY = SPECTROGRAM_TUNING * (2 ** SPECTROGRAM_OCTAVES_DOWN);
 //const SPECTROGRAM_HIGHEST_FREQUENCY = SPECTROGRAM_TUNING * (2 ** SPECTROGRAM_OCTAVES_UP);

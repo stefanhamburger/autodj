@@ -61,7 +61,12 @@ import fftDataManager from './fftDataManager.mjs';
         audioEle.pause();
       }
     };
-    //TODO: don't add <audio> element to DOM but add UI elements to see elapsed time and to change volume
+    document.addEventListener('keydown', (event) => {
+      //TODO: we can also add the volume change buttons
+      if (event.key === 'MediaPlayPause') {
+        onPause();
+      }
+    });
 
     const setSong = (songName) => {
       view.setSong(songName);
@@ -74,28 +79,14 @@ import fftDataManager from './fftDataManager.mjs';
     });
 
     //Microsoft Edge does not support the constructors, so we need to call the factory methods instead
-
-    //const audioSourceNode = new MediaElementAudioSourceNode(audioCtx, { mediaElement: audioEle });
     const audioSourceNode = audioCtx.createMediaElementSource(audioEle);
 
-    /*const analyserNodeHi = new AnalyserNode(audioCtx, {
-      fftSize: 4096,
-      maxDecibels: -25,
-      minDecibels: -60,
-      smoothingTimeConstant: 0,
-    });*/
     const analyserNodeHi = audioCtx.createAnalyser();
     analyserNodeHi.fftSize = 4096;
     analyserNodeHi.maxDecibels = -25;
     analyserNodeHi.minDecibels = -60;
     analyserNodeHi.smoothingTimeConstant = 0;
 
-    /*const analyserNodeLo = new AnalyserNode(audioCtx, {
-      fftSize: 16384,
-      maxDecibels: -25,
-      minDecibels: -60,
-      smoothingTimeConstant: 0,
-    });*/
     const analyserNodeLo = audioCtx.createAnalyser();
     analyserNodeLo.fftSize = 16384;
     analyserNodeLo.maxDecibels = -25;
@@ -104,17 +95,15 @@ import fftDataManager from './fftDataManager.mjs';
 
     const gainNode = audioCtx.createGain();
     gainNode.gain.value = 0.1;
-    const onVolumChange = (newVolume) => {
-      gainNode.gain.value = newVolume;
+    const onVolumeChange = (newVolume) => {
+      //Smooth interpolation to target volume within 50-100ms
+      gainNode.gain.setTargetAtTime(newVolume, audioCtx.currentTime, 0.03);
     };
 
-    audioSourceNode.connect(analyserNodeHi);
-    analyserNodeHi.connect(analyserNodeLo);
-    analyserNodeLo.connect(gainNode);
-    gainNode.connect(audioCtx.destination);
+    audioSourceNode.connect(analyserNodeHi).connect(analyserNodeLo).connect(gainNode).connect(audioCtx.destination);
 
     //Create view
-    view.init(onVolumChange, onPause);
+    view.init(onVolumeChange, onPause);
     /*audioEle.addEventListener('progress', () => {
       model.heartbeat(audioEle.currentTime);
       view.updateTime(audioEle.currentTime);
@@ -128,6 +117,7 @@ import fftDataManager from './fftDataManager.mjs';
     const fftManagerLo = fftDataManager(analyserNodeLo.frequencyBinCount);
     const redrawSpectrogram = () => {
       requestAnimationFrame(redrawSpectrogram);
+      //TODO: model+view should be updated with setTimeout, otherwise e.g. curSong is never updated if user tabbed out
       model.heartbeat(audioEle.currentTime);
       view.updateTime(audioEle.currentTime);
 

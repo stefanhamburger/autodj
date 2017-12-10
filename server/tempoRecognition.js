@@ -49,13 +49,13 @@ const getWindow = (waveform, position) => {
  * mimicing .NET's System.Windows.Forms.Application.DoEvents()
  * There's probably a better way to do this via iterators/generators or web workers.
 */
-const processEvents = async () => new Promise(resolve => setTimeout(resolve));
+const processEvents = () => new Promise(resolve => setTimeout(resolve));
 
-const detectBeats = (waveform) => {
+const detectBeats = async (waveform) => {
   //Get window
   let pos = 0;
   while (pos <= waveform.length) {
-    const window = getWindow(waveform, pos);
+    const signalWindow = getWindow(waveform, pos);
     pos += HOP_SIZE;
 
     //apply a STFT to extract spectral coefficients
@@ -74,7 +74,7 @@ const detectBeats = (waveform) => {
     }
 
     //process other events so we don't block the process
-    processEvents();
+    await processEvents();
   }
 
   //Detect peaks

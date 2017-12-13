@@ -12,7 +12,7 @@ const app = express();
 app.use(express.static('public'));
 
 //main HTML
-app.get('/', async (req, res) => {
+app.get('/', (req, res) => {
   let output = fs.readFileSync('./index.html');
   const collectionsString = Object.keys(settings.get().collections).map(key => `<option>${key}</option>`).join('');
   output = output.toString().replace(/__INSERT_COLLECTIONS__/, collectionsString);
@@ -20,7 +20,7 @@ app.get('/', async (req, res) => {
 });
 
 //create a new audio stream
-app.get('/init', async (req, res) => {
+app.get('/init', (req, res) => {
   const { sid, obj: session } = sessions.newSession();
   let numChannels = Number(req.query.numChannels);
   if (!Number.isInteger(numChannels)) numChannels = 2;

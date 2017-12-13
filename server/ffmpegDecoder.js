@@ -10,7 +10,7 @@ const MAX_FFMPEG_BUFFER = 8 * 48000 * 60 * 20;//up to 20 minutes of audio, or 46
  * @param {string} path - The path of the audio file we want to decode
  * @return {Promise<ArrayBuffer>}
  */
-module.exports.decodeAudio = async path => new Promise((resolve, reject) => {
+module.exports.decodeAudio = path => new Promise((resolve, reject) => {
   //Create FFmpeg process
   execFile(
     'ffmpeg',

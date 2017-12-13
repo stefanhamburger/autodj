@@ -91,9 +91,9 @@ const addData = (fftManagerHi, binSizeHi, fftManagerLo, binSizeLo, newTime) => {
         nearestBuffersHi.maxWeight * (freqHiWeight * nearestBuffersHi.maxArray[freqHiIndex] + (1.0 - freqHiWeight) * nearestBuffersHi.maxArray[freqHiIndex + 1])) / 255;
 
       //interpolate between low and high frequency FFT data
-      //const amplitude = ((1.0 - j / oldHeight) * amplitudeLo + (j / oldHeight) * amplitudeHi) / 255;
+      //const amplitude = (1.0 - j / oldHeight) * amplitudeLo + (j / oldHeight) * amplitudeHi;
       //alternatively:
-      //const amplitude = Math.sqrt(Math.max(amplitudeLo / 255, 0.1) * Math.max(amplitudeHi / 255, 0.1));
+      //const amplitude = Math.sqrt(Math.max(amplitudeLo, 0.1) * Math.max(amplitudeHi, 0.1));
       const amplitude =
         0.1 * amplitudeLo +
         0.1 * amplitudeHi +

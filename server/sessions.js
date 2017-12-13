@@ -9,18 +9,18 @@ const sessions = {};
 
 /**
  * after how much time a session times out (because we haven't received any more client requests for it)
- * This will free up resources and kill the FFmpeg process. Set to 5 minutes.
+ * This will free up resources and kill the FFmpeg process. Set to 15 seconds.
  */
-const SESSION_TIMEOUT = 1 * 15000;
+const SESSION_TIMEOUT = 15000;
 /** length of the session id. Doesn't need to be too long for our use case */
 const SESSION_ID_LENGTH = 16;
 
-const hex = '0123456789abcdefghijklmnopqrstuvwxyz';
+const alphabet = '0123456789abcdefghijklmnopqrstuvwxyz';
 /** generates a new random session id */
 const generateSID = () => {
   let out = '';
   for (let i = 0; i < SESSION_ID_LENGTH; i += 1) {
-    out += hex[Math.floor(Math.random() * hex.length)];
+    out += alphabet[Math.floor(Math.random() * alphabet.length)];
   }
 
   //if session id is already in use, find another one - highly unlikely, that this happens

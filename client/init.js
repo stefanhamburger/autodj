@@ -117,7 +117,7 @@ import fftDataManager from './fftDataManager.mjs';
     const fftManagerLo = fftDataManager(analyserNodeLo.frequencyBinCount);
     const redrawSpectrogram = () => {
       requestAnimationFrame(redrawSpectrogram);
-      //TODO: model+view should be updated with setTimeout, otherwise e.g. curSong is never updated if user tabbed out
+      //TODO: model+view should be updated with setTimeout, otherwise in Chrome e.g. curSong is never updated if user tabbed out
       model.heartbeat(audioEle.currentTime);
       view.updateTime(audioEle.currentTime);
 

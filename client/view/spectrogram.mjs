@@ -101,13 +101,13 @@ const addData = (fftManagerHi, binSizeHi, fftManagerLo, binSizeLo, newTime) => {
       if (jFrac >= 0.5) {
         //On 0 to 0.5, use product of low and high
         amplitude = amplitudeProduct;
-      } else if (jFrac >= 0.7) {
+      } else if (jFrac <= 0.3) {
         //On 0.7 to 1, use high only
         amplitude = amplitudeHi;
       } else {
         //Between 0.5 and 0.7, lerp between both
-        const jFracNormalized = (jFrac - 0.5) * 5;
-        amplitude = (1.0 - jFracNormalized) * amplitudeProduct + jFracNormalized * amplitudeHi;
+        const jFracNormalized = (jFrac - 0.3) * 5;
+        amplitude = jFracNormalized * amplitudeProduct + (1.0 - jFracNormalized) * amplitudeHi;
       }
 
       //set background color based on amplitude

@@ -4,7 +4,7 @@ import view from './view/view.mjs';
 import spectrogram from './view/spectrogram.mjs';
 import fftDataManager from './fftDataManager.mjs';
 
-{
+document.addEventListener('DOMContentLoaded', () => {
   const startLink = document.getElementById('startLink');
   startLink.addEventListener('click', async () => {
     //Get form input
@@ -134,4 +134,6 @@ import fftDataManager from './fftDataManager.mjs';
     };
     requestAnimationFrame(redrawSpectrogram);
   });
-}
+  startLink.innerHTML = 'Start stream';
+  startLink.disabled = false;
+});

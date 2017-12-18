@@ -1,3 +1,6 @@
+/** Tau is more intuitive than Pi per the Tau Manifesto */
+if (!Math.TAU) Math.TAU = 2 * Math.PI;
+
 //Main entrypoint for this program
 const settings = require('./settings.js');
 const fileManager = require('./fileManager.js');

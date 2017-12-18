@@ -1,6 +1,3 @@
-/** Tau is more intuitive than Pi per the Tau Manifesto */
-if (!Math.TAU) Math.TAU = 2 * Math.PI;
-
 /**
  * The window size. This should be equal to or less than the smallest unit we want to recognize.
  * Anything smaller than 10ms can no longer be distinguished by human listeners.
@@ -44,6 +41,34 @@ const getWindow = (waveform, position) => {
   return buffer;
 };
 
+/** Perform a Short-Time Fourier Transform on the input waveform */
+const stft = (waveform) => {
+  const out = [];
+
+  //Per the Nyquist–Shannon theorem, we can only do a FFT to half of the sample rate
+  const fftSize = waveform.length / 2;
+
+  //for each partial
+  for (let i = 0; i < fftSize; i += 1) {
+    const frequency = i * 48000 / fftSize;//frequency of this partial in Hertz
+    let real = 0;
+    let imaginary = 0;
+
+    //for each sample
+    for (let j = 0; j < waveform.length; j += 1) {
+      real += waveform[j] * Math.cos(Math.TAU * frequency * j);
+      imaginary += waveform[j] * Math.sin(Math.TAU * frequency * j);
+    }
+
+    const amplitude = Math.sqrt(real * real + imaginary * imaginary);
+    const phase = Math.atan2(imaginary, real);
+
+    out.push({ frequency, amplitude, phase });
+  }
+
+  return out;
+};
+
 /**
  * Process other events before continuing execution,
  * mimicing .NET's System.Windows.Forms.Application.DoEvents()
@@ -59,7 +84,7 @@ const detectBeats = async (waveform) => {
     pos += HOP_SIZE;
 
     //apply a STFT to extract spectral coefficients
-    //...
+    const frequencyData = stft(signalWindow);
 
     //We now have current and previous spectral data, so take derivative and calculate peaks
     if (pos > 0) {

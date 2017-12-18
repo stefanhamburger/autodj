@@ -1,6 +1,7 @@
 <!doctype html>
 <html>
   <head>
+    <script src="bundle.js" defer></script>
     <title>AutoDJ</title>
     <link rel="icon" href="favicon.ico" type="image/x-icon">
   </head>
@@ -8,9 +9,8 @@
     <div id="form">
       <p>Collection: <select id="collection">__INSERT_COLLECTIONS__</select></p>
       <p># channels: <select id="channels"><option value=1>Mono</option><option value=2 selected>Stereo</option></select></p>
-      <button id="startLink">Start stream</button>
+      <button id="startLink" disabled>Loading...</button>
     </div>
     <div id="view"></div>
-    <script src="bundle.js"></script>
   </body>
 </html>

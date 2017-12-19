@@ -1,4 +1,5 @@
 import getViridisColor from './viridis.mjs';
+import frequencyToVolume from './equalLoudnessContour.mjs';
 
 /** The height in pixels of the top navigation, the spectrogram is drawn below it */
 const TOP_NAVIGATION_HEIGHT = 100;
@@ -96,19 +97,23 @@ const addData = (fftManagerHi, binSizeHi, fftManagerLo, binSizeLo, newTime) => {
         0.1 * amplitudeHi +
         0.8 * ((amplitudeLo + 0.1) * (amplitudeHi + 0.1) - 0.01) / 1.20;
 
-      const jFrac = j / oldHeight;
+      const jFrac = j / (oldHeight - 1);
       let amplitude;
       if (jFrac >= 0.5) {
-        //On 0 to 0.5, use product of low and high
+        //On 0.5 to 1, use product of low and high
         amplitude = amplitudeProduct;
       } else if (jFrac <= 0.3) {
-        //On 0.7 to 1, use high only
+        //On 0 to 0.3, use high only
         amplitude = amplitudeHi;
       } else {
-        //Between 0.5 and 0.7, lerp between both
+        //Between 0.3 and 0.5, lerp between both
         const jFracNormalized = (jFrac - 0.3) * 5;
         amplitude = jFracNormalized * amplitudeProduct + (1.0 - jFracNormalized) * amplitudeHi;
       }
+
+      //Adjust volume based on Equal-loudness contour to strengthen mid-range tones
+      //Since this reduces the amplitude of most frequency, we multiply by 1.5 to make up for the lost power
+      amplitude *= frequencyToVolume(frequency) * 1.5;
 
       //set background color based on amplitude
       ctx.fillStyle = getViridisColor(amplitude);

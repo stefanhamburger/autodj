@@ -84,13 +84,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const analyserNodeHi = audioCtx.createAnalyser();
     analyserNodeHi.fftSize = 4096;
     analyserNodeHi.maxDecibels = -25;
-    analyserNodeHi.minDecibels = -60;
+    analyserNodeHi.minDecibels = -55;
     analyserNodeHi.smoothingTimeConstant = 0;
 
     const analyserNodeLo = audioCtx.createAnalyser();
     analyserNodeLo.fftSize = 16384;
     analyserNodeLo.maxDecibels = -25;
-    analyserNodeLo.minDecibels = -60;
+    analyserNodeLo.minDecibels = -55;
     analyserNodeLo.smoothingTimeConstant = 0;
 
     const gainNode = audioCtx.createGain();

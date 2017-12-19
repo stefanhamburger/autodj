@@ -6,7 +6,7 @@
 const WINDOW_SIZE = 960;
 
 /**
- * How far we want to move the window each time. Should be <= WINDOW_SIZE, a small overlap improves recognition
+ * How far we want to move the window each time. Should be < WINDOW_SIZE, a small overlap improves recognition
 */
 const HOP_SIZE = 480;
 
@@ -77,30 +77,40 @@ const stft = (waveform) => {
 const processEvents = () => new Promise(resolve => setTimeout(resolve));
 
 const detectBeats = async (waveform) => {
+  const beatData = [];
+
   //Get window
   let pos = 0;
+  let prevFreqData;
+  let curFreqData;
   while (pos <= waveform.length) {
     const signalWindow = getWindow(waveform, pos);
     pos += HOP_SIZE;
 
     //apply a STFT to extract spectral coefficients
-    const frequencyData = stft(signalWindow);
+    prevFreqData = curFreqData;
+    curFreqData = stft(signalWindow);
 
     //We now have current and previous spectral data, so take derivative and calculate peaks
     if (pos > 0) {
       //take discrete derivative of two consecutive windows (distance measure)
-      //...
+      const derivative = [];
+      for (let i = 0; i < curFreqData.length; i += 1) {
+        derivative[i] = curFreqData[i].amplitude - prevFreqData[i].amplitude;
+        //TODO: we can use a better distance measure than this
+      }
 
       //Sum up all frequencies
-      //...
-
-      //Remove average
-      //...
+      const sum = derivative.reduce((accum, currentValue) => accum + currentValue, 0);
+      beatData.push(sum);
     }
 
     //process other events so we don't block the process
     await processEvents();
   }
+
+  //Remove average
+  //...
 
   //Detect peaks
   //...

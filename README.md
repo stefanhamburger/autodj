@@ -5,7 +5,7 @@
 3. Download this Git repository (`git pull https://github.com/stefanhamburger/autodj.git`)
 4. Install dependencies by running `npm install`
 5. In this folder, create a file called `settings.json`. You must have a local folder with audio files, this is not included with the repository. Include this folder as follows:
-```
+```json
 {
   "collections": {
     "My music collection": "/path/to/music/collection"

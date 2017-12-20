@@ -93,8 +93,8 @@ const addData = (fftManagerHi, binSizeHi, fftManagerLo, binSizeLo, newTime) => {
 
       //interpolate between low and high frequency FFT data
       const amplitudeProduct =
-        0.1 * amplitudeLo +
-        0.1 * amplitudeHi +
+        0.15 * amplitudeLo +
+        0.05 * amplitudeHi +
         0.8 * ((amplitudeLo + 0.1) * (amplitudeHi + 0.1) - 0.01) / 1.20;
 
       const jFrac = j / (oldHeight - 1);

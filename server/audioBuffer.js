@@ -95,7 +95,12 @@ module.exports.init = (session) => {
   const { inputStream, getOutputBuffer, killCommand } = ffmpeg.createEncoder(session.numChannels);
   session.inputStream = inputStream;
   session.getOutputBuffer = getOutputBuffer;
-  session.killCommand = killCommand;
+  session.killCommand = () => {
+    //remove audio buffer from memory
+    audioManager.removeReference(session.songs[session.curSong], { sid: session.sid, index: session.curSong });
+    //kill FFmpeg process
+    killCommand();
+  };
 
   //initialize session data
   session.clientBufferLength = 0;//the playback position of the client (in seconds)

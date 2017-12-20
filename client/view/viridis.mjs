@@ -286,7 +286,7 @@ const colorMap = [
  */
 const getViridisColor = (fracIn) => {
   //clamp fractional value into [0, 1] range
-  const frac = Math.max(Math.min(fracIn, 1.0), 0.0);
+  const frac = Math.min(Math.max(0.0, fracIn), 1.0);
 
   //return value from color map
   const index = Math.round(frac * (colorMap.length - 1));

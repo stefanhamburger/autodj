@@ -97,7 +97,8 @@ module.exports.init = (session) => {
   session.getOutputBuffer = getOutputBuffer;
   session.killCommand = () => {
     //remove audio buffer from memory
-    audioManager.removeReference(session.songs[session.curSong], { sid: session.sid, index: session.curSong });
+    audioManager.removeReference(session.songs[session.curSong].songRef, { sid: session.sid, index: session.curSong });
+    //TODO: also remove follow-up song from memory
     //kill FFmpeg process
     killCommand();
   };

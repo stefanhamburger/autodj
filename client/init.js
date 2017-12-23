@@ -74,9 +74,9 @@ document.addEventListener('DOMContentLoaded', () => {
     model.init(setSong);
 
     //Set up Web Audio API to create volume slider and generate FFT data
-    const audioCtx = new AudioContext({
+    const audioCtx = AudioContext ? new AudioContext({
       sampleRate: 44100, //ideally, we'd use a 48,000 sample rate but this is not yet supported by browsers
-    });
+    }) : new webkitAudioContext();
 
     //Microsoft Edge does not support the constructors, so we need to call the factory methods instead
     const audioSourceNode = audioCtx.createMediaElementSource(audioEle);

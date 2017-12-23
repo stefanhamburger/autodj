@@ -3,6 +3,9 @@
 
 const { decodeAudio } = require('./ffmpegDecoder.js');
 
+/** byte length is 8 bytes per sample (2 channels, Float32 format) */
+const BYTES_PER_SAMPLE = 8;
+
 const audioWaveforms = {};
 
 /**
@@ -27,7 +30,7 @@ module.exports.getWaveform = song => audioWaveforms[song.path].buffer;
  * Gets the number of samples of the given song
  * @param {*} song The song to use
  */
-module.exports.getDuration = async song => (await audioWaveforms[song.path].buffer).byteLength / 8;
+module.exports.getDuration = async song => (await audioWaveforms[song.path].buffer).byteLength / BYTES_PER_SAMPLE;
 
 /**
  * Delete waveform data to free up memory

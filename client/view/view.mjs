@@ -52,7 +52,7 @@ const init = (onVolumeChange, onPause) => {
 };
 
 const setSong = (songName) => {
-  metadataEle.innerHTML = `<b>Currently playing:</b> ${songName.replace(/&/g, '&amp;').replace(/ - /g, ' &ndash; ').replace(/</g, '&lt;').replace(/>/g, '&gt;')}`;
+  metadataEle.innerHTML = `<b>Currently playing:</b> ${songName.replace(/ - /g, ' – ').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}`;
 };
 
 const updateTime = (newTime) => {

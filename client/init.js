@@ -121,7 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
       model.heartbeat(audioEle.currentTime);
       view.updateTime(audioEle.currentTime);
 
-      const bufferHi = fftManagerHi.getNewBuffer(audioEle.currentTime * 44100 + 4096);
+      const bufferHi = fftManagerHi.getNewBuffer(audioEle.currentTime * 44100);
       analyserNodeHi.getByteFrequencyData(bufferHi);//TODO: need to use getFloatFrequencyData
 
       const bufferLo = fftManagerLo.getNewBuffer(audioEle.currentTime * 44100);

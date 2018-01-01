@@ -1,9 +1,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import spectrogram from './spectrogram.mjs';
+import CurrentSong from '../../components/CurrentSong.mjs';
 import TotalDuration from '../../components/TotalDuration.mjs';
 
-let metadataEle;
+let curSongWrapper;
 let totalTimeWrapper;
 
 //Initializes the view
@@ -12,8 +13,8 @@ const init = (onVolumeChange, onPause) => {
   const rootEle = document.getElementById('view');
 
   //show currently playing song
-  metadataEle = document.createElement('div');
-  rootEle.appendChild(metadataEle);
+  curSongWrapper = document.createElement('div');
+  rootEle.appendChild(curSongWrapper);
 
   //show total time (for long we have been playing audio)
   totalTimeWrapper = document.createElement('div');
@@ -52,7 +53,10 @@ const init = (onVolumeChange, onPause) => {
 };
 
 const setSong = (songName) => {
-  metadataEle.innerHTML = `<b>Currently playing:</b> ${songName.replace(/ - /g, ' – ').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}`;
+  ReactDOM.render(
+    <CurrentSong name={songName} />,
+    curSongWrapper,
+  );
 };
 
 const updateTime = (newTime) => {

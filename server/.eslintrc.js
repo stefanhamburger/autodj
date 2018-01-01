@@ -1,5 +1,5 @@
 module.exports = {
-  extends: 'airbnb-base',
+  extends: 'airbnb',
   env: {
     node: true,
   },
@@ -19,5 +19,7 @@ module.exports = {
     'no-mixed-operators': 'off',
     'no-param-reassign': ['error', { 'props': false }],
     'spaced-comment': 'off',
+    'react/jsx-filename-extension': 'off', //.jsx interferes with .mjs extension
+    'react/prop-types': 'off', //PropTypes is no longer part of React core
   },
 };

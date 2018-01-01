@@ -1,7 +1,10 @@
+import React from 'react';
+import ReactDOM from 'react-dom';
 import spectrogram from './spectrogram.mjs';
+import TotalDuration from '../../components/TotalDuration.mjs';
 
 let metadataEle;
-let totalTimeEle;
+let totalTimeWrapper;
 
 //Initializes the view
 
@@ -13,9 +16,12 @@ const init = (onVolumeChange, onPause) => {
   rootEle.appendChild(metadataEle);
 
   //show total time (for long we have been playing audio)
-  totalTimeEle = document.createElement('div');
-  totalTimeEle.innerHTML = '<b>Total time:</b> 00:00';
-  rootEle.appendChild(totalTimeEle);
+  totalTimeWrapper = document.createElement('div');
+  rootEle.appendChild(totalTimeWrapper);
+  ReactDOM.render(
+    <TotalDuration time={0} />,
+    totalTimeWrapper,
+  );
 
   //pause button
   const btnPause = document.createElement('button');
@@ -50,24 +56,10 @@ const setSong = (songName) => {
 };
 
 const updateTime = (newTime) => {
-  //Calculate HH:MM:SS
-  const seconds = Math.floor(newTime) % 60;
-  let minutes = Math.floor(newTime / 60);
-  let hours = 0;
-  if (minutes >= 60) {
-    hours = Math.floor(minutes / 60);
-    minutes %= 60;
-  }
-  //Create string
-  let out = '<b>Total time:</b> ';
-  if (hours > 0) {
-    out += `${hours}:`;
-    if (minutes < 10) out += '0';
-  }
-  out += `${minutes}:`;
-  if (seconds < 10) out += '0';
-  out += String(seconds);
-  totalTimeEle.innerHTML = out;
+  ReactDOM.render(
+    <TotalDuration time={newTime} />,
+    totalTimeWrapper,
+  );
 };
 
 export default {

@@ -21,9 +21,9 @@ class TotalDuration extends React.Component {
 
 function TotalDuration({ time }) {
   //Calculate HH:MM:SS
-  const timestamp = Math.floor(Number(time));
+  const timestamp = Math.floor(time);
   const hours = Math.floor(timestamp / 3600);
-  const minutes = Math.floor(timestamp / 60);
+  const minutes = Math.floor(timestamp / 60) % 60;
   const seconds = timestamp % 60;
   //Create DOM
   return (

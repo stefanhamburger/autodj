@@ -1,10 +1,6 @@
 //Main entrypoint for the server process
 
-/** Tau is more intuitive than Pi per the Tau Manifesto https://tauday.com/tau-manifesto */
-if (!Math.TAU) Math.TAU = 2 * Math.PI;
-/** Clamps the given value between min and max */
-if (!Math.clamp) Math.clamp = (min, max, val) => Math.min(Math.max(min, val), max);
-
+import './mathFunctions.mjs';//import statements must be at the top, so define Math functions in a separate file
 import * as settings from './settings.mjs';
 import * as fileManager from './fileManager.mjs';
 import initServer from './server.mjs';

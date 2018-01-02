@@ -1,6 +1,6 @@
 //Main entrypoint for the server process
 
-import './mathFunctions.mjs';//import statements must be at the top, so define Math functions in a separate file
+import './mathExtensions.mjs';//import statements must be at the top, so define Math functions in a separate file
 import * as settings from './settings.mjs';
 import * as fileManager from './fileManager.mjs';
 import initServer from './server.mjs';

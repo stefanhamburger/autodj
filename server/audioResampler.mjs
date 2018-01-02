@@ -1,4 +1,4 @@
-const { getChannel } = require('./waveformWrapper.js');
+import { getChannel } from './waveformWrapper.mjs';
 
 //Resamples a waveform from 44,100 Hz to 48,000 Hz. Uses linear interpolation, which doesn't produce good results so we should eventually replace it.
 //TODO: we can use a better algorithm, see e.g. http://www.univie.ac.at/nuhag-php/bibtex/open_files/falara00_kannan%20rajamani.pdf
@@ -18,7 +18,7 @@ const resampleChannel = (origChannel, resampledChannel) => {
   }
 };
 
-module.exports.resample = (waveformBuffer, leftChannel, rightChannel) => {
+export default (waveformBuffer, leftChannel, rightChannel) => {
   const resampledLength = Math.ceil(waveformBuffer.length / 2 * 160 / 147) * 2;
   const resampledBuffer = new Float32Array(resampledLength);
   const resampledLeft = getChannel({ waveform: resampledBuffer, curChannel: 0 });

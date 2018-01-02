@@ -124,4 +124,4 @@ const detectBeats = async (waveform) => {
   ];
 };
 
-module.exports.detectBeats = detectBeats;
+export default detectBeats;

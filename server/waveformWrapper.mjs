@@ -6,7 +6,7 @@
 //TODO: replace this with a Proxy https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy
 
 //Gets a wrapper for the given channel from the waveform data
-module.exports.getChannel =
+export const getChannel =
 ({ waveform, curChannel, numChannels = 2 } = {}) =>
   ({
     length: Math.ceil(waveform.length / numChannels),
@@ -17,7 +17,7 @@ module.exports.getChannel =
   });
 
 //Gets a wrapper for a mono stream based on the given stereo waveform data
-module.exports.getMono =
+export const getMono =
 ({ waveform } = {}) =>
   ({
     length: Math.ceil(waveform.length / 2),
@@ -25,7 +25,7 @@ module.exports.getMono =
   });
 
 //Creates a interlaced stereo waveform from the given mono input
-module.exports.monoToStereo = (waveform) => {
+export const monoToStereo = (waveform) => {
   const out = new Float32Array(waveform.length * 2);
   for (let i = 0; i < waveform.length; i += 1) {
     out[i * 2] = waveform[i];

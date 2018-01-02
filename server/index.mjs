@@ -5,9 +5,9 @@ if (!Math.TAU) Math.TAU = 2 * Math.PI;
 /** Clamps the given value between min and max */
 if (!Math.clamp) Math.clamp = (min, max, val) => Math.min(Math.max(min, val), max);
 
-const settings = require('./settings.js');
-const fileManager = require('./fileManager.js');
-const server = require('./server.js');
+import * as settings from './settings.mjs';
+import * as fileManager from './fileManager.mjs';
+import initServer from './server.mjs';
 
 //Exit on async error to prevent further bugs and provide better debug messages
 process.on('unhandledRejection', (err) => {
@@ -24,7 +24,7 @@ process.on('unhandledRejection', (err) => {
   await fileManager.init();
 
   //start setting up server
-  server.init();
+  initServer();
 
   console.log(`=== Server is running! ${new Date().toString()} ===`);
 })());

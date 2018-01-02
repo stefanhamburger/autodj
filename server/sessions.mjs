@@ -1,9 +1,7 @@
-/** @module session */
-
 const sessions = {};
 
 /**
- * @typedef {Object} module:session.Session
+ * @typedef {Object} Session
  * @property {string} sid - session id
  */
 
@@ -32,9 +30,9 @@ const generateSID = () => {
 /**
  * Indicates that the given session is still active and should not be deleted
  * By default, sessions are automatically deleted after SESSION_TIMEOUT to free up memory
- * @param {*} session - The session we want to extend
+ * @param {Session} session - The session we want to extend
  */
-module.exports.lifeSign = (session) => {
+export const lifeSign = (session) => {
   clearTimeout(session.timeout);
   const { sid } = session;
   session.timeout = setTimeout(() => {
@@ -46,10 +44,11 @@ module.exports.lifeSign = (session) => {
 
 /**
  * Creates a new session
- * @returns {module:session.Session}
+ * @returns {Session}
  */
-module.exports.newSession = () => {
+export const newSession = () => {
   const sid = generateSID();
+  /** @type {Session} */
   const session = { sid };
   session.events = [];
   session.emitEvent = event => session.events.push(event);
@@ -60,7 +59,7 @@ module.exports.newSession = () => {
   };
 
   sessions[sid] = session;
-  module.exports.lifeSign(session);
+  lifeSign(session);
   console.log(`[${sid}] Starting new session...`);
 
   return { sid, obj: session };
@@ -70,4 +69,4 @@ module.exports.newSession = () => {
  * Gets a session with the given session id
  * @param {string} sid - The id of the requested session
  */
-module.exports.getSession = sid => sessions[sid];
+export const getSession = sid => sessions[sid];

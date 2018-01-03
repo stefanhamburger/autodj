@@ -1,8 +1,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import spectrogram from './spectrogram.mjs';
+import ButtonPause from '../../components/ButtonPause.mjs';
 import CurrentSong from '../../components/CurrentSong.mjs';
 import TotalDuration from '../../components/TotalDuration.mjs';
+import VolumeControl from '../../components/VolumeControl.mjs';
 
 let curSongWrapper;
 let totalTimeWrapper;
@@ -24,26 +26,15 @@ const init = (onVolumeChange, onPause) => {
     totalTimeWrapper,
   );
 
-  //pause button
-  const btnPause = document.createElement('button');
-  btnPause.innerHTML = 'Pause/Continue';
-  btnPause.addEventListener('mousedown', () => {
-    onPause();
-  });
-  rootEle.appendChild(btnPause);
-
-  //volume control
-  const volumeLabel = document.createElement('span');
-  volumeLabel.innerHTML = 'Volume:&nbsp;';
-  rootEle.appendChild(volumeLabel);
-  const volumeSlider = document.createElement('input');
-  volumeSlider.type = 'range';
-  volumeSlider.min = 0;
-  volumeSlider.value = 10;
-  volumeSlider.max = 100;
-  volumeSlider.step = 1;
-  volumeSlider.addEventListener('input', () => onVolumeChange(Number(volumeSlider.value) / 100));
-  rootEle.appendChild(volumeSlider);
+  const mediaControls = document.createElement('div');
+  rootEle.appendChild(mediaControls);
+  ReactDOM.render(
+    <React.Fragment>
+      <ButtonPause pauseCallback={onPause} />
+      <VolumeControl volumeChangeCallback={onVolumeChange} />
+    </React.Fragment>,
+    mediaControls,
+  );
 
   //show spectrogram as canvas
   const canvas = document.createElement('canvas');

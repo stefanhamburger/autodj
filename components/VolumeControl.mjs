@@ -3,8 +3,7 @@ import React from 'react';
 function VolumeControl({ volumeChangeCallback }) {
   return (
     <label>
-      Volume:
-      {' '}
+      <span style={{ marginRight: '5px' }}>Volume:</span>
       <input type="range" min="0" defaultValue="10" max="100" step="1" onInput={event => volumeChangeCallback(Number(event.target.value) / 100)} />
     </label>
   );

@@ -1,6 +1,7 @@
 import * as fileManager from './fileManager.mjs';
 import createEncoder from './ffmpegEncoder.mjs';
 import * as audioManager from './audioManager.mjs';
+import startTempoRecognition from './startTempoRecognition.mjs';
 
 /** number of samples to preload - this controls how fast the server can react to input from the client, so should be kept as small as possible */
 const PRELOAD_BUFFER_LENGTH = 5 * 48000;
@@ -30,6 +31,10 @@ const addFileToStream = (session) => {
     session.emitEvent({ type: 'SONG_START', songName: songWrapper.songRef.name, time: 0 });
     songWrapper.ready = new Promise(async (resolve) => {
       songWrapper.totalLength = await audioManager.getDuration(songWrapper.songRef);
+
+      //do tempo recognition
+      startTempoRecognition(songWrapper);
+
       resolve();
     });
   } else {
@@ -47,6 +52,10 @@ const addFileToStream = (session) => {
       songWrapper.offset = 0;//the offset into the song at which to start mixing, e.g. to skip silence at the beginning
       session.emitEvent({ type: 'SONG_START', songName: songWrapper.songRef.name, time: startTime / 48000 });
       songWrapper.totalLength = await audioManager.getDuration(songWrapper.songRef);//how long we want to play this song, e.g. to skip the ending
+
+      //do tempo recognition
+      startTempoRecognition(songWrapper);
+
       resolve();
     });
   }

@@ -2,8 +2,6 @@ import fs from 'fs';
 import path from 'path';
 import * as settings from './settings.mjs';
 
-/** The OS-dependent directory separator (/ on Linux, \ on Windows) */
-const PATH_SEPARATOR = path.sep;
 /** We only load audio files that have one of these extensions */
 const SUPPORTED_EXTENSIONS = ['mp3', 'wav', 'ogg', 'opus'];
 
@@ -38,7 +36,7 @@ const getFolderContents = async dirPath => new Promise((resolve) => {
       resolve([]);
     } else {
       const out = [].concat(...(await Promise.all(files.map(async (file) => {
-        const stats = await getFileStats(dirPath + PATH_SEPARATOR + file);
+        const stats = await getFileStats(path.join(dirPath, file));
         if (stats) {
           if (stats.isFile()) {
             const extensionStart = file.lastIndexOf('.');
@@ -50,12 +48,12 @@ const getFolderContents = async dirPath => new Promise((resolve) => {
                 extension,
                 size: stats.size,
                 lastMod: stats.mtime,
-                path: dirPath + PATH_SEPARATOR + file,
+                path: path.join(dirPath, file),
               }];
             }
           } else if (stats.isDirectory()) {
             //get all files in this directory
-            const subfiles = await getFolderContents(dirPath + PATH_SEPARATOR + file);
+            const subfiles = await getFolderContents(path.join(dirPath, file));
             return subfiles;
           }
         }

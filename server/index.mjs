@@ -10,6 +10,11 @@ process.on('unhandledRejection', (err) => {
   console.error(err);
   process.exit(1);
 });
+//Report all errors on error console. For some reason, a crash was not reported. Possibly related to experimental ES modules
+process.on('uncaughtException', (err) => {
+  console.error(err);
+  process.exit(1);
+});
 
 //Loads audio files into memory and initializes web server
 ((async () => {

@@ -4,6 +4,8 @@ const MusicTempo = require('music-tempo');//tiny-worker does not yet support ES 
 //The bpm range that should be detected (60-180 bpm)
 const MIN_BPM = 60;
 const MAX_BPM = 180;
+const HOP_SIZE = 480;
+const SAMPLE_RATE = 48000;
 
 let waveform;
 let hasReceivedLength = false;
@@ -22,12 +24,14 @@ onmessage = function messageHandler(ev) {
     if (pos === waveform.length) {
       //start tempo recognition
       const mt = new MusicTempo(waveform, {
+        hopSize: HOP_SIZE,
+        timeStep: SAMPLE_RATE / HOP_SIZE,
         maxBeatInterval: 60 / MIN_BPM,
         minBeatInterval: 60 / MAX_BPM,
       });
 
       //MusicTempo expects a PCM with a 44,100 sample rate. So we need to convert the tempo since we have a 48,000 sample rate
-      const bpm = Math.round(mt.tempo * 48000 / 44100 * 1000) / 1000;
+      const bpm = mt.tempo;//Math.round(mt.tempo * 48000 / 44100 * 1000) / 1000;
 
       //send recognized tempo to main thread
       postMessage(bpm);//TODO: need to send more data than just tempo

@@ -25,7 +25,7 @@ onmessage = function messageHandler(ev) {
       //start tempo recognition
       const mt = new MusicTempo(waveform, {
         hopSize: HOP_SIZE,
-        timeStep: SAMPLE_RATE / HOP_SIZE,
+        timeStep: HOP_SIZE / SAMPLE_RATE,
         maxBeatInterval: 60 / MIN_BPM,
         minBeatInterval: 60 / MAX_BPM,
       });

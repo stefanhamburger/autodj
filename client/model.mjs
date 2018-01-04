@@ -1,4 +1,5 @@
 const upcomingSongs = [];
+const tempoInfo = {};
 let setSong;
 
 const init = (setSongIn) => {
@@ -9,6 +10,10 @@ const processEvents = events => events.forEach((event) => {
   switch (event.type) {
     case 'SONG_START':
       upcomingSongs.push({ name: event.songName, time: event.time });
+      break;
+    case 'TEMPO_INFO':
+      tempoInfo[event.songName] = event.bpm;
+      setSong();
       break;
     default:
       console.error('Metadata event not recognized', event);
@@ -25,4 +30,11 @@ const heartbeat = (time) => {
   }
 };
 
-export default { init, processEvents, heartbeat };
+const getTempo = songName => tempoInfo[songName];
+
+export default {
+  init,
+  processEvents,
+  heartbeat,
+  getTempo,
+};

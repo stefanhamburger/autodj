@@ -1,13 +1,14 @@
 import Worker from 'tiny-worker';
 import * as audioManager from './audioManager.mjs';
 
-export default async function startTempoRecognition(song) {
+export default async function startTempoRecognition(session, song) {
   const waveformBuffer = await audioManager.getWaveform(song.songRef);
   const waveformArray = new Float32Array(waveformBuffer);
   const worker = new Worker('server/worker/tempoRecognition.mjs');
 
   worker.onmessage = (msg) => {
     console.log(`Song ${song.songRef.name} has ${msg.data} bpm`);
+    session.emitEvent({ type: 'TEMPO_INFO', songName: song.songRef.name, bpm: msg.data });
     worker.terminate();
   };
 

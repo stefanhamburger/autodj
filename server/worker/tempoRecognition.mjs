@@ -16,7 +16,7 @@ onmessage = function messageHandler(ev) {
 
     //if we are done
     if (pos === waveform.length) {
-      console.log('Received audio buffer! Calculating tempo...');
+      //console.log('Received audio buffer! Calculating tempo...');
       const mt = new MusicTempo(waveform);
       postMessage(mt.tempo);//TODO: need to send more data than just tempo
     }

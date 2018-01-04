@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import spectrogram from './spectrogram.mjs';
+import model from '../model.mjs';
 import ButtonPause from '../../components/ButtonPause.mjs';
 import CurrentSong from '../../components/CurrentSong.mjs';
 import TotalDuration from '../../components/TotalDuration.mjs';
@@ -43,9 +44,11 @@ const init = (onVolumeChange, onPause) => {
   rootEle.appendChild(canvas);
 };
 
-const setSong = (songName) => {
+let curSongName;
+const setSong = (songName = curSongName) => {
+  curSongName = songName;
   ReactDOM.render(
-    <CurrentSong name={songName} />,
+    <CurrentSong name={songName} bpm={model.getTempo(songName)} />,
     curSongWrapper,
   );
 };

@@ -18,7 +18,9 @@ onmessage = function messageHandler(ev) {
     if (pos === waveform.length) {
       //console.log('Received audio buffer! Calculating tempo...');
       const mt = new MusicTempo(waveform);
-      postMessage(mt.tempo);//TODO: need to send more data than just tempo
+      //MusicTempo expects a PCM with a 44,100 sample rate. So we need to convert the tempo since we have a 48,000 sample rate
+      const bpm = mt.tempo * 48000 / 44100;
+      postMessage(bpm);//TODO: need to send more data than just tempo
     }
   }
 };

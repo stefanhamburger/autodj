@@ -72,7 +72,13 @@ const addToBuffer = async (session) => {
     const remainingSongLength = curSong.totalLength - session.curSongPosition;
     const numSamplesToWrite = Math.min(session.samplesToAdd, remainingSongLength, MAX_SAMPLES_PER_LOOP);
 
-    session.inputStream.write(Buffer.from(waveform, (curSong.offset + session.curSongPosition) * BYTES_PER_SAMPLE, numSamplesToWrite * BYTES_PER_SAMPLE));
+    try {
+      session.inputStream.write(Buffer.from(waveform, (curSong.offset + session.curSongPosition) * BYTES_PER_SAMPLE, numSamplesToWrite * BYTES_PER_SAMPLE));
+    } catch (error) {
+      console.error('Ran out of memory when trying to send data to FFmpeg encoder.', error);
+      session.kill();
+      return;
+    }
     session.curSongPosition += numSamplesToWrite;
     session.samplesToAdd -= numSamplesToWrite;
 

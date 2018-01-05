@@ -27,6 +27,13 @@ const generateSID = () => {
   return out;
 };
 
+/** Closes the given session and cleans up memory. */
+const killSession = (session) => {
+  console.log(`[${session.sid}] Session timed out.`);
+  session.killCommand();
+  delete sessions[session.sid];
+};
+
 /**
  * Indicates that the given session is still active and should not be deleted
  * By default, sessions are automatically deleted after SESSION_TIMEOUT to free up memory
@@ -34,11 +41,8 @@ const generateSID = () => {
  */
 export const lifeSign = (session) => {
   clearTimeout(session.timeout);
-  const { sid } = session;
   session.timeout = setTimeout(() => {
-    console.log(`[${sid}] Session timed out.`);
-    session.killCommand();
-    delete sessions[sid];
+    session.kill();
   }, SESSION_TIMEOUT);
 };
 
@@ -51,6 +55,7 @@ export const newSession = () => {
   /** @type {Session} */
   const session = { sid };
   session.events = [];
+  session.kill = killSession.bind(null, session);
   session.emitEvent = event => session.events.push(event);
   session.flushEvents = () => {
     const eventsCopy = session.events.slice();

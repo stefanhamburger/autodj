@@ -6,6 +6,7 @@ export default async function startTempoRecognition(session, song) {
   const waveformArray = new Float32Array(waveformBuffer);
   const worker = new Worker('server/worker/tempoRecognition.mjs');
 
+  //add listener to result
   worker.onmessage = (msg) => {
     console.log(`Song ${song.songRef.name} has ${msg.data} bpm`);
     session.emitEvent({ type: 'TEMPO_INFO', songName: song.songRef.name, bpm: msg.data });
@@ -25,5 +26,4 @@ export default async function startTempoRecognition(session, song) {
     }
   };
   sendNextSamples();
-  //TODO: add listener to result
 }

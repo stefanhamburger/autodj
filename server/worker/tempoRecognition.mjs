@@ -24,16 +24,21 @@ onmessage = function messageHandler(ev) {
 
     //if we are done
     if (pos === waveform.length) {
-      //start tempo recognition
-      const mt = new MusicTempo(waveform, {
-        hopSize: HOP_SIZE,
-        timeStep: HOP_SIZE / SAMPLE_RATE,
-        maxBeatInterval: 60 / MIN_BPM,
-        minBeatInterval: 60 / MAX_BPM,
-      });
+      try {
+        //start tempo recognition
+        const mt = new MusicTempo(waveform, {
+          hopSize: HOP_SIZE,
+          timeStep: HOP_SIZE / SAMPLE_RATE,
+          maxBeatInterval: 60 / MIN_BPM,
+          minBeatInterval: 60 / MAX_BPM,
+        });
 
-      //send recognized tempo to main thread
-      postMessage(mt.tempo);//TODO: need to send more data than just tempo
+        //send recognized tempo to main thread
+        postMessage(mt.tempo);//TODO: need to send more data than just tempo
+      } catch (error) {
+        console.error('Tempo detection failed', error);
+        postMessage(0);
+      }
     }
   }
 };

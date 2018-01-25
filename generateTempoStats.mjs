@@ -30,6 +30,7 @@ const ThreadPool = ((() => {
   };
 })());
 
+
 function getTempo({ waveform }) {
   return new Promise((resolve, reject) => {
     const worker = new Worker('server/worker/tempoRecognition.mjs');
@@ -58,6 +59,7 @@ function getTempo({ waveform }) {
   });
 }
 
+
 ((async () => {
   //Read settings from local JSON file
   settings.init();
@@ -65,7 +67,7 @@ function getTempo({ waveform }) {
   //start reading list of files
   await fileManager.init();
 
-  const collection = process.env.COLLECTION;//'music collection';
+  const collection = process.env.COLLECTION;
   const files = fileManager.getFiles(collection);
   if (!files) {
     console.error(`Error: Music collection "${collection}" not found.`);

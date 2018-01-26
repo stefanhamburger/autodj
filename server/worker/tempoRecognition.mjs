@@ -3,7 +3,7 @@ const MusicTempo = require('music-tempo');//tiny-worker does not yet support ES 
 
 //The bpm range that should be detected (60-180 bpm)
 const MIN_BPM = 60;
-const MAX_BPM = 180;
+const MAX_BPM = 160;
 //By how many samples to move when generating the next FFT window
 const HOP_SIZE = 480;
 //The sample rate of the audio in Hertz

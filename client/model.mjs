@@ -11,10 +11,15 @@ const processEvents = events => events.forEach((event) => {
     case 'SONG_START':
       upcomingSongs.push({ name: event.songName, time: event.time });
       break;
-    case 'TEMPO_INFO':
-      tempoInfo[event.songName] = event.bpm;
+    case 'TEMPO_INFO': {
+      let { bpm } = event;
+      if (bpm === undefined) {
+        bpm = 0;
+      }
+      tempoInfo[event.songName] = bpm;
       setSong();
       break;
+    }
     default:
       console.error('Metadata event not recognized', event);
   }

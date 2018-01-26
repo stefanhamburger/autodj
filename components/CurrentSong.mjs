@@ -1,11 +1,23 @@
 import React from 'react';
 
 function CurrentSong({ name, bpm }) {
+  //Generate JSX from bpm value
+  let jsxTempo;
+  if (bpm !== undefined) {
+    if (bpm > 0) {
+      jsxTempo = <React.Fragment>, {bpm} bpm</React.Fragment>;
+    } else {
+      jsxTempo = 'Tempo could not be recognized.';
+    }
+  } else {
+    jsxTempo = '';
+  }
+
   return (
     <React.Fragment>
       <b style={{ marginRight: '5px' }}>Currently playing:</b>
       {name.replace(/ - /g, ' – ')}
-      {bpm !== undefined ? <React.Fragment>, {bpm} bpm</React.Fragment> : ''}
+      {jsxTempo}
     </React.Fragment>
   );
 }

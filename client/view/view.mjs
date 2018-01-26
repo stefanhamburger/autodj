@@ -15,10 +15,6 @@ let totalTimeWrapper;
 const init = (onVolumeChange, onPause) => {
   const rootEle = document.getElementById('view');
 
-  //show currently playing song
-  curSongWrapper = document.createElement('div');
-  rootEle.appendChild(curSongWrapper);
-
   //show total time (for long we have been playing audio)
   totalTimeWrapper = document.createElement('div');
   rootEle.appendChild(totalTimeWrapper);
@@ -36,6 +32,10 @@ const init = (onVolumeChange, onPause) => {
     </React.Fragment>,
     mediaControls,
   );
+
+  //show currently playing song
+  curSongWrapper = document.createElement('div');
+  rootEle.appendChild(curSongWrapper);
 
   //show spectrogram as canvas
   const canvas = document.createElement('canvas');

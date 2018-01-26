@@ -7,10 +7,10 @@ function CurrentSong({ name, bpm }) {
     if (bpm > 0) {
       jsxTempo = <React.Fragment>, {bpm} bpm</React.Fragment>;
     } else {
-      jsxTempo = 'Tempo could not be recognized.';
+      jsxTempo = ' [Tempo detection failed]';
     }
   } else {
-    jsxTempo = '';
+    jsxTempo = ' [Detecting tempo...]';
   }
 
   return (

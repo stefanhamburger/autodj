@@ -4,7 +4,7 @@ import getViridisColor from '../client/view/viridis.mjs';
 
 const Container = styled.label`
   &:hover > input {
-    display: block;
+    display: inline-block;
   }
 `;
 
@@ -19,12 +19,11 @@ const Button = styled.span`
 
 const Slider = styled.input`
   display: none;
-  transform: rotate(-90deg);
   width: 100px;
   height: 15px;
   position: absolute;
-  margin-left: 74px;
-  margin-top: 40px;
+  margin-left: 0px;
+  margin-top: 3px;
   z-index: 3;
   background-color: rgba(240, 240, 240, 0.8);
 `;

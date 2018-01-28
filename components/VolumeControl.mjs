@@ -8,10 +8,12 @@ const Container = styled.label`
   }
 `;
 
-const Button = styled.span`
+const Button = styled.button`
   display: inline-block;
   width: 24px;
   height: 24px;
+  padding: 0;
+  background-color: #ddb6e6;
   border: 1px solid ${getViridisColor(0)};
   border-radius: 5px;
   text-align: center;

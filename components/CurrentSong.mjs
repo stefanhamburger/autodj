@@ -14,7 +14,7 @@ function CurrentSong({ name, bpm }) {
   return (
     <React.Fragment>
       <b style={{ marginRight: '5px' }}>Currently playing:</b>
-      {name.replace(/ - /g, ' – ')}
+      {name !== '' ? name.replace(/ - /g, ' – ') : 'Loading...'}
       {jsxTempo}
     </React.Fragment>
   );

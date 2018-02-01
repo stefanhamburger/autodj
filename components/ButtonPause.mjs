@@ -2,7 +2,8 @@ import React from 'react';
 
 function ButtonPause({ isPaused, pauseCallback }) {
   return (
-    <button onMouseDown={pauseCallback}>{ isPaused ? '▶️' : '⏸'}</button>
+    //alternatively, we could use ▶/⏸ but they have a box around them
+    <button onMouseDown={pauseCallback}>{ isPaused ? '►' : '❚❚'}</button>
   );
 }
 

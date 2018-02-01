@@ -57,8 +57,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const onPause = () => {
       if (audioEle.paused) {
         audioEle.play();
+        view.setIsPaused(false);
       } else {
         audioEle.pause();
+        view.setIsPaused(true);
       }
     };
     document.addEventListener('keydown', (event) => {

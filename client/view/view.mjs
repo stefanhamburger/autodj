@@ -10,7 +10,7 @@ const state = {};
 
 const rerender = () => {
   ReactDOM.render(
-    <PlaybackContainer totalTime={state.totalTime} onPause={state.onPause} onVolumeChange={state.onVolumeChange} songName={state.songName} bpm={state.bpm} />,
+    <PlaybackContainer state={state} />,
     container,
   );
 };
@@ -21,6 +21,9 @@ const init = (onVolumeChange, onPause) => {
 
   state.onVolumeChange = onVolumeChange;
   state.onPause = onPause;
+  state.isPaused = false;
+  state.songName = '';
+  state.bpm = undefined;
 
   container = document.createElement('div');
   rootEle.appendChild(container);
@@ -41,6 +44,11 @@ const setSong = (songName = curSongName) => {
   curSongName = songName;
 };
 
+const setIsPaused = (isPaused) => {
+  state.isPaused = isPaused;
+  rerender();
+};
+
 const updateTime = (newTime) => {
   state.totalTime = newTime;
   rerender();
@@ -49,5 +57,6 @@ const updateTime = (newTime) => {
 export default {
   init,
   setSong,
+  setIsPaused,
   updateTime,
 };

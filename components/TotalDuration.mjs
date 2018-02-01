@@ -28,8 +28,6 @@ function TotalDuration({ time }) {
   //Create DOM
   return (
     <React.Fragment>
-      <b>Total time:</b>
-      {' '}
       {(hours !== 0) ? `${hours}:` : ''}
       {(hours === 0) ? String(minutes) : String(minutes).padStart(2, '0')}
       :

@@ -1,8 +1,8 @@
 import React from 'react';
 
-function ButtonPause({ pauseCallback }) {
+function ButtonPause({ isPaused, pauseCallback }) {
   return (
-    <button onMouseDown={pauseCallback}>Pause/Continue</button>
+    <button onMouseDown={pauseCallback}>{ isPaused ? '▶️' : '⏸'}</button>
   );
 }
 

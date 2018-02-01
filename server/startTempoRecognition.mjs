@@ -1,10 +1,16 @@
 import Worker from 'tiny-worker';
 import * as audioManager from './audioManager.mjs';
 
-const SONG_MIN_LENGTH = 120 * 48000;
-const SONG_START_LENGTH = 60 * 48000;
-const SONG_END_LENGTH = 60 * 48000;
+/** Sampling rate of the waveform data */
+const SAMPLE_RATE = 48000;
+/** How many samples a song must at least have before we detect beginning and end separately. Must be ≥60 seconds */
+const SONG_MIN_LENGTH = 120 * SAMPLE_RATE;
+/** How many samples we use from the beginning of the song to detect tempo */
+const SONG_START_LENGTH = 60 * SAMPLE_RATE;
+/** How many samples we use from the end of the song to detect tempo */
+const SONG_END_LENGTH = 60 * SAMPLE_RATE;
 
+/** Creates a worker to detect the tempo of the given waveform data, and calls the callback function with the bpm */
 function createWorker(waveformArray, callback) {
   const worker = new Worker('server/worker/tempoRecognition.mjs');
 
@@ -17,11 +23,11 @@ function createWorker(waveformArray, callback) {
   //send number of samples
   worker.postMessage(waveformArray.length);
 
-  //to prevent Node from blocking and using too much RAM, send waveform in blocks of 48k samples
+  //to prevent Node from blocking and using too much RAM, send waveform in blocks of 48k samples (1 second)
   let pos = 0;
   const sendNextSamples = () => {
-    worker.postMessage(Array.from(waveformArray.slice(pos, pos + 48000)));
-    pos += 48000;
+    worker.postMessage(Array.from(waveformArray.slice(pos, pos + 1 * SAMPLE_RATE)));
+    pos += 1 * SAMPLE_RATE;
     if (pos < waveformArray.length) {
       setTimeout(sendNextSamples);
     }
@@ -29,6 +35,7 @@ function createWorker(waveformArray, callback) {
   sendNextSamples();
 }
 
+/** Does a tempo detection on the given song and emits the bpm via session events */
 export default async function startTempoRecognition(session, song) {
   const waveformBuffer = await audioManager.getWaveform(song.songRef);
   const waveformArray = new Float32Array(waveformBuffer);

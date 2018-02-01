@@ -11,6 +11,9 @@ function PlaybackContainer({
   songName = '',
   bpm = undefined,
 }) {
+  //show total time (for long we have been playing audio)
+  //show controls for media playback
+  //show currently playing song
   return (
     <React.Fragment>
       <div>

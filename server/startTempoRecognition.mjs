@@ -10,6 +10,7 @@ const SONG_START_LENGTH = 60 * SAMPLE_RATE;
 /** How many samples we use from the end of the song to detect tempo */
 const SONG_END_LENGTH = 60 * SAMPLE_RATE;
 
+
 /** Creates a worker to detect the tempo of the given waveform data, and calls the callback function with the bpm */
 function createWorker(waveformArray, callback) {
   const worker = new Worker('server/worker/tempoRecognition.mjs');
@@ -35,8 +36,9 @@ function createWorker(waveformArray, callback) {
   sendNextSamples();
 }
 
+
 /** Does a tempo detection on the given song and emits the bpm via session events */
-export default async function startTempoRecognition(session, song) {
+export default async function startTempoRecognition(session, song, isFirstSong = false) {
   const waveformBuffer = await audioManager.getWaveform(song.songRef);
   const waveformArray = new Float32Array(waveformBuffer);
 
@@ -44,21 +46,24 @@ export default async function startTempoRecognition(session, song) {
   if (waveformArray.length < SONG_MIN_LENGTH) {
     createWorker(waveformArray, (bpm) => {
       console.log(`Song ${song.songRef.name} starts and ends with ${bpm} bpm`);
-      session.emitEvent({ type: 'TEMPO_INFO', songName: song.songRef.name, bpm });
+      session.emitEvent({ type: 'TEMPO_INFO_START', songName: song.songRef.name, bpm });
+      session.emitEvent({ type: 'TEMPO_INFO_END', songName: song.songRef.name, bpm });
     });
   } else { //otherwise, we only detect the beginning and end of the song
-    //tempo at beginning of song
-    //TODO: if this is the first song we are playing, tempo at beginning doesn't matter
-    createWorker(waveformArray.slice(0, SONG_START_LENGTH), (bpm) => {
-      console.log(`Song ${song.songRef.name} starts with ${bpm} bpm`);
-      session.emitEvent({ type: 'TEMPO_INFO', songName: song.songRef.name, bpm });
-    });
+    //if this is the first song we are playing, tempo at beginning doesn't matter
+    if (!isFirstSong) {
+      //tempo at beginning of song
+      createWorker(waveformArray.slice(0, SONG_START_LENGTH), (bpm) => {
+        console.log(`Song ${song.songRef.name} starts with ${bpm} bpm`);
+        session.emitEvent({ type: 'TEMPO_INFO_START', songName: song.songRef.name, bpm });
+      });
+    }
 
     //tempo at end of song
     //TODO: to avoid overloading the server, maybe this worker should only be started after the one above is done
     createWorker(waveformArray.slice(waveformArray.length - SONG_END_LENGTH), (bpm) => {
       console.log(`Song ${song.songRef.name} ends with ${bpm} bpm`);
-      //session.emitEvent({ type: 'TEMPO_INFO', songName: song.songRef.name, bpm });
+      session.emitEvent({ type: 'TEMPO_INFO_END', songName: song.songRef.name, bpm });
     });
   }
 }

@@ -1,20 +1,20 @@
-const upcomingSongs = [];
+const songPlaylist = [];
 let setSong;
 
 const init = (setSongIn) => {
   setSong = setSongIn;
 };
 
-const processEvents = events => events.forEach((event) => {
+const processEvents = events => events && events.forEach((event) => {
   switch (event.type) {
     case 'SONG_START':
-      upcomingSongs.push({ id: event.id, name: event.songName, time: event.time });
+      songPlaylist.push({ id: event.id, name: event.songName, time: event.time });
       break;
     case 'TEMPO_INFO_START': {
       const { id } = event;
       let { bpm } = event;
       if (bpm === undefined) bpm = 0;
-      upcomingSongs.filter(song => song.id === id).forEach((song) => {
+      songPlaylist.filter(song => song.id === id).forEach((song) => {
         song.bpmStart = bpm;
         setSong();
       });
@@ -24,7 +24,7 @@ const processEvents = events => events.forEach((event) => {
       const { id } = event;
       let { bpm } = event;
       if (bpm === undefined) bpm = 0;
-      upcomingSongs.filter(song => song.id === id).forEach((song) => {
+      songPlaylist.filter(song => song.id === id).forEach((song) => {
         song.bpmEnd = bpm;
         setSong();
       });
@@ -36,16 +36,21 @@ const processEvents = events => events.forEach((event) => {
 });
 
 const heartbeat = (time) => {
-  for (let i = upcomingSongs.length - 1; i >= 0; i -= 1) {
-    const song = upcomingSongs[i];
+  for (let i = songPlaylist.length - 1; i >= 0; i -= 1) {
+    const song = songPlaylist[i];
     if (song.time <= time) {
       setSong(song.name);
-      upcomingSongs.splice(i, 1);
+      //songPlaylist.splice(i, 1);
+      break;
     }
   }
 };
 
-const getTempo = songName => upcomingSongs.filter(song => song.name === songName)[0].bpmStart;
+const getTempo = (songName) => {
+  const requestedSong = songPlaylist.filter(song => song.name === songName)[0];
+  if (!requestedSong) throw new Error(`Could not find song ${songName}.`);
+  return { bpmStart: requestedSong.bpmStart, bpmEnd: requestedSong.bpmEnd };
+};
 
 export default {
   init,

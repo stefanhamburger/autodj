@@ -16,7 +16,7 @@ function PlaybackContainer({ state }) {
         <VolumeControl volumeChangeCallback={state.onVolumeChange} />
       </div>
       <div>
-        <CurrentSong name={state.songName} bpm={state.bpm} />
+        <CurrentSong name={state.songName} bpmStart={state.bpmStart} bpmEnd={state.bpmEnd} />
       </div>
     </React.Fragment>
   );

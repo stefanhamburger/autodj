@@ -39,7 +39,9 @@ const init = (onVolumeChange, onPause) => {
 let curSongName;
 const setSong = (songName = curSongName) => {
   state.songName = songName;
-  state.bpm = model.getTempo(songName);
+  const tempoResult = model.getTempo(songName);
+  state.bpmStart = tempoResult.bpmStart;
+  state.bpmEnd = tempoResult.bpmEnd;
   rerender();
   curSongName = songName;
 };

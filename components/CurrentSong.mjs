@@ -1,14 +1,14 @@
 import React from 'react';
 
-function CurrentSong({ name, bpm }) {
+function CurrentSong({ name, bpmStart, bpmEnd }) {
   //Generate JSX from bpm value
   let jsxTempo;
-  if (bpm === undefined) {
+  if (bpmStart === undefined && bpmEnd === undefined) {
     jsxTempo = ' [Detecting tempo...]';
-  } else if (bpm === 0) {
+  } else if ((bpmStart === 0 && bpmEnd === 0) || (bpmStart === 0 && bpmEnd === undefined) || (bpmStart === undefined && bpmEnd === 0)) {
     jsxTempo = ' [Tempo detection failed]';
   } else {
-    jsxTempo = <React.Fragment> [{bpm} bpm]</React.Fragment>;
+    jsxTempo = <React.Fragment> [{bpmStart === 0 ? '???' : bpmStart} bpm → {bpmEnd === 0 ? '???' : bpmEnd} bpm]</React.Fragment>;
   }
 
   return (

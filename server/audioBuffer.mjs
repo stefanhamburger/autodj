@@ -39,7 +39,7 @@ const addFileToStream = (session) => {
       songWrapper.totalLength = await audioManager.getDuration(songWrapper.songRef);
 
       //do tempo recognition
-      startTempoRecognition(session, songWrapper);
+      startTempoRecognition(session, songWrapper, true);
 
       resolve();
     });
@@ -95,7 +95,7 @@ const addToBuffer = async (session) => {
 
     if (session.curSongPosition >= curSong.totalLength) {
       //delete previous song from memory
-      audioManager.removeReference(curSong.songRef, { sid: session.sid, index: session.curSong });
+      audioManager.removeReference(curSong.songRef, { sid: session.sid, id: session.curSong });
       //start encoding next song
       session.curSong += 1;
       session.curSongPosition = 0;
@@ -125,7 +125,7 @@ export const init = (session) => {
     //remove audio buffer from memory
     for (let i = session.curSong; i < session.songs.length; i += 1) {
       try {
-        audioManager.removeReference(session.songs[i].songRef, { sid: session.sid, index: i });
+        audioManager.removeReference(session.songs[i].songRef, { sid: session.sid, id: session.songs[i].id });
       } finally {
         //ignore error
       }

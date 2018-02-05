@@ -58,7 +58,7 @@ const addFileToStream = (session) => {
       songWrapper.offset = 0;//the offset into the song at which to start mixing, e.g. to skip silence at the beginning
       session.emitEvent({
         type: 'SONG_START',
-        id: index,
+        id,
         songName: songWrapper.songRef.name,
         time: startTime / 48000,
       });

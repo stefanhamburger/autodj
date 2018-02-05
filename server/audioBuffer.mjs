@@ -18,9 +18,10 @@ const addFileToStream = (session) => {
   const files = fileManager.getFiles(session.collection);
 
   const randomFile = files[Math.floor(Math.random() * files.length)];
-  const songWrapper = { songRef: randomFile };
+  const id = session.songs.length;
+  const songWrapper = { id, songRef: randomFile };
   session.songs.push(songWrapper);
-  audioManager.addReference(randomFile, { sid: session.sid, index: (session.songs.length - 1) });
+  audioManager.addReference(randomFile, { sid: session.sid, id });
   console.log(`[${session.sid}] Adding to playlist: ${randomFile.name}...`);
 
   //If this is the first song in the stream, start playing immediately without worrying about mixing
@@ -28,7 +29,12 @@ const addFileToStream = (session) => {
     songWrapper.startTime = 0;
     songWrapper.offset = 0;
     songWrapper.totalLength = 30 * 48000;//we assume the song is at least 30 seconds long, this will be overwritten as soon as we have the correct duration
-    session.emitEvent({ type: 'SONG_START', songName: songWrapper.songRef.name, time: 0 });
+    session.emitEvent({
+      type: 'SONG_START',
+      id,
+      songName: songWrapper.songRef.name,
+      time: 0,
+    });
     songWrapper.ready = new Promise(async (resolve) => {
       songWrapper.totalLength = await audioManager.getDuration(songWrapper.songRef);
 
@@ -50,7 +56,12 @@ const addFileToStream = (session) => {
         : prevSongWrapper.startTime + prevSongWrapper.totalLength;
       songWrapper.startTime = startTime;//the time in samples at which to start adding this song to the stream
       songWrapper.offset = 0;//the offset into the song at which to start mixing, e.g. to skip silence at the beginning
-      session.emitEvent({ type: 'SONG_START', songName: songWrapper.songRef.name, time: startTime / 48000 });
+      session.emitEvent({
+        type: 'SONG_START',
+        id: index,
+        songName: songWrapper.songRef.name,
+        time: startTime / 48000,
+      });
       songWrapper.totalLength = await audioManager.getDuration(songWrapper.songRef);//how long we want to play this song, e.g. to skip the ending
 
       //do tempo recognition

@@ -13,10 +13,10 @@ const audioWaveforms = {};
  * @param {*} song The song to use
  * @param {*} referenceName How to remember the reference: by session id and song index
  */
-export const addReference = async (song, { sid, index }) => {
+export const addReference = async (song, { sid, id }) => {
   audioWaveforms[song.path] = {
     buffer: decodeAudio(song.path),
-    references: [`${sid}#${index}`],
+    references: [`${sid}#${id}`],
   };
 };
 
@@ -37,11 +37,11 @@ export const getDuration = async song => (await audioWaveforms[song.path].buffer
  * @param {*} song The song to use
  * @param {*} referenceName How the reference is remembered: session id and song index
  */
-export const removeReference = (song, { sid, index }) => {
+export const removeReference = (song, { sid, id }) => {
   const waveformObj = audioWaveforms[song.path];
   if (!waveformObj) throw new Error('song not found in memeory');
   //Remove reference
-  const sessionReference = waveformObj.references.findIndex(ref => ref === `${sid}#${index}`);
+  const sessionReference = waveformObj.references.findIndex(ref => ref === `${sid}#${id}`);
   if (sessionReference === -1) throw new Error('session reference not found in song');
   waveformObj.references.splice(sessionReference, 1);
 

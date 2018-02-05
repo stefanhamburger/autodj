@@ -1,5 +1,4 @@
 const upcomingSongs = [];
-const tempoInfo = {};
 let setSong;
 
 const init = (setSongIn) => {
@@ -9,24 +8,26 @@ const init = (setSongIn) => {
 const processEvents = events => events.forEach((event) => {
   switch (event.type) {
     case 'SONG_START':
-      upcomingSongs.push({ name: event.songName, time: event.time });
+      upcomingSongs.push({ id: event.id, name: event.songName, time: event.time });
       break;
     case 'TEMPO_INFO_START': {
+      const { id } = event;
       let { bpm } = event;
-      if (bpm === undefined) {
-        bpm = 0;
-      }
-      tempoInfo[event.songName] = bpm;
-      setSong();
+      if (bpm === undefined) bpm = 0;
+      upcomingSongs.filter(song => song.id === id).forEach((song) => {
+        song.bpmStart = bpm;
+        setSong();
+      });
       break;
     }
     case 'TEMPO_INFO_END': {
+      const { id } = event;
       let { bpm } = event;
-      if (bpm === undefined) {
-        bpm = 0;
-      }
-      //tempoInfo[event.songName] = bpm;//TODO
-      //setSong();
+      if (bpm === undefined) bpm = 0;
+      upcomingSongs.filter(song => song.id === id).forEach((song) => {
+        song.bpmEnd = bpm;
+        setSong();
+      });
       break;
     }
     default:
@@ -44,7 +45,7 @@ const heartbeat = (time) => {
   }
 };
 
-const getTempo = songName => tempoInfo[songName];
+const getTempo = songName => upcomingSongs.filter(song => song.name === songName)[0].bpmStart;
 
 export default {
   init,

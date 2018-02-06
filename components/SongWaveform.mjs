@@ -1,15 +1,17 @@
 import React from 'react';
+import getViridisColor from '../client/view/viridis.mjs';
 
 /** Canvas element dimensions. Width must match THUMBNAIL_WIDTH in server/audioManager.mjs */
 const CANVAS_WIDTH = 600;
 const CANVAS_HEIGHT = 40;
 
 /** Colors for thumbnail */
-const COLOR_BACKGROUND = '#ff0000';
-const COLOR_FOREGROUND = 'rgba(0, 0, 0, 0.7)';
-const COLOR_FOREGROUND_PLAYED = 'rgba(0, 200, 0, 0.7)';
-const COLOR_TRACK_LINE = '#ffffff';
-const COLOR_EDGE = '#ffa500';
+const COLOR_BACKGROUND = '#000';
+const COLOR_BACKGROUND_EDGE = '#700';//getViridisColor(0.0);
+const COLOR_FOREGROUND = getViridisColor(0.4).replace(/^rgb\((.+)\)$/, 'rgba($1,0.6)');
+const COLOR_FOREGROUND_PLAYED = getViridisColor(1.0).replace(/^rgb\((.+)\)$/, 'rgba($1,0.6)');
+console.log(COLOR_FOREGROUND_PLAYED);
+const COLOR_TRACK_LINE = '#fff';
 
 class SongWaveform extends React.Component {
   componentDidMount() {
@@ -28,7 +30,7 @@ class SongWaveform extends React.Component {
 
     //fill first and last minute
     if (this.props.duration !== 0) {
-      ctx.fillStyle = COLOR_EDGE;
+      ctx.fillStyle = COLOR_BACKGROUND_EDGE;
       const minuteWidth = Math.round(CANVAS_WIDTH * 60 * 48000 / this.props.duration);
       if (this.props.bpmStart !== undefined && this.props.bpmStart !== 0) {
         ctx.fillRect(0, 0, minuteWidth, CANVAS_HEIGHT);

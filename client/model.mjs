@@ -10,6 +10,14 @@ const processEvents = events => events && events.forEach((event) => {
     case 'SONG_START':
       songPlaylist.push({ id: event.id, name: event.songName, time: event.time });
       break;
+    case 'SONG_DURATION': {
+      const { id, duration } = event;
+      songPlaylist.filter(song => song.id === id).forEach((song) => {
+        song.duration = duration;
+        setSong();
+      });
+      break;
+    }
     case 'TEMPO_INFO_START': {
       const { id } = event;
       let { bpm } = event;
@@ -52,9 +60,19 @@ const getTempo = (songName) => {
   return { bpmStart: requestedSong.bpmStart, bpmEnd: requestedSong.bpmEnd };
 };
 
+const getSongPosition = (songName) => {
+  const requestedSong = songPlaylist.filter(song => song.name === songName)[0];
+  if (!requestedSong) throw new Error(`Could not find song ${songName}.`);
+
+  const duration = requestedSong.duration !== undefined ? requestedSong.duration : 0;
+  const start = requestedSong.time;
+  return { duration, start };
+};
+
 export default {
   init,
   processEvents,
   heartbeat,
   getTempo,
+  getSongPosition,
 };

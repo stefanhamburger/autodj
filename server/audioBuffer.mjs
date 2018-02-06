@@ -37,6 +37,11 @@ const addFileToStream = (session) => {
     });
     songWrapper.ready = new Promise(async (resolve) => {
       songWrapper.totalLength = await audioManager.getDuration(songWrapper.songRef);
+      session.emitEvent({
+        type: 'SONG_DURATION',
+        id,
+        duration: songWrapper.totalLength,
+      });
 
       //do tempo recognition
       startTempoRecognition(session, songWrapper, true);
@@ -63,6 +68,11 @@ const addFileToStream = (session) => {
         time: startTime / 48000,
       });
       songWrapper.totalLength = await audioManager.getDuration(songWrapper.songRef);//how long we want to play this song, e.g. to skip the ending
+      session.emitEvent({
+        type: 'SONG_DURATION',
+        id,
+        duration: songWrapper.totalLength,
+      });
 
       //do tempo recognition
       startTempoRecognition(session, songWrapper);

@@ -24,6 +24,9 @@ const init = (onVolumeChange, onPause) => {
   state.isPaused = false;
   state.songName = '';
   state.bpm = undefined;
+  state.songStart = 0;
+  state.songElapsed = 0;
+  state.songDuration = 0;
 
   container = document.createElement('div');
   rootEle.appendChild(container);
@@ -39,11 +42,18 @@ const init = (onVolumeChange, onPause) => {
 let curSongName;
 const setSong = (songName = curSongName) => {
   state.songName = songName;
+  curSongName = songName;
+
   const tempoResult = model.getTempo(songName);
   state.bpmStart = tempoResult.bpmStart;
   state.bpmEnd = tempoResult.bpmEnd;
+
+  const positionResult = model.getSongPosition(songName);
+  state.songDuration = positionResult.duration;
+  state.songStart = positionResult.start;
+  state.songElapsed = state.totalTime * 48000 - state.songStart;
+
   rerender();
-  curSongName = songName;
 };
 
 const setIsPaused = (isPaused) => {
@@ -53,6 +63,7 @@ const setIsPaused = (isPaused) => {
 
 const updateTime = (newTime) => {
   state.totalTime = newTime;
+  state.songElapsed = state.totalTime * 48000 - state.songStart;
   rerender();
 };
 

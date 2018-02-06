@@ -1,6 +1,19 @@
 import React from 'react';
 
-function CurrentSong({ name, bpmStart, bpmEnd }) {
+const timeToString = (timeIn) => {
+  const time = Math.round(timeIn / 48000);//samples to seconds
+  const seconds = time % 60;
+  const minutes = Math.floor(time / 60);
+  return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+};
+
+function CurrentSong({
+  name,
+  bpmStart,
+  bpmEnd,
+  duration,
+  elapsed,
+}) {
   //Generate JSX from bpm value
   let jsxTempo;
   if (bpmStart === undefined && bpmEnd === undefined) {
@@ -14,6 +27,7 @@ function CurrentSong({ name, bpmStart, bpmEnd }) {
   return (
     <React.Fragment>
       <b style={{ marginRight: '5px' }}>Currently playing:</b>
+      {timeToString(elapsed)} / {timeToString(duration)} –&nbsp;
       {name !== '' ? name.replace(/ - /g, ' – ') : 'Loading...'}
       {jsxTempo}
     </React.Fragment>

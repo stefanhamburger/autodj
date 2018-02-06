@@ -37,6 +37,10 @@ function createWorker(waveformArray, callback) {
 }
 
 
+/** Waits for the given amount of milliseconds, without blocking the server process */
+const sleep = time => new Promise(resolve => setTimeout(resolve, time));
+
+
 /** Does a tempo detection on the given song and emits the bpm via session events */
 export default async function startTempoRecognition(session, song, isFirstSong = false) {
   const waveformBuffer = await audioManager.getWaveform(song.songRef);
@@ -57,10 +61,12 @@ export default async function startTempoRecognition(session, song, isFirstSong =
         console.log(`[${session.sid}] Song ${song.songRef.name} starts with ${bpm} bpm`);
         session.emitEvent({ type: 'TEMPO_INFO_START', id: song.id, bpm });
       });
+
+      //Wait 5 seconds before detection tempo at end to avoid overloading the server
+      await sleep(5000);
     }
 
     //tempo at end of song
-    //TODO: to avoid overloading the server, maybe this worker should only be started after the worker above is done
     createWorker(waveformArray.slice(waveformArray.length - SONG_END_LENGTH), (bpm) => {
       console.log(`[${session.sid}] Song ${song.songRef.name} ends with ${bpm} bpm`);
       session.emitEvent({ type: 'TEMPO_INFO_END', id: song.id, bpm });

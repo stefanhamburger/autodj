@@ -7,6 +7,16 @@ const timeToString = (timeIn) => {
   return `${minutes}:${seconds.toString().padStart(2, '0')}`;
 };
 
+const tempoToString = (bpm) => {
+  if (bpm === undefined) {
+    return '...';
+  } else if (bpm === 0) {
+    return '???';
+  } else {
+    return bpm.toString();
+  }
+}
+
 function CurrentSong({
   name,
   bpmStart,
@@ -21,7 +31,7 @@ function CurrentSong({
   } else if ((bpmStart === 0 && bpmEnd === 0) || (bpmStart === 0 && bpmEnd === undefined) || (bpmStart === undefined && bpmEnd === 0)) {
     jsxTempo = ' [Tempo detection failed]';
   } else {
-    jsxTempo = <React.Fragment> [{bpmStart === 0 ? '???' : bpmStart} bpm → {bpmEnd === 0 ? '???' : bpmEnd} bpm]</React.Fragment>;
+    jsxTempo = <React.Fragment> [{tempoToString(bpmStart)} bpm → {tempoToString(bpmEnd)} bpm]</React.Fragment>;
   }
 
   return (

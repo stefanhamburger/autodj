@@ -107,8 +107,8 @@ document.addEventListener('DOMContentLoaded', () => {
     //Create view
     view.init(onVolumeChange, onPause);
 
-    //Update model and view whenver current time changes
-    //This cannot be done during requestAnimationFrame() because that requires user to have tab open
+    //Update model and view
+    //The onprogress handler is called once per second, while requestAnimationFrame() is called up to 60 HZ as long as tab is open
     const updateModelView = () => {
       model.heartbeat(audioEle.currentTime);
       view.updateTime(audioEle.currentTime);
@@ -124,6 +124,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const fftManagerLo = fftDataManager(analyserNodeLo.frequencyBinCount);
     const redrawSpectrogram = () => {
       requestAnimationFrame(redrawSpectrogram);
+
+      updateModelView();
 
       const bufferHi = fftManagerHi.getNewBuffer(audioEle.currentTime * 44100);
       analyserNodeHi.getByteFrequencyData(bufferHi);//TODO: need to use getFloatFrequencyData

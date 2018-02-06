@@ -28,10 +28,13 @@ function TotalDuration({ time }) {
   //Create DOM
   return (
     <React.Fragment>
-      {(hours !== 0) ? `${hours}:` : ''}
-      {(hours === 0) ? String(minutes) : String(minutes).padStart(2, '0')}
-      :
-      {String(seconds).padStart(2, '0')}
+      <b style={{ display: 'inline-block', marginRight: '5px' }}>Total time:</b>
+      <span>
+        {(hours !== 0) ? `${hours}:` : ''}
+        {(hours === 0) ? String(minutes) : String(minutes).padStart(2, '0')}
+        :
+        {String(seconds).padStart(2, '0')}
+      </span>
     </React.Fragment>
   );
   /*

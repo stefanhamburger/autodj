@@ -1,4 +1,5 @@
 import React from 'react';
+import SongWaveform from './SongWaveform.mjs';
 
 const timeToString = (timeIn) => {
   const time = Math.round(timeIn / 48000);//samples to seconds
@@ -40,6 +41,8 @@ function CurrentSong({
       {timeToString(elapsed)} / {timeToString(duration)} –&nbsp;
       {name !== '' ? name.replace(/ - /g, ' – ') : 'Loading...'}
       {jsxTempo}
+      <br />
+      <SongWaveform bpmStart={bpmStart} bpmEnd={bpmEnd} duration={duration} elapsed={elapsed} />
     </React.Fragment>
   );
 }

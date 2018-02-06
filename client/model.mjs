@@ -2,6 +2,7 @@ const songPlaylist = [];
 let setSong;
 
 const init = (setSongIn) => {
+  //reference to view.setSong()
   setSong = setSongIn;
 };
 

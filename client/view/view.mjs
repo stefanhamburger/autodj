@@ -54,7 +54,7 @@ const setSong = (songName = curSongName) => {
     const positionResult = model.getSongPosition(songName);
     state.songDuration = positionResult.duration;
     state.songStart = positionResult.start;
-    state.songElapsed = state.totalTime * 48000 - state.songStart;
+    state.songElapsed = (state.totalTime - state.songStart) * 48000;
 
     const thumbnailResult = model.getThumbnail(songName);
     state.thumbnailMin = thumbnailResult.thumbnailMin;
@@ -71,7 +71,7 @@ const setIsPaused = (isPaused) => {
 
 const updateTime = (newTime) => {
   state.totalTime = newTime;
-  state.songElapsed = state.totalTime * 48000 - state.songStart;
+  state.songElapsed = (state.totalTime - state.songStart) * 48000;
   rerender();
 };
 

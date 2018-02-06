@@ -127,16 +127,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
       updateModelView();
 
-      const bufferHi = fftManagerHi.getNewBuffer(audioEle.currentTime * 44100);
+      const { sampleRate } = audioCtx;
+
+      const bufferHi = fftManagerHi.getNewBuffer(audioEle.currentTime * sampleRate);
       analyserNodeHi.getByteFrequencyData(bufferHi);//TODO: need to use getFloatFrequencyData
 
-      const bufferLo = fftManagerLo.getNewBuffer(audioEle.currentTime * 44100);
+      const bufferLo = fftManagerLo.getNewBuffer(audioEle.currentTime * sampleRate);
       analyserNodeLo.getByteFrequencyData(bufferLo);
 
-      spectrogram.addData(fftManagerHi, binSizeHi, fftManagerLo, binSizeLo, audioEle.currentTime * 44100);
+      spectrogram.addData(fftManagerHi, binSizeHi, fftManagerLo, binSizeLo, audioEle.currentTime * sampleRate);
 
-      fftManagerHi.garbageCollection(audioEle.currentTime * 44100);
-      fftManagerLo.garbageCollection(audioEle.currentTime * 44100);
+      fftManagerHi.garbageCollection(audioEle.currentTime * sampleRate);
+      fftManagerLo.garbageCollection(audioEle.currentTime * sampleRate);
     };
     requestAnimationFrame(redrawSpectrogram);
   });

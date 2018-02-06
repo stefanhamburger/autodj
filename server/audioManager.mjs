@@ -96,7 +96,7 @@ export const createThumbnail = async (session, song) => {
     out.set(outMax, THUMBNAIL_WIDTH);
     audioWaveforms[song.songRef.path].waveformThumbnail = out;
 
-    console.log(`[${session.sid}] Generated waveform of ${song.songRef.name} in ${new Date() - startTime}ms`);
+    console.log(`[${session.sid}] Generated thumbnail of ${song.songRef.name} in ${new Date() - startTime}ms`);
   }
 
   //Notify client that waveform data is ready

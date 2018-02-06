@@ -30,7 +30,7 @@ class SongWaveform extends React.Component {
 
     //draw waveform
     if (this.props.thumbnailMin !== undefined && this.props.thumbnailMax !== undefined) {
-      ctx.fillStyle = 'black';
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
       for (let i = 0; i < CANVAS_WIDTH; i += 1) {
         //need to lerp from [-1, 1] to [0, 40]
         const minValue = (this.props.thumbnailMin[i] + 1) / 2 * CANVAS_HEIGHT;

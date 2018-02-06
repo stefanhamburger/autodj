@@ -73,7 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const setSong = (songName) => {
       view.setSong(songName);
     };
-    model.init(setSong);
+    model.init(setSong, sid);
 
     //Set up Web Audio API to create volume slider and generate FFT data
     const audioCtx = new AudioContext({

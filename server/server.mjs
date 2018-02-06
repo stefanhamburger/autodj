@@ -3,6 +3,7 @@
 import express from 'express';
 import fs from 'fs';
 import * as audioBuffer from './audioBuffer.mjs';
+import * as audioManager from './audioManager.mjs';
 import * as sessions from './sessions.mjs';
 import { get as getSettings } from './settings.mjs';
 
@@ -10,6 +11,7 @@ const app = express();
 
 //all files from the public folder should be sent as root on the webserver
 app.use(express.static('public'));
+
 
 //main HTML
 app.get('/', (req, res) => {
@@ -19,7 +21,8 @@ app.get('/', (req, res) => {
   res.send(output);
 });
 
-//create a new audio stream
+
+/** Create a new audio stream */
 app.get('/init', (req, res) => {
   const { sid, obj: session } = sessions.newSession();
   let numChannels = Number(req.query.numChannels);
@@ -31,6 +34,8 @@ app.get('/init', (req, res) => {
   audioBuffer.init(session);
 });
 
+
+/** Send a part of the audio buffer to MSE */
 app.get('/part', (req, res) => {
   const session = sessions.getSession(req.query.sid);
   if (session && req.query.id && req.query.id.match(/[0-9]+/)) {
@@ -55,6 +60,18 @@ app.get('/part', (req, res) => {
     res.status(404).send('Session not found');
   }
 });
+
+
+/** Send thumbnail of the waveform data */
+app.get('/thumbnail', (req, res) => {
+  const { sid, song } = req.query;
+  try {
+    res.send(Buffer.from(audioManager.getThumbnail(sid, song).buffer));
+  } catch (error) {
+    res.status(404).end();
+  }
+});
+
 
 export default function () {
   //Only accept connections from localhost on port 3000

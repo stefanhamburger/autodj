@@ -24,6 +24,8 @@ function CurrentSong({
   bpmEnd,
   duration,
   elapsed,
+  thumbnailMin,
+  thumbnailMax,
 }) {
   //Generate JSX from bpm value
   let jsxTempo;
@@ -44,7 +46,14 @@ function CurrentSong({
       {name !== '' ? name.replace(/ - /g, ' – ') : 'Loading...'}
       {jsxTempo}
       <br />
-      <SongWaveform bpmStart={bpmStart} bpmEnd={bpmEnd} duration={duration} elapsed={elapsed} />
+      <SongWaveform
+        bpmStart={bpmStart}
+        bpmEnd={bpmEnd}
+        duration={duration}
+        elapsed={elapsed}
+        thumbnailMin={thumbnailMin}
+        thumbnailMax={thumbnailMax}
+      />
     </React.Fragment>
   );
 }

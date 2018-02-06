@@ -22,6 +22,8 @@ function PlaybackContainer({ state }) {
           bpmEnd={state.bpmEnd}
           elapsed={state.songElapsed}
           duration={state.songDuration}
+          thumbnailMin={state.thumbnailMin}
+          thumbnailMax={state.thumbnailMax}
         />
       </div>
     </React.Fragment>

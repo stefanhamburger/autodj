@@ -27,6 +27,8 @@ const init = (onVolumeChange, onPause) => {
   state.songStart = 0;
   state.songElapsed = 0;
   state.songDuration = 0;
+  state.thumbnailMin = undefined;
+  state.thumbnailMax = undefined;
 
   container = document.createElement('div');
   rootEle.appendChild(container);
@@ -53,6 +55,10 @@ const setSong = (songName = curSongName) => {
     state.songDuration = positionResult.duration;
     state.songStart = positionResult.start;
     state.songElapsed = state.totalTime * 48000 - state.songStart;
+
+    const thumbnailResult = model.getThumbnail(songName);
+    state.thumbnailMin = thumbnailResult.thumbnailMin;
+    state.thumbnailMax = thumbnailResult.thumbnailMax;
 
     rerender();
   }

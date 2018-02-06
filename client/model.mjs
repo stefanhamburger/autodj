@@ -1,12 +1,16 @@
 const songPlaylist = [];
 let setSong;
+let sid;
 
-const init = (setSongIn) => {
+const init = (setSongIn, sidIn) => {
   //reference to view.setSong()
   setSong = setSongIn;
+
+  //session id as fetched in init.js
+  sid = sidIn;
 };
 
-const processEvents = events => events && events.forEach((event) => {
+const processEvents = events => events && events.forEach(async (event) => {
   switch (event.type) {
     case 'SONG_START':
       songPlaylist.push({ id: event.id, name: event.songName, time: event.time });
@@ -35,6 +39,19 @@ const processEvents = events => events && events.forEach((event) => {
       if (bpm === undefined) bpm = 0;
       songPlaylist.filter(song => song.id === id).forEach((song) => {
         song.bpmEnd = bpm;
+        setSong();
+      });
+      break;
+    }
+    case 'THUMBNAIL_READY': {
+      const { id } = event;
+      const thumbnailResult = await fetch(`thumbnail?sid=${sid}&song=${id}`);
+      const thumbnailBuffer = await thumbnailResult.arrayBuffer();
+      const thumbnailMin = new Float32Array(thumbnailBuffer, 0, 600);
+      const thumbnailMax = new Float32Array(thumbnailBuffer, 600 * 4);
+      songPlaylist.filter(song => song.id === id).forEach((song) => {
+        song.thumbnailMin = thumbnailMin;
+        song.thumbnailMax = thumbnailMax;
         setSong();
       });
       break;
@@ -71,10 +88,21 @@ const getSongPosition = (songName) => {
   return { duration, start };
 };
 
+const getThumbnail = (songName) => {
+  const requestedSong = songPlaylist.filter(song => song.name === songName)[0];
+  if (!requestedSong) throw new Error(`Could not find song ${songName}.`);
+
+  return {
+    thumbnailMin: requestedSong.thumbnailMin,
+    thumbnailMax: requestedSong.thumbnailMax,
+  };
+};
+
 export default {
   init,
   processEvents,
   heartbeat,
   getTempo,
   getSongPosition,
+  getThumbnail,
 };

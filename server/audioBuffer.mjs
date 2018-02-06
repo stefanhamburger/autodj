@@ -23,6 +23,7 @@ const addFileToStream = (session) => {
   session.songs.push(songWrapper);
   audioManager.addReference(randomFile, { sid: session.sid, id });
   console.log(`[${session.sid}] Adding to playlist: ${randomFile.name}...`);
+  audioManager.createThumbnail(session, songWrapper);
 
   //If this is the first song in the stream, start playing immediately without worrying about mixing
   if (session.songs.length === 1) {

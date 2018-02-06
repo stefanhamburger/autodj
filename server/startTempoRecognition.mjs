@@ -62,7 +62,7 @@ export default async function startTempoRecognition(session, song, isFirstSong =
         session.emitEvent({ type: 'TEMPO_INFO_START', id: song.id, bpm });
       });
 
-      //Wait 5 seconds before detection tempo at end to avoid overloading the server
+      //Wait 5 seconds before detection tempo at end of song to avoid overloading the server
       await sleep(5000);
     }
 

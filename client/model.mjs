@@ -48,7 +48,6 @@ const heartbeat = (time) => {
     const song = songPlaylist[i];
     if (song.time <= time) {
       setSong(song.name);
-      //songPlaylist.splice(i, 1);
       break;
     }
   }

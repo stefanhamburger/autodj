@@ -45,7 +45,7 @@ const processEvents = events => events && events.forEach(async (event) => {
     }
     case 'THUMBNAIL_READY': {
       const { id } = event;
-      const thumbnailResult = await fetch(`thumbnail?sid=${sid}&song=${id}`);
+      const thumbnailResult = await fetch(`thumbnail?sid=${sid}&song=${id}`, { cache: 'no-store' });
       const thumbnailBuffer = await thumbnailResult.arrayBuffer();
       const thumbnailMin = new Float32Array(thumbnailBuffer, 0, 600);
       const thumbnailMax = new Float32Array(thumbnailBuffer, 600 * 4);

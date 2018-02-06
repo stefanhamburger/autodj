@@ -45,7 +45,7 @@ export default async function startTempoRecognition(session, song, isFirstSong =
   //if song is too short, we detect tempo across the whole song
   if (waveformArray.length < SONG_MIN_LENGTH) {
     createWorker(waveformArray, (bpm) => {
-      console.log(`Song ${song.songRef.name} starts and ends with ${bpm} bpm`);
+      console.log(`[${session.sid}] Song ${song.songRef.name} starts and ends with ${bpm} bpm`);
       session.emitEvent({ type: 'TEMPO_INFO_START', id: song.id, bpm });
       session.emitEvent({ type: 'TEMPO_INFO_END', id: song.id, bpm });
     });
@@ -54,15 +54,15 @@ export default async function startTempoRecognition(session, song, isFirstSong =
     if (!isFirstSong) {
       //tempo at beginning of song
       createWorker(waveformArray.slice(0, SONG_START_LENGTH), (bpm) => {
-        console.log(`Song ${song.songRef.name} starts with ${bpm} bpm`);
+        console.log(`[${session.sid}] Song ${song.songRef.name} starts with ${bpm} bpm`);
         session.emitEvent({ type: 'TEMPO_INFO_START', id: song.id, bpm });
       });
     }
 
     //tempo at end of song
-    //TODO: to avoid overloading the server, maybe this worker should only be started after the one above is done
+    //TODO: to avoid overloading the server, maybe this worker should only be started after the worker above is done
     createWorker(waveformArray.slice(waveformArray.length - SONG_END_LENGTH), (bpm) => {
-      console.log(`Song ${song.songRef.name} ends with ${bpm} bpm`);
+      console.log(`[${session.sid}] Song ${song.songRef.name} ends with ${bpm} bpm`);
       session.emitEvent({ type: 'TEMPO_INFO_END', id: song.id, bpm });
     });
   }

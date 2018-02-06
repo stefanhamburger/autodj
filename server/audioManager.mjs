@@ -14,10 +14,14 @@ const audioWaveforms = {};
  * @param {*} referenceName How to remember the reference: by session id and song index
  */
 export const addReference = async (song, { sid, id }) => {
-  audioWaveforms[song.path] = {
-    buffer: decodeAudio(song.path),
-    references: [`${sid}#${id}`],
-  };
+  if (audioWaveforms[song.path] === undefined) {
+    audioWaveforms[song.path] = {
+      buffer: decodeAudio(song.path),
+      references: [`${sid}#${id}`],
+    };
+  } else {
+    audioWaveforms[song.path].references.push(`${sid}#${id}`);
+  }
 };
 
 /**

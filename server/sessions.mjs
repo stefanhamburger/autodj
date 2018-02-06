@@ -6,7 +6,7 @@ const sessions = {};
  */
 
 /**
- * after how much time a session times out (because we haven't received any more client requests for it)
+ * After how many milliseconds a session times out (because we haven't received any more client requests for it).
  * This will free up resources and kill the FFmpeg process. Set to 15 seconds.
  */
 const SESSION_TIMEOUT = 15000;
@@ -14,7 +14,7 @@ const SESSION_TIMEOUT = 15000;
 const SESSION_ID_LENGTH = 16;
 
 const alphabet = '0123456789abcdefghijklmnopqrstuvwxyz';
-/** generates a new random session id */
+/** Generates a new random session id */
 const generateSID = () => {
   let out = '';
   for (let i = 0; i < SESSION_ID_LENGTH; i += 1) {

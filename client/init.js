@@ -106,10 +106,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     //Create view
     view.init(onVolumeChange, onPause);
-    /*audioEle.addEventListener('progress', () => {
+
+    //Update model and view whenver current time changes
+    //This cannot be done during requestAnimationFrame() because that requires user to have tab open
+    const updateModelView = () => {
       model.heartbeat(audioEle.currentTime);
       view.updateTime(audioEle.currentTime);
-    });*/
+    };
+    audioEle.addEventListener('progress', updateModelView);
+    updateModelView();
 
     //Perform a FFT on the input stream, returns 1024 bins
     //Bin at index i corresponds to frequency i / 2048 * 44100
@@ -119,9 +124,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const fftManagerLo = fftDataManager(analyserNodeLo.frequencyBinCount);
     const redrawSpectrogram = () => {
       requestAnimationFrame(redrawSpectrogram);
-      //TODO: model+view should be updated with setTimeout, otherwise in Chrome e.g. curSong is never updated if user tabbed out
-      model.heartbeat(audioEle.currentTime);
-      view.updateTime(audioEle.currentTime);
 
       const bufferHi = fftManagerHi.getNewBuffer(audioEle.currentTime * 44100);
       analyserNodeHi.getByteFrequencyData(bufferHi);//TODO: need to use getFloatFrequencyData

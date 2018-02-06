@@ -16,7 +16,7 @@ const tempoToString = (bpm) => {
   } else {
     return bpm.toString();
   }
-}
+};
 
 function CurrentSong({
   name,

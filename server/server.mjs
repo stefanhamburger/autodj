@@ -37,6 +37,7 @@ app.get('/part', (req, res) => {
     sessions.lifeSign(session);
     let clientBufferLength = Number(req.get('X-Playback-Position'));
     clientBufferLength = Number.isNaN(clientBufferLength) ? 0 : clientBufferLength;
+    clientBufferLength = session.verifyClientTime(clientBufferLength);
     res.set('Content-Type', 'audio/webm');
 
     //Get metadata

@@ -63,6 +63,23 @@ export const newSession = () => {
     return eventsCopy;
   };
 
+  //Do a sanity check on the client-provided audio playback time, and fixes it if necessary. clientTime is given in seconds
+  //Otherwise, clients can overlad the server by quickly seeking to a later time and forcing the server to process new songs
+  //If the client is running out of buffer and lagging behind (e.g. due to network latency), this function has no effect
+  session.prevTime = new Date() / 1000 - 0;
+  session.verifyClientTime = (clientTime) => {
+    const newDelta = new Date() / 1000 - clientTime;
+    //We allow up to 3 seconds of seeking into the future.
+    //Anything above that gets clipped to how much time has elapsed on the server since the last signal
+    if (session.prevTime - newDelta > 3) {
+      console.error(`[${session.sid}] Caught possible denial of service with elapsed playtime: ${Math.abs(newDelta - session.prevTime)}.`);
+      return new Date() / 1000 - session.prevTime;
+    } else {
+      session.prevTime = newDelta;
+      return clientTime;
+    }
+  };
+
   sessions[sid] = session;
   lifeSign(session);
   console.log(`[${sid}] Starting new session...`);

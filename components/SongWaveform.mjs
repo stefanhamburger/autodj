@@ -12,6 +12,8 @@ class SongWaveform extends React.Component {
   }
   updateCanvas() {
     const ctx = this.canvas.getContext('2d');
+    const position = Math.round((this.props.duration === 0) ? 0 : this.props.elapsed / this.props.duration * CANVAS_WIDTH);
+
     //draw background
     ctx.fillStyle = 'red';
     ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
@@ -30,8 +32,10 @@ class SongWaveform extends React.Component {
 
     //draw waveform
     if (this.props.thumbnailMin !== undefined && this.props.thumbnailMax !== undefined) {
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
       for (let i = 0; i < CANVAS_WIDTH; i += 1) {
+        //grey if this pixel was already played, otherwise black
+        ctx.fillStyle = (i <= position) ? 'rgba(0, 200, 0, 0.7)' : 'rgba(0, 0, 0, 0.7)';
+
         //need to lerp from [-1, 1] to [0, 40]
         const minValue = (this.props.thumbnailMin[i] + 1) / 2 * CANVAS_HEIGHT;
         const maxValue = (this.props.thumbnailMax[i] + 1) / 2 * CANVAS_HEIGHT;
@@ -40,9 +44,8 @@ class SongWaveform extends React.Component {
     }
 
     //draw current position
-    const position = (this.props.duration === 0) ? 0 : this.props.elapsed / this.props.duration;
     ctx.fillStyle = 'white';
-    ctx.fillRect(Math.round(position * CANVAS_WIDTH), 0, 1, CANVAS_HEIGHT);
+    ctx.fillRect(position, 0, 1, CANVAS_HEIGHT);
   }
   render() {
     return (

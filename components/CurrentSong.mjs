@@ -34,7 +34,7 @@ function CurrentSong({
   } else if ((bpmStart === 0 && bpmEnd === 0) || (bpmStart === 0 && bpmEnd === undefined) || (bpmStart === undefined && bpmEnd === 0)) {
     jsxTempo = ' [Tempo detection failed]';
   } else if (bpmStart === undefined) {
-    jsxTempo = <React.Fragment> [Ends at {tempoToString(bpmEnd)} bpm]</React.Fragment>;
+    jsxTempo = <React.Fragment> [Ends with {tempoToString(bpmEnd)} bpm]</React.Fragment>;
   } else {
     jsxTempo = <React.Fragment> [{tempoToString(bpmStart)} bpm → {tempoToString(bpmEnd)} bpm]</React.Fragment>;
   }

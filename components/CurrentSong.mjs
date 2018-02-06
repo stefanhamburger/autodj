@@ -38,7 +38,7 @@ function CurrentSong({
   return (
     <React.Fragment>
       <b style={{ marginRight: '5px' }}>Currently playing:</b>
-      {timeToString(elapsed)} / {timeToString(duration)} –&nbsp;
+      {timeToString(elapsed)} / {timeToString(duration)} |{' '}
       {name !== '' ? name.replace(/ - /g, ' – ') : 'Loading...'}
       {jsxTempo}
       <br />

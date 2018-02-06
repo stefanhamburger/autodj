@@ -55,7 +55,9 @@ const heartbeat = (time) => {
 
 const getTempo = (songName) => {
   const requestedSong = songPlaylist.filter(song => song.name === songName)[0];
-  if (!requestedSong) throw new Error(`Could not find song ${songName}.`);
+  if (!requestedSong) {
+    return { bpmStart: undefined, bpmEnd: undefined };
+  }
   return { bpmStart: requestedSong.bpmStart, bpmEnd: requestedSong.bpmEnd };
 };
 

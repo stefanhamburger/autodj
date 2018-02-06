@@ -1,7 +1,15 @@
 import React from 'react';
 
+/** Canvas element dimensions. Width must match THUMBNAIL_WIDTH in server/audioManager.mjs */
 const CANVAS_WIDTH = 600;
 const CANVAS_HEIGHT = 40;
+
+/** Colors for thumbnail */
+const COLOR_BACKGROUND = '#ff0000';
+const COLOR_FOREGROUND = 'rgba(0, 0, 0, 0.7)';
+const COLOR_FOREGROUND_PLAYED = 'rgba(0, 200, 0, 0.7)';
+const COLOR_TRACK_LINE = '#ffffff';
+const COLOR_EDGE = '#ffa500';
 
 class SongWaveform extends React.Component {
   componentDidMount() {
@@ -15,12 +23,12 @@ class SongWaveform extends React.Component {
     const position = Math.round((this.props.duration === 0) ? 0 : this.props.elapsed / this.props.duration * CANVAS_WIDTH);
 
     //draw background
-    ctx.fillStyle = 'red';
+    ctx.fillStyle = COLOR_BACKGROUND;
     ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
     //fill first and last minute
     if (this.props.duration !== 0) {
-      ctx.fillStyle = 'orange';
+      ctx.fillStyle = COLOR_EDGE;
       const minuteWidth = Math.round(CANVAS_WIDTH * 60 * 48000 / this.props.duration);
       if (this.props.bpmStart !== undefined && this.props.bpmStart !== 0) {
         ctx.fillRect(0, 0, minuteWidth, CANVAS_HEIGHT);
@@ -34,7 +42,7 @@ class SongWaveform extends React.Component {
     if (this.props.thumbnailMin !== undefined && this.props.thumbnailMax !== undefined) {
       for (let i = 0; i < CANVAS_WIDTH; i += 1) {
         //grey if this pixel was already played, otherwise black
-        ctx.fillStyle = (i <= position) ? 'rgba(0, 200, 0, 0.7)' : 'rgba(0, 0, 0, 0.7)';
+        ctx.fillStyle = (i <= position) ? COLOR_FOREGROUND_PLAYED : COLOR_FOREGROUND;
 
         //need to lerp from [-1, 1] to [0, 40]
         const minValue = (this.props.thumbnailMin[i] + 1) / 2 * CANVAS_HEIGHT;
@@ -44,7 +52,7 @@ class SongWaveform extends React.Component {
     }
 
     //draw current position
-    ctx.fillStyle = 'white';
+    ctx.fillStyle = COLOR_TRACK_LINE;
     ctx.fillRect(position, 0, 1, CANVAS_HEIGHT);
   }
   render() {

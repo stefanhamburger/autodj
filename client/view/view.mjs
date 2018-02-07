@@ -41,22 +41,22 @@ const init = (onVolumeChange, onPause) => {
   rootEle.appendChild(canvas);
 };
 
-let curSongName;
-const setSong = (songName = curSongName) => {
-  if (songName !== undefined) {
-    state.songName = songName;
-    curSongName = songName;
+let curSongId;
+const setSong = (songId = curSongId) => {
+  if (songId !== undefined) {
+    curSongId = songId;
+    state.songName = model.getSongName(songId);
 
-    const tempoResult = model.getTempo(songName);
+    const tempoResult = model.getTempo(state.songName);
     state.bpmStart = tempoResult.bpmStart;
     state.bpmEnd = tempoResult.bpmEnd;
 
-    const positionResult = model.getSongPosition(songName);
+    const positionResult = model.getSongPosition(state.songName);
     state.songDuration = positionResult.duration;
     state.songStart = positionResult.start;
     state.songElapsed = (state.totalTime - state.songStart) * 48000;
 
-    const thumbnailResult = model.getThumbnail(songName);
+    const thumbnailResult = model.getThumbnail(state.songName);
     state.thumbnailMin = thumbnailResult.thumbnailMin;
     state.thumbnailMax = thumbnailResult.thumbnailMax;
 

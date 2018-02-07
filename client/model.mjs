@@ -65,10 +65,16 @@ const heartbeat = (time) => {
   for (let i = songPlaylist.length - 1; i >= 0; i -= 1) {
     const song = songPlaylist[i];
     if (song.time <= time) {
-      setSong(song.name);
+      setSong(song.id);
       break;
     }
   }
+};
+
+const getSongName = (songId) => {
+  const requestedSong = songPlaylist.filter(song => song.id === songId)[0];
+  if (!requestedSong) throw new Error(`Could not find song ${songId}.`);
+  return requestedSong.name;
 };
 
 const getTempo = (songName) => {
@@ -102,6 +108,7 @@ export default {
   init,
   processEvents,
   heartbeat,
+  getSongName,
   getTempo,
   getSongPosition,
   getThumbnail,

@@ -71,45 +71,34 @@ const heartbeat = (time) => {
   }
 };
 
-const getSongName = (songId) => {
-  const requestedSong = songPlaylist.filter(song => song.id === songId)[0];
-  if (!requestedSong) throw new Error(`Could not find song ${songId}.`);
-  return requestedSong.name;
-};
-
-const getTempo = (songId) => {
+const getSongInfo = (songId) => {
   const requestedSong = songPlaylist.filter(song => song.id === songId)[0];
   if (!requestedSong) {
-    return { bpmStart: undefined, bpmEnd: undefined };
+    return {
+      name: '',
+      start: 0,
+      duration: 0,
+      bpmStart: undefined,
+      bpmEnd: undefined,
+      thumbnailMin: undefined,
+      thumbnailMax: undefined,
+    };
+  } else {
+    return {
+      name: requestedSong.name,
+      start: requestedSong.time,
+      duration: requestedSong.duration !== undefined ? requestedSong.duration : 0,
+      bpmStart: requestedSong.bpmStart,
+      bpmEnd: requestedSong.bpmEnd,
+      thumbnailMin: requestedSong.thumbnailMin,
+      thumbnailMax: requestedSong.thumbnailMax,
+    };
   }
-  return { bpmStart: requestedSong.bpmStart, bpmEnd: requestedSong.bpmEnd };
-};
-
-const getSongPosition = (songId) => {
-  const requestedSong = songPlaylist.filter(song => song.id === songId)[0];
-  if (!requestedSong) throw new Error(`Could not find song ${songId}.`);
-
-  const duration = requestedSong.duration !== undefined ? requestedSong.duration : 0;
-  const start = requestedSong.time;
-  return { duration, start };
-};
-
-const getThumbnail = (songId) => {
-  const requestedSong = songPlaylist.filter(song => song.id === songId)[0];
-  if (!requestedSong) throw new Error(`Could not find song ${songId}.`);
-
-  return {
-    thumbnailMin: requestedSong.thumbnailMin,
-    thumbnailMax: requestedSong.thumbnailMax,
-  };
 };
 
 export default {
   init,
   processEvents,
   heartbeat,
-  getSongName,
-  getTempo,
-  getSongPosition,
-  getThumbnail,
+  getSongInfo,
 };

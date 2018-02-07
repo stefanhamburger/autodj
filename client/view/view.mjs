@@ -23,10 +23,11 @@ const init = (onVolumeChange, onPause) => {
   state.onPause = onPause;
   state.isPaused = false;
   state.songName = '';
-  state.bpm = undefined;
   state.songStart = 0;
   state.songElapsed = 0;
   state.songDuration = 0;
+  state.bpmStart = undefined;
+  state.bpmEnd = undefined;
   state.thumbnailMin = undefined;
   state.thumbnailMax = undefined;
 
@@ -45,20 +46,18 @@ let curSongId;
 const setSong = (songId = curSongId) => {
   if (songId !== undefined) {
     curSongId = songId;
-    state.songName = model.getSongName(songId);
+    const songInfo = model.getSongInfo(songId);
 
-    const tempoResult = model.getTempo(songId);
-    state.bpmStart = tempoResult.bpmStart;
-    state.bpmEnd = tempoResult.bpmEnd;
-
-    const positionResult = model.getSongPosition(songId);
-    state.songDuration = positionResult.duration;
-    state.songStart = positionResult.start;
+    state.songName = songInfo.name;
+    state.songStart = songInfo.start;
+    state.songDuration = songInfo.duration;
     state.songElapsed = (state.totalTime - state.songStart) * 48000;
 
-    const thumbnailResult = model.getThumbnail(songId);
-    state.thumbnailMin = thumbnailResult.thumbnailMin;
-    state.thumbnailMax = thumbnailResult.thumbnailMax;
+    state.bpmStart = songInfo.bpmStart;
+    state.bpmEnd = songInfo.bpmEnd;
+
+    state.thumbnailMin = songInfo.thumbnailMin;
+    state.thumbnailMax = songInfo.thumbnailMax;
 
     rerender();
   }

@@ -47,16 +47,16 @@ const setSong = (songId = curSongId) => {
     curSongId = songId;
     state.songName = model.getSongName(songId);
 
-    const tempoResult = model.getTempo(state.songName);
+    const tempoResult = model.getTempo(songId);
     state.bpmStart = tempoResult.bpmStart;
     state.bpmEnd = tempoResult.bpmEnd;
 
-    const positionResult = model.getSongPosition(state.songName);
+    const positionResult = model.getSongPosition(songId);
     state.songDuration = positionResult.duration;
     state.songStart = positionResult.start;
     state.songElapsed = (state.totalTime - state.songStart) * 48000;
 
-    const thumbnailResult = model.getThumbnail(state.songName);
+    const thumbnailResult = model.getThumbnail(songId);
     state.thumbnailMin = thumbnailResult.thumbnailMin;
     state.thumbnailMax = thumbnailResult.thumbnailMax;
 

@@ -77,26 +77,26 @@ const getSongName = (songId) => {
   return requestedSong.name;
 };
 
-const getTempo = (songName) => {
-  const requestedSong = songPlaylist.filter(song => song.name === songName)[0];
+const getTempo = (songId) => {
+  const requestedSong = songPlaylist.filter(song => song.id === songId)[0];
   if (!requestedSong) {
     return { bpmStart: undefined, bpmEnd: undefined };
   }
   return { bpmStart: requestedSong.bpmStart, bpmEnd: requestedSong.bpmEnd };
 };
 
-const getSongPosition = (songName) => {
-  const requestedSong = songPlaylist.filter(song => song.name === songName)[0];
-  if (!requestedSong) throw new Error(`Could not find song ${songName}.`);
+const getSongPosition = (songId) => {
+  const requestedSong = songPlaylist.filter(song => song.id === songId)[0];
+  if (!requestedSong) throw new Error(`Could not find song ${songId}.`);
 
   const duration = requestedSong.duration !== undefined ? requestedSong.duration : 0;
   const start = requestedSong.time;
   return { duration, start };
 };
 
-const getThumbnail = (songName) => {
-  const requestedSong = songPlaylist.filter(song => song.name === songName)[0];
-  if (!requestedSong) throw new Error(`Could not find song ${songName}.`);
+const getThumbnail = (songId) => {
+  const requestedSong = songPlaylist.filter(song => song.id === songId)[0];
+  if (!requestedSong) throw new Error(`Could not find song ${songId}.`);
 
   return {
     thumbnailMin: requestedSong.thumbnailMin,

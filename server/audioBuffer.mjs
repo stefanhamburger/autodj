@@ -128,8 +128,8 @@ const addToBuffer = async (session) => {
           numSamplesToWrite;
         //Loop through numSamplesToWrite, add both channels to buffer
         for (let j = bufferStart; j < bufferEnd; j += 1) {
-          outBuffer[j * 2] += waveform[songPosition * 2 + j];
-          outBuffer[j * 2 + 1] += waveform[songPosition * 2 + j + 1];
+          outBuffer[j * 2] += waveform[(songPosition + j) * 2];
+          outBuffer[j * 2 + 1] += waveform[(songPosition + j) * 2 + 1];
         }
 
         if (endTime > song.startTime + song.totalLength) {

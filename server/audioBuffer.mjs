@@ -2,6 +2,7 @@ import * as fileManager from './fileManager.mjs';
 import createEncoder from './ffmpegEncoder.mjs';
 import * as audioManager from './audioManager.mjs';
 import startTempoRecognition from './startTempoRecognition.mjs';
+//import { setTimeout } from 'timers';
 
 /** number of samples to preload - this controls how fast the server can react to input from the client, so should be kept as small as possible */
 const PRELOAD_BUFFER_LENGTH = 5 * 48000;
@@ -11,6 +12,7 @@ const BYTES_PER_SAMPLE = 8;
 const MAX_SAMPLES_PER_LOOP = 2 * 48000;
 
 /**
+ * Pick a random song, start decoding it and add it to the playlist.
  * @param {module:session.Session} session
 */
 const addFileToStream = (session) => {
@@ -18,29 +20,30 @@ const addFileToStream = (session) => {
   const files = fileManager.getFiles(session.collection);
 
   const randomFile = files[Math.floor(Math.random() * files.length)];
-  const id = session.songs.length;
+  const id = String(Math.random());//TODO: use a better id format than Math.random(), similar to session id
   const songWrapper = { id, songRef: randomFile };
-  session.songs.push(songWrapper);
+  session.currentSongs.push(songWrapper);
   audioManager.addReference(randomFile, { sid: session.sid, id });
   console.log(`[${session.sid}] Adding to playlist: ${randomFile.name}...`);
   audioManager.createThumbnail(session, songWrapper);
 
   //If this is the first song in the stream, start playing immediately without worrying about mixing
-  if (session.songs.length === 1) {
+  if (session.currentSongs.length === 1 && session.finishedSongs.length === 0) {
     songWrapper.startTime = 0;
     songWrapper.offset = 0;
     songWrapper.totalLength = 30 * 48000;//we assume the song is at least 30 seconds long, this will be overwritten as soon as we have the correct duration
     session.emitEvent({
       type: 'SONG_START',
-      id,
+      id: songWrapper.id,
       songName: songWrapper.songRef.name,
       time: 0,
     });
-    songWrapper.ready = new Promise(async (resolve) => {
+    songWrapper.ready = false;//we need to store ready state separately since we can't get a promise's state natively
+    songWrapper.readyPromise = new Promise(async (resolve) => {
       songWrapper.totalLength = await audioManager.getDuration(songWrapper.songRef);
       session.emitEvent({
         type: 'SONG_DURATION',
-        id,
+        id: songWrapper.id,
         duration: songWrapper.totalLength,
       });
 
@@ -48,30 +51,45 @@ const addFileToStream = (session) => {
       startTempoRecognition(session, songWrapper, true);
 
       resolve();
+      songWrapper.ready = true;
     });
   } else {
     //append new song at the end of the previous song
-    const prevSongWrapper = session.songs[session.songs.length - 2];
-    songWrapper.ready = new Promise(async (resolve) => {
-      //wait until previous song has finished processing
-      await prevSongWrapper.ready;
+    songWrapper.ready = false;
+    songWrapper.readyPromise = new Promise(async (resolve) => {
+      const previousSongs = session.currentSongs.filter(song => song.id !== songWrapper.id);
+
+      //wait until previous songs have finished processing
+      await Promise.all(previousSongs.map(song => song.readyPromise));
+
+      //find the song that is right before this one (= song with the highest starting time)
+      const previousSong = previousSongs.reduce((accumulator, curSong) => {
+        if (curSong.startTime > accumulator.startTime) {
+          return curSong;
+        } else {
+          return accumulator;
+        }
+      }, { startTime: Number.NEGATIVE_INFINITY });
 
       //TODO: we need to implement mixing and cross-fade between songs
-      const startTime = (session.songs.length === 1)
-        ? 0
-        : prevSongWrapper.startTime + prevSongWrapper.totalLength;
-      songWrapper.startTime = startTime;//the time in samples at which to start adding this song to the stream
-      songWrapper.offset = 0;//the offset into the song at which to start mixing, e.g. to skip silence at the beginning
+      //the time in samples at which to start adding this song to the stream
+      songWrapper.startTime = previousSong.startTime + previousSong.totalLength;
+      //the offset (in samples) into the song at which to start mixing, e.g. to skip silence at the beginning
+      songWrapper.offset = 0;
+
       session.emitEvent({
         type: 'SONG_START',
-        id,
+        id: songWrapper.id,
         songName: songWrapper.songRef.name,
-        time: startTime / 48000,
+        time: songWrapper.startTime / 48000,
       });
-      songWrapper.totalLength = await audioManager.getDuration(songWrapper.songRef);//how long we want to play this song, e.g. to skip the ending
+
+      //how long we want to play this song, e.g. to skip the ending
+      songWrapper.totalLength = (await audioManager.getDuration(songWrapper.songRef)) - songWrapper.offset;
+
       session.emitEvent({
         type: 'SONG_DURATION',
-        id,
+        id: songWrapper.id,
         duration: songWrapper.totalLength,
       });
 
@@ -79,43 +97,55 @@ const addFileToStream = (session) => {
       startTempoRecognition(session, songWrapper);
 
       resolve();
+      songWrapper.ready = true;
     });
   }
 };
 
-//writes some samples to the FFmpeg input stream to start encoding
+
+/** Write a certain number of samples to the FFmpeg input stream so that they are encoded */
 const addToBuffer = async (session) => {
-  //if we need to write bytes to buffer, write as many samples as possible from the current song
-  //if end of song is reached, we will add samples from follow-up song in the next function call
   if (session.samplesToAdd > 0) {
-    const curSong = session.songs[session.curSong];
-    const waveform = await audioManager.getWaveform(curSong.songRef);
+    //Filter session.currentSongs to only get songs that are ready for processing
+    const numSamplesToWrite = Math.min(session.samplesToAdd, MAX_SAMPLES_PER_LOOP);
+    const endTime = session.encoderPosition + numSamplesToWrite;
+    const songs = session.currentSongs.filter(song => song.ready === true && endTime > song.startTime && session.encoderPosition < song.startTime + song.totalLength);
 
-    const remainingSongLength = curSong.totalLength - session.curSongPosition;
-    const numSamplesToWrite = Math.min(session.samplesToAdd, remainingSongLength, MAX_SAMPLES_PER_LOOP);
+    //only encode when we have at least one song to encode (at the start of a session, it takes a couple seconds until we can encode a song)
+    if (songs.length > 0) {
+      //TODO: also ensure that songs don't end prematurely: If there isn't at least one song to cover till endTime, reduce numSamplesToWrite accordingly
 
-    try {
-      session.inputStream.write(Buffer.from(waveform, (curSong.offset + session.curSongPosition) * BYTES_PER_SAMPLE, numSamplesToWrite * BYTES_PER_SAMPLE));
-    } catch (error) {
-      console.error('Ran out of memory when trying to send data to FFmpeg encoder.', error);
-      session.kill();
-      return;
+      const outBuffer = new Float32Array(numSamplesToWrite * 2);//input is always stereo (two channels)
+
+      //Get an array of songs that should be written to the current stream, and the offset into their waveform
+      for (let i = 0; i < songs.length; i += 1) {
+        const song = songs[i];
+        const waveform = new Float32Array(await audioManager.getWaveform(song.songRef));
+        const songPosition = session.encoderPosition - song.startTime;
+        const bufferStart = songPosition < 0 ? -songPosition : 0;
+        const bufferEnd = (song.startTime + song.totalLength < endTime) ?
+          (numSamplesToWrite - (endTime - (song.startTime + song.totalLength))) :
+          numSamplesToWrite;
+        //Loop through numSamplesToWrite, add both channels to buffer
+        for (let j = bufferStart; j < bufferEnd; j += 1) {
+          outBuffer[j * 2] += waveform[songPosition * 2 + j];
+          outBuffer[j * 2 + 1] += waveform[songPosition * 2 + j + 1];
+        }
+
+        if (endTime > song.startTime + song.totalLength) {
+          //need to move song from currentSongs into finshedSongs if we reached its end
+          session.currentSongs.splice(session.currentSongs.findIndex(ele => ele === song), 1);
+          session.finishedSongs.push(song);
+          audioManager.removeReference(song.songRef, { sid: session.sid, id: song.id });
+          //need to start encoding another song if we don't have any current songs left
+          addFileToStream(session);
+        }
+      }
+
+      session.encoderInput.write(Buffer.from(outBuffer.buffer));
+      session.encoderPosition += numSamplesToWrite;
+      session.samplesToAdd -= numSamplesToWrite;
     }
-    session.curSongPosition += numSamplesToWrite;
-    session.samplesToAdd -= numSamplesToWrite;
-
-    if (session.curSongPosition >= curSong.totalLength) {
-      //delete previous song from memory
-      audioManager.removeReference(curSong.songRef, { sid: session.sid, id: session.curSong });
-      //start encoding next song
-      session.curSong += 1;
-      session.curSongPosition = 0;
-    }
-  }
-
-  //if we need more waveform data, add another song (by starting to decoding it into waveform data)
-  if (session.curSong >= session.songs.length - 1) {
-    addFileToStream(session);
   }
 
   //Only add more waveform data if it's still needed, otherwise pause until we receive message from client
@@ -126,17 +156,18 @@ const addToBuffer = async (session) => {
   }
 };
 
-//initializes audio buffer
+
+/** Initializes the audio buffer */
 export const init = (session) => {
   //create new FFmpeg process
   const { inputStream, getOutputBuffer, killCommand } = createEncoder(session.numChannels);
-  session.inputStream = inputStream;
-  session.getOutputBuffer = getOutputBuffer;
+  session.encoderInput = inputStream;
+  session.getEncoderOutput = getOutputBuffer;
   session.killCommand = () => {
     //remove audio buffer from memory
-    for (let i = session.curSong; i < session.songs.length; i += 1) {
+    for (let i = 0; i < session.currentSongs.length; i += 1) {
       try {
-        audioManager.removeReference(session.songs[i].songRef, { sid: session.sid, id: session.songs[i].id });
+        audioManager.removeReference(session.currentSongs[i].songRef, { sid: session.sid, id: session.currentSongs[i].id });
       } finally {
         //ignore error
       }
@@ -147,9 +178,9 @@ export const init = (session) => {
 
   //initialize session data
   session.clientBufferLength = 0;//the playback position of the client (in seconds)
-  session.songs = [];//the list of songs, given by their waveform data
-  session.curSong = 0;//which song from the list is currently playing
-  session.curSongPosition = 0;//the current position in the current song (given as sample index)
+  session.finishedSongs = [];//songs that we have finished playing. FIXME we can probably remove this completely
+  session.currentSongs = [];//the list of current and upcoming songs. We look at this list when getting songs for mixing
+  session.encoderPosition = 0;//the current position where we are encoding audio data
   session.samplesToAdd = PRELOAD_BUFFER_LENGTH;//how many samples we need to feed to FFmpeg
 
   //Encoder
@@ -170,9 +201,13 @@ export const init = (session) => {
 
   addFileToStream(session);
   setTimeout(addToBuffer.bind(null, session));
+
+  //Also add a second song 15 seconds later
+  setTimeout(addFileToStream.bind(null, session), 15000);
 };
 
-//Start converting the given amount of audio
+
+/** Start converting the given amount of audio. */
 export const scheduleNewAudio = (session, newBufferLength) => {
   //Provide new input to FFmpeg
   if (newBufferLength > 0) {

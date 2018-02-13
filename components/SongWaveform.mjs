@@ -10,7 +10,6 @@ const COLOR_BACKGROUND = '#000';
 const COLOR_BACKGROUND_EDGE = '#700';
 const COLOR_FOREGROUND = getViridisColor(0.4).replace(/^rgb\((.+)\)$/, 'rgba($1,0.6)');
 const COLOR_FOREGROUND_PLAYED = getViridisColor(1.0).replace(/^rgb\((.+)\)$/, 'rgba($1,0.6)');
-console.log(COLOR_FOREGROUND_PLAYED);
 const COLOR_TRACK_LINE = '#fff';
 
 class SongWaveform extends React.Component {

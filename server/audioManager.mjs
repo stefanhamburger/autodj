@@ -78,8 +78,8 @@ export const createThumbnail = async (session, song) => {
     const outMax = new Float32Array(THUMBNAIL_WIDTH);
     const outMin = new Float32Array(THUMBNAIL_WIDTH);
     for (let i = 0; i < THUMBNAIL_WIDTH; i += 1) {
-      outMax[i] = Number.MIN_VALUE;
-      outMin[i] = Number.MAX_VALUE;
+      outMax[i] = Number.NEGATIVE_INFINITY;
+      outMin[i] = Number.POSITIVE_INFINITY;
     }
 
     //How many samples are contained in one pixel

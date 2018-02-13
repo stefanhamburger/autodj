@@ -13,12 +13,16 @@ const init = (setSongIn, sidIn) => {
 const processEvents = events => events && events.forEach(async (event) => {
   switch (event.type) {
     case 'SONG_START':
-      songPlaylist.push({ id: event.id, name: event.songName, startTime: event.time });
+      songPlaylist.push({
+        id: event.id,
+        name: event.songName,
+        startTime: event.time, //given in seconds
+      });
       break;
     case 'SONG_DURATION': {
       const { id, duration } = event;
       songPlaylist.filter(song => song.id === id).forEach((song) => {
-        song.duration = duration;
+        song.duration = duration;//given in samples
         setSong();
       });
       break;

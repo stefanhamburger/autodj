@@ -50,7 +50,7 @@ app.get('/part', (req, res) => {
     res.set('X-Metadata', encodeURI(JSON.stringify(metadata)));
 
     //send as many bytes as there in session.ffmpegData since last output position
-    const ffmpegBuffer = session.getOutputBuffer();
+    const ffmpegBuffer = session.getEncoderOutput();
     res.send(Buffer.concat(ffmpegBuffer.buffer, ffmpegBuffer.length));
     //TODO: if length of buffer contents is zero, maybe wait 250ms and try again before sending nothing
 

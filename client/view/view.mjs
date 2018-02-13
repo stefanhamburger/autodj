@@ -54,8 +54,8 @@ const setSong = (songId = curSongId) => {
     const songInfo = model.getSongInfo(songId);
 
     state.songName = songInfo.name;
-    state.songStart = songInfo.start;
-    state.songDuration = songInfo.duration;
+    state.songStart = songInfo.startTime;
+    state.songDuration = songInfo.duration !== undefined ? songInfo.duration : 0;
     state.songElapsed = (state.totalTime - state.songStart) * 48000;
 
     state.bpmStart = songInfo.bpmStart;

@@ -13,7 +13,7 @@ const init = (setSongIn, sidIn) => {
 const processEvents = events => events && events.forEach(async (event) => {
   switch (event.type) {
     case 'SONG_START':
-      songPlaylist.push({ id: event.id, name: event.songName, time: event.time });
+      songPlaylist.push({ id: event.id, name: event.songName, startTime: event.time });
       break;
     case 'SONG_DURATION': {
       const { id, duration } = event;
@@ -62,38 +62,46 @@ const processEvents = events => events && events.forEach(async (event) => {
 });
 
 const heartbeat = (time) => {
+  //Find the current song by looking at the last song that is still being played in the present time
   for (let i = songPlaylist.length - 1; i >= 0; i -= 1) {
     const song = songPlaylist[i];
-    if (song.time <= time) {
+    if (song.startTime <= time) {
       setSong(song.id);
       break;
     }
   }
 };
 
+/** Get state information about the current song, or default values if song was not found. */
 const getSongInfo = (songId) => {
   const requestedSong = songPlaylist.filter(song => song.id === songId)[0];
+
+  //Use if statement until object spread becomes natively supported in webpack
   if (!requestedSong) {
     return {
       name: '',
-      start: 0,
-      duration: 0,
+      startTime: 0,
+      duration: undefined,
       bpmStart: undefined,
       bpmEnd: undefined,
       thumbnailMin: undefined,
       thumbnailMax: undefined,
     };
   } else {
-    return {
-      name: requestedSong.name,
-      start: requestedSong.time,
-      duration: requestedSong.duration !== undefined ? requestedSong.duration : 0,
-      bpmStart: requestedSong.bpmStart,
-      bpmEnd: requestedSong.bpmEnd,
-      thumbnailMin: requestedSong.thumbnailMin,
-      thumbnailMax: requestedSong.thumbnailMax,
-    };
+    return requestedSong;
   }
+
+  /*//Override default values with values from requestedSong, if they exist, then return object
+  return {
+    name: '',
+    startTime: 0,
+    duration: 0,
+    bpmStart: undefined,
+    bpmEnd: undefined,
+    thumbnailMin: undefined,
+    thumbnailMax: undefined,
+    ...requestedSong,
+  };*/
 };
 
 export default {

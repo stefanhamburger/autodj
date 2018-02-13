@@ -43,6 +43,11 @@ const init = (onVolumeChange, onPause) => {
 };
 
 let curSongId;
+/**
+ * Tells the view to update its state based on the current model.
+ * If a song id is given, also update the current song to the given id.
+ * @param songId
+ */
 const setSong = (songId = curSongId) => {
   if (songId !== undefined) {
     curSongId = songId;

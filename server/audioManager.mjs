@@ -2,6 +2,7 @@
 //Ensures waveform data is kept in memory as long as needed, and cleaned up as soon as possible
 
 import decodeAudio from './ffmpegDecoder.mjs';
+import * as consoleColors from './consoleColors.mjs';
 
 /** byte length is 8 bytes per sample (2 channels, Float32 format) */
 const BYTES_PER_SAMPLE = 8;
@@ -101,7 +102,7 @@ export const createThumbnail = async (session, song) => {
     out.set(outMax, THUMBNAIL_WIDTH);
     audioWaveforms[song.songRef.path].waveformThumbnail = out;
 
-    console.log(`[${session.sid}] Generated thumbnail of ${song.songRef.name} in ${new Date() - startTime}ms`);
+    console.log(`${consoleColors.magenta(`[${session.sid}]`)} Generated thumbnail of ${consoleColors.green(song.songRef.name)} in ${new Date() - startTime}ms`);
   }
 
   //Notify client that waveform data is ready

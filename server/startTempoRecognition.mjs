@@ -1,5 +1,6 @@
 import Worker from 'tiny-worker';
 import * as audioManager from './audioManager.mjs';
+import * as consoleColors from './consoleColors.mjs';
 
 /** Sampling rate of the waveform data */
 const SAMPLE_RATE = 48000;
@@ -51,7 +52,7 @@ export default async function startTempoRecognition(session, song, isFirstSong =
   //if song is too short, we detect tempo across the whole song
   if (waveformArray.length < SONG_MIN_LENGTH) {
     createWorker(waveformArray).then((bpm) => {
-      console.log(`[${session.sid}] Song ${song.songRef.name} starts and ends with ${bpm} bpm`);
+      console.log(`${consoleColors.magenta(`[${session.sid}]`)} Song ${consoleColors.green(song.songRef.name)} starts and ends with ${bpm} bpm`);
       session.emitEvent({ type: 'TEMPO_INFO_START', id: song.id, bpm });
       session.emitEvent({ type: 'TEMPO_INFO_END', id: song.id, bpm });
     });
@@ -60,7 +61,7 @@ export default async function startTempoRecognition(session, song, isFirstSong =
     if (!isFirstSong) {
       //tempo at beginning of song
       createWorker(waveformArray.slice(0, SONG_START_LENGTH)).then((bpm) => {
-        console.log(`[${session.sid}] Song ${song.songRef.name} starts with ${bpm} bpm`);
+        console.log(`${consoleColors.magenta(`[${session.sid}]`)} Song ${consoleColors.green(song.songRef.name)} starts with ${bpm} bpm`);
         session.emitEvent({ type: 'TEMPO_INFO_START', id: song.id, bpm });
       });
 
@@ -70,7 +71,7 @@ export default async function startTempoRecognition(session, song, isFirstSong =
 
     //tempo at end of song
     createWorker(waveformArray.slice(waveformArray.length - SONG_END_LENGTH)).then((bpm) => {
-      console.log(`[${session.sid}] Song ${song.songRef.name} ends with ${bpm} bpm`);
+      console.log(`${consoleColors.magenta(`[${session.sid}]`)} Song ${consoleColors.green(song.songRef.name)} ends with ${bpm} bpm`);
       session.emitEvent({ type: 'TEMPO_INFO_END', id: song.id, bpm });
     });
   }

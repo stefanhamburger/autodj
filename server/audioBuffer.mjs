@@ -2,7 +2,7 @@ import * as fileManager from './fileManager.mjs';
 import createEncoder from './ffmpegEncoder.mjs';
 import * as audioManager from './audioManager.mjs';
 import startTempoRecognition from './startTempoRecognition.mjs';
-//import { setTimeout } from 'timers';
+import * as consoleColors from './consoleColors.mjs';
 
 /** number of samples to preload - this controls how fast the server can react to input from the client, so should be kept as small as possible */
 const PRELOAD_BUFFER_LENGTH = 5 * 48000;
@@ -22,7 +22,7 @@ const addFileToStream = (session) => {
   const songWrapper = { id, songRef: randomFile };
   session.currentSongs.push(songWrapper);
   audioManager.addReference(randomFile, { sid: session.sid, id });
-  console.log(`[${session.sid}] Adding to playlist: ${randomFile.name}...`);
+  console.log(`${consoleColors.magenta(`[${session.sid}]`)} Adding to playlist: ${consoleColors.green(randomFile.name)}...`);
   audioManager.createThumbnail(session, songWrapper);
 
   //If this is the first song in the stream, start playing immediately without worrying about mixing

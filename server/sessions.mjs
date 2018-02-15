@@ -1,3 +1,5 @@
+import * as consoleColors from './consoleColors.mjs';
+
 const sessions = {};
 
 /**
@@ -30,7 +32,7 @@ const generateSID = () => {
 
 /** Closes the given session and cleans up memory. */
 const killSession = (session) => {
-  console.log(`[${session.sid}] Session timed out.`);
+  console.log(`${consoleColors.magenta(`[${session.sid}]`)} Session timed out.`);
   session.killCommand();
   delete sessions[session.sid];
 };
@@ -75,7 +77,7 @@ export const newSession = () => {
     //We allow up to 3 seconds of seeking into the future.
     //Anything above that gets clipped to how much time has elapsed on the server since the last signal
     if (session.prevTime - newDelta > 3) {
-      console.error(`[${session.sid}] Caught possible denial of service with elapsed playtime: ${Math.abs(newDelta - session.prevTime)}.`);
+      console.error(`${consoleColors.magenta(`[${session.sid}]`)} Caught possible denial of service with elapsed playtime: ${Math.abs(newDelta - session.prevTime)}.`);
       return new Date() / 1000 - session.prevTime;
     } else {
       session.prevTime = newDelta;
@@ -85,7 +87,7 @@ export const newSession = () => {
 
   sessions[sid] = session;
   lifeSign(session);
-  console.log(`[${sid}] Starting new session...`);
+  console.log(`${consoleColors.magenta(`[${sid}]`)} Starting new session...`);
 
   return { sid, obj: session };
 };

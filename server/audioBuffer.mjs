@@ -13,7 +13,7 @@ const MAX_SAMPLES_PER_LOOP = 2 * 48000;
  * Pick a random song, start decoding it and add it to the playlist.
  * @param {module:session.Session} session
 */
-const addFileToStream = (session) => {
+const addFileToStream = (session, isFirstSong = false) => {
   //wait until list of files was loaded
   const files = fileManager.getFiles(session.collection);
 
@@ -26,7 +26,7 @@ const addFileToStream = (session) => {
   const thumbnailPromise = audioManager.createThumbnail(session, songWrapper);
 
   //If this is the first song in the stream, start playing immediately without worrying about mixing
-  if (session.currentSongs.length === 1 && session.finishedSongs.length === 0) {
+  if (isFirstSong === false) {
     songWrapper.startTime = 0;
     songWrapper.offset = 0;
     songWrapper.totalLength = 30 * 48000;//we assume the song is at least 30 seconds long, this will be overwritten as soon as we have the correct duration
@@ -63,20 +63,19 @@ const addFileToStream = (session) => {
       resolve();
       songWrapper.ready = true;
     });
-  } else {
+  } else { //append new song at the end of the previous song
     //inform client that we are considering this follow-up song - subject to successful tempo detection etc.
     session.emitEvent({
       type: 'NEXT_SONG',
       songName: songWrapper.songRef.name,
     });
 
-    //append new song at the end of the previous song
     songWrapper.ready = false;
     songWrapper.readyPromise = new Promise(async (resolve, reject) => {
-      const previousSongs = session.currentSongs.filter(song => song.id !== songWrapper.id);
+      const previousSongs = session.currentSongs.filter(entry => entry.id !== songWrapper.id);
 
       //wait until previous songs have finished processing
-      await Promise.all(previousSongs.map(song => song.readyPromise));
+      await Promise.all(previousSongs.map(entry => entry.readyPromise));
 
       //find the song that is right before this one (= song with the highest starting time)
       const previousSong = previousSongs.reduce((accumulator, curSong) => {
@@ -232,7 +231,7 @@ export const init = (session) => {
     };
   }
 
-  addFileToStream(session);
+  addFileToStream(session, true);
   setTimeout(addToBuffer.bind(null, session));
 
   //Also add a second song 15 seconds later

@@ -40,10 +40,6 @@ function createWorker(waveformArray) {
 }
 
 
-/** Waits for the given amount of milliseconds, without blocking the server process */
-const sleep = time => new Promise(resolve => setTimeout(resolve, time));
-
-
 /** Does a tempo detection on the given song and emits the bpm via session events */
 export default async function startTempoRecognition(session, song, isFirstSong = false) {
   const waveformBuffer = await audioManager.getWaveform(song.songRef);
@@ -51,28 +47,22 @@ export default async function startTempoRecognition(session, song, isFirstSong =
 
   //if song is too short, we detect tempo across the whole song
   if (waveformArray.length < SONG_MIN_LENGTH) {
-    createWorker(waveformArray).then((bpm) => {
-      console.log(`${consoleColors.magenta(`[${session.sid}]`)} Song ${consoleColors.green(song.songRef.name)} starts and ends with ${bpm} bpm`);
-      session.emitEvent({ type: 'TEMPO_INFO_START', id: song.id, bpm });
-      session.emitEvent({ type: 'TEMPO_INFO_END', id: song.id, bpm });
-    });
+    const bpm = await createWorker(waveformArray);
+    console.log(`${consoleColors.magenta(`[${session.sid}]`)} Song ${consoleColors.green(song.songRef.name)} starts and ends with ${bpm} bpm`);
+    session.emitEvent({ type: 'TEMPO_INFO_START', id: song.id, bpm });
+    session.emitEvent({ type: 'TEMPO_INFO_END', id: song.id, bpm });
   } else { //otherwise, we only detect the beginning and end of the song
     //if this is the first song we are playing, tempo at beginning doesn't matter
     if (!isFirstSong) {
       //tempo at beginning of song
-      createWorker(waveformArray.slice(0, SONG_START_LENGTH)).then((bpm) => {
-        console.log(`${consoleColors.magenta(`[${session.sid}]`)} Song ${consoleColors.green(song.songRef.name)} starts with ${bpm} bpm`);
-        session.emitEvent({ type: 'TEMPO_INFO_START', id: song.id, bpm });
-      });
-
-      //Wait 5 seconds before detection tempo at end of song to avoid overloading the server
-      await sleep(5000);
+      const bpmStart = await createWorker(waveformArray.slice(0, SONG_START_LENGTH));
+      console.log(`${consoleColors.magenta(`[${session.sid}]`)} Song ${consoleColors.green(song.songRef.name)} starts with ${bpmStart} bpm`);
+      session.emitEvent({ type: 'TEMPO_INFO_START', id: song.id, bpmStart });
     }
 
     //tempo at end of song
-    createWorker(waveformArray.slice(waveformArray.length - SONG_END_LENGTH)).then((bpm) => {
-      console.log(`${consoleColors.magenta(`[${session.sid}]`)} Song ${consoleColors.green(song.songRef.name)} ends with ${bpm} bpm`);
-      session.emitEvent({ type: 'TEMPO_INFO_END', id: song.id, bpm });
-    });
+    const bpmEnd = await createWorker(waveformArray.slice(waveformArray.length - SONG_END_LENGTH));
+    console.log(`${consoleColors.magenta(`[${session.sid}]`)} Song ${consoleColors.green(song.songRef.name)} ends with ${bpmEnd} bpm`);
+    session.emitEvent({ type: 'TEMPO_INFO_END', id: song.id, bpmEnd });
   }
 }

@@ -60,6 +60,11 @@ const processEvents = events => events && events.forEach(async (event) => {
       });
       break;
     }
+    case 'NEXT_SONG': {
+      const { songName } = event;
+      console.log(`Considering next song to be ${songName}.`);
+      break;
+    }
     default:
       console.error('Metadata event not recognized', event);
   }

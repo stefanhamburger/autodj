@@ -50,8 +50,8 @@ export default async function startTempoRecognition(session, song, isFirstSong =
     const bpm = await createWorker(waveformArray);
     console.log(`${consoleColors.magenta(`[${session.sid}]`)} Song ${consoleColors.green(song.songRef.name)} starts and ends with ${bpm} bpm`);
     if (bpm === 0) throw new Error('Tempo detection failed');
-    session.emitEvent({ type: 'TEMPO_INFO_START', id: song.id, bpm });
-    session.emitEvent({ type: 'TEMPO_INFO_END', id: song.id, bpm });
+    song.bpmStart = bpm;
+    song.bpmEnd = bpm;
   } else { //otherwise, we only detect the beginning and end of the song
     //if this is the first song we are playing, tempo at beginning doesn't matter
     if (!isFirstSong) {
@@ -59,13 +59,13 @@ export default async function startTempoRecognition(session, song, isFirstSong =
       const bpmStart = await createWorker(waveformArray.slice(0, SONG_START_LENGTH));
       console.log(`${consoleColors.magenta(`[${session.sid}]`)} Song ${consoleColors.green(song.songRef.name)} starts with ${bpmStart} bpm`);
       if (bpmStart === 0) throw new Error('Tempo detection failed');
-      session.emitEvent({ type: 'TEMPO_INFO_START', id: song.id, bpm: bpmStart });
+      song.bpmStart = bpmStart;
     }
 
     //tempo at end of song
     const bpmEnd = await createWorker(waveformArray.slice(waveformArray.length - SONG_END_LENGTH));
     console.log(`${consoleColors.magenta(`[${session.sid}]`)} Song ${consoleColors.green(song.songRef.name)} ends with ${bpmEnd} bpm`);
     if (bpmEnd === 0) throw new Error('Tempo detection failed');
-    session.emitEvent({ type: 'TEMPO_INFO_END', id: song.id, bpm: bpmEnd });
+    song.bpmStart = bpmEnd;
   }
 }

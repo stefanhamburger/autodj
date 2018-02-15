@@ -23,7 +23,7 @@ const addFileToStream = (session) => {
   session.currentSongs.push(songWrapper);
   audioManager.addReference(randomFile, { sid: session.sid, id });
   console.log(`${consoleColors.magenta(`[${session.sid}]`)} Adding to playlist: ${consoleColors.green(randomFile.name)}...`);
-  audioManager.createThumbnail(session, songWrapper);
+  const thumbnailPromise = audioManager.createThumbnail(session, songWrapper);
 
   //If this is the first song in the stream, start playing immediately without worrying about mixing
   if (session.currentSongs.length === 1 && session.finishedSongs.length === 0) {
@@ -39,6 +39,7 @@ const addFileToStream = (session) => {
     songWrapper.ready = false;//we need to store ready state separately since we can't get a promise's state natively
     songWrapper.readyPromise = new Promise(async (resolve) => {
       songWrapper.totalLength = await audioManager.getDuration(songWrapper.songRef);
+      //TODO: we should only send the duration if we are sure we are going to keep this song, or at least allow overriding it
       session.emitEvent({
         type: 'SONG_DURATION',
         id: songWrapper.id,
@@ -52,13 +53,26 @@ const addFileToStream = (session) => {
         //TODO: tempo recognition failed, we need to immediately switch to another random song
       }
 
+      session.emitEvent({ type: 'TEMPO_INFO_END', id: songWrapper.id, bpm: songWrapper.bpmEnd });
+
+      //Notify client that waveform data is ready
+      await thumbnailPromise.then(() => {
+        session.emitEvent({ type: 'THUMBNAIL_READY', id: songWrapper.id });
+      });
+
       resolve();
       songWrapper.ready = true;
     });
   } else {
+    //inform client that we are considering this follow-up song - subject to successful tempo detection etc.
+    session.emitEvent({
+      type: 'NEXT_SONG',
+      songName: songWrapper.songRef.name,
+    });
+
     //append new song at the end of the previous song
     songWrapper.ready = false;
-    songWrapper.readyPromise = new Promise(async (resolve) => {
+    songWrapper.readyPromise = new Promise(async (resolve, reject) => {
       const previousSongs = session.currentSongs.filter(song => song.id !== songWrapper.id);
 
       //wait until previous songs have finished processing
@@ -79,6 +93,20 @@ const addFileToStream = (session) => {
       //the offset (in samples) into the song at which to start mixing, e.g. to skip silence at the beginning
       songWrapper.offset = 0;
 
+      //how long we want to play this song, e.g. to skip the ending
+      songWrapper.totalLength = (await audioManager.getDuration(songWrapper.songRef)) - songWrapper.offset;
+
+      //do tempo recognition - and only use song if recognition was successful
+      try {
+        await startTempoRecognition(session, songWrapper);
+      } catch (error) {
+        //remove this song and start converting another song
+        session.currentSongs.splice(session.currentSongs.findIndex(entry => entry.id === songWrapper.id), 1);
+        addFileToStream(session);
+        reject();
+        return;
+      }
+
       session.emitEvent({
         type: 'SONG_START',
         id: songWrapper.id,
@@ -86,21 +114,19 @@ const addFileToStream = (session) => {
         time: songWrapper.startTime / 48000,
       });
 
-      //how long we want to play this song, e.g. to skip the ending
-      songWrapper.totalLength = (await audioManager.getDuration(songWrapper.songRef)) - songWrapper.offset;
-
       session.emitEvent({
         type: 'SONG_DURATION',
         id: songWrapper.id,
         duration: songWrapper.totalLength,
       });
 
-      //do tempo recognition - and only use song if recognition was successful
-      try {
-        await startTempoRecognition(session, songWrapper);
-      } catch (error) {
-        //TODO: tempo recognition failed, reject this song and find another song
-      }
+      session.emitEvent({ type: 'TEMPO_INFO_START', id: songWrapper.id, bpm: songWrapper.bpmStart });
+      session.emitEvent({ type: 'TEMPO_INFO_END', id: songWrapper.id, bpm: songWrapper.bpmEnd });
+
+      //Notify client that waveform data is ready
+      await thumbnailPromise.then(() => {
+        session.emitEvent({ type: 'THUMBNAIL_READY', id: songWrapper.id });
+      });
 
       resolve();
       songWrapper.ready = true;

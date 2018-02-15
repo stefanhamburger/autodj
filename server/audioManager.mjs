@@ -104,9 +104,6 @@ export const createThumbnail = async (session, song) => {
 
     console.log(`${consoleColors.magenta(`[${session.sid}]`)} Generated thumbnail of ${consoleColors.green(song.songRef.name)} in ${new Date() - startTime}ms`);
   }
-
-  //Notify client that waveform data is ready
-  session.emitEvent({ type: 'THUMBNAIL_READY', id: song.id });
 };
 
 

@@ -5,7 +5,7 @@ import TotalDuration from './TotalDuration.mjs';
 import VolumeControl from './VolumeControl.mjs';
 import UpcomingSong from './UpcomingSong.mjs';
 
-function PlaybackContainer({ state }) {
+export default function PlaybackContainer({ state }) {
   //show total time (for long we have been playing audio)
   //show controls for media playback
   //TODO: add button for skipping to next song transition
@@ -35,5 +35,3 @@ function PlaybackContainer({ state }) {
     </React.Fragment>
   );
 }
-
-export default PlaybackContainer;

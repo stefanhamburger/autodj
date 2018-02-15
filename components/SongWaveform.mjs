@@ -12,7 +12,7 @@ const COLOR_FOREGROUND = getViridisColor(0.4).replace(/^rgb\((.+)\)$/, 'rgba($1,
 const COLOR_FOREGROUND_PLAYED = getViridisColor(1.0).replace(/^rgb\((.+)\)$/, 'rgba($1,0.6)');
 const COLOR_TRACK_LINE = '#fff';
 
-class SongWaveform extends React.Component {
+export default class SongWaveform extends React.Component {
   componentDidMount() {
     this.updateCanvas();
   }
@@ -62,5 +62,3 @@ class SongWaveform extends React.Component {
     );
   }
 }
-
-export default SongWaveform;

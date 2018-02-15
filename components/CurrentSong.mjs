@@ -18,7 +18,7 @@ const tempoToString = (bpm) => {
   }
 };
 
-function CurrentSong({
+export default function CurrentSong({
   name,
   bpmStart,
   bpmEnd,
@@ -57,5 +57,3 @@ function CurrentSong({
     </React.Fragment>
   );
 }
-
-export default CurrentSong;

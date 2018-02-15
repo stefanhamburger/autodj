@@ -1,6 +1,6 @@
 import React from 'react';
 
-function UpcomingSong({
+export default function UpcomingSong({
   name,
 }) {
   return (
@@ -10,5 +10,3 @@ function UpcomingSong({
     </React.Fragment>
   );
 }
-
-export default UpcomingSong;

@@ -30,7 +30,7 @@ const Slider = styled.input`
   background-color: rgba(240, 240, 240, 0.8);
 `;
 
-function VolumeControl({ volumeChangeCallback }) {
+export default function VolumeControl({ volumeChangeCallback }) {
   return (
     <Container>
       <Button>🔉</Button>
@@ -38,5 +38,3 @@ function VolumeControl({ volumeChangeCallback }) {
     </Container>
   );
 }
-
-export default VolumeControl;

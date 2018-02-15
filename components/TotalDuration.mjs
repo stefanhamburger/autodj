@@ -1,6 +1,6 @@
 import React from 'react';
 
-function TotalDuration({ time }) {
+export default function TotalDuration({ time }) {
   //Calculate HH:MM:SS
   const timestamp = Math.floor(time);
   const hours = Math.floor(timestamp / 3600);
@@ -20,5 +20,3 @@ function TotalDuration({ time }) {
     </React.Fragment>
   );
 }
-
-export default TotalDuration;

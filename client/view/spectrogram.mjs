@@ -2,7 +2,7 @@ import getViridisColor from './viridis.mjs';
 import frequencyToVolume from './equalLoudnessContour.mjs';
 
 /** The height in pixels of the top navigation, the spectrogram is drawn below it */
-const TOP_NAVIGATION_HEIGHT = 100;
+const TOP_NAVIGATION_HEIGHT = 120;
 /** How fast the spectrogram moves to the left, in pixels per second. This number should be a multiple of 60 because we redraw up to 60Hz */
 const SPECTROGRAM_SPEED = 120;
 /** How many samples are in one pixel */

@@ -1,10 +1,14 @@
 const songPlaylist = [];
 let setSong;
+let setUpcoming;
 let sid;
 
-const init = (setSongIn, sidIn) => {
+const init = (setSongIn, setUpcomingIn, sidIn) => {
   //reference to view.setSong()
   setSong = setSongIn;
+
+  //reference to view.setUpcoming()
+  setUpcoming = setUpcomingIn;
 
   //session id as fetched in init.js
   sid = sidIn;
@@ -62,7 +66,7 @@ const processEvents = events => events && events.forEach(async (event) => {
     }
     case 'NEXT_SONG': {
       const { songName } = event;
-      console.log(`Considering next song to be ${songName}.`);
+      setUpcoming(songName);
       break;
     }
     default:
@@ -100,7 +104,7 @@ const getSongInfo = (songId) => {
     return requestedSong;
   }
 
-  /*//Override default values with values from requestedSong, if they exist, then return object
+  /*//Override default values with values from requestedSong, if they exist, then return object - not supported by webpack
   return {
     name: '',
     startTime: 0,

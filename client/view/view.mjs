@@ -68,6 +68,10 @@ const setSong = (songId = curSongId) => {
   }
 };
 
+const setUpcoming = (name) => {
+  state.nextSong = name;
+};
+
 const setIsPaused = (isPaused) => {
   state.isPaused = isPaused;
   rerender();
@@ -82,6 +86,7 @@ const updateTime = (newTime) => {
 export default {
   init,
   setSong,
+  setUpcoming,
   setIsPaused,
   updateTime,
 };

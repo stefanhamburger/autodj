@@ -100,10 +100,11 @@ const addFileToStream = (session) => {
       try {
         await startTempoRecognition(session, songWrapper);
       } catch (error) {
+        console.log(`${consoleColors.magenta(`[${session.sid}]`)} Tempo detection failed; skipping ${consoleColors.green(songWrapper.songRef.name)}...`);
         //remove this song and start converting another song
         session.currentSongs.splice(session.currentSongs.findIndex(entry => entry.id === songWrapper.id), 1);
-        addFileToStream(session);
         reject();
+        addFileToStream(session);
         return;
       }
 

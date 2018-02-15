@@ -36,7 +36,6 @@ onmessage = function messageHandler(ev) {
         //send recognized tempo to main thread
         postMessage(mt.tempo);//TODO: need to send more data than just tempo
       } catch (error) {
-        console.error('Tempo detection failed', error);
         postMessage(0);
       }
     }

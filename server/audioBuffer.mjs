@@ -26,7 +26,7 @@ const addFileToStream = (session, isFirstSong = false) => {
   const thumbnailPromise = audioManager.createThumbnail(session, songWrapper);
 
   //If this is the first song in the stream, start playing immediately without worrying about mixing
-  if (isFirstSong === false) {
+  if (isFirstSong === true) {
     songWrapper.startTime = 0;
     songWrapper.offset = 0;
     songWrapper.totalLength = 30 * 48000;//we assume the song is at least 30 seconds long, this will be overwritten as soon as we have the correct duration

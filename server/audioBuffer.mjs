@@ -6,8 +6,6 @@ import startTempoRecognition from './startTempoRecognition.mjs';
 
 /** number of samples to preload - this controls how fast the server can react to input from the client, so should be kept as small as possible */
 const PRELOAD_BUFFER_LENGTH = 5 * 48000;
-/** byte length is 8 bytes per sample (2 channels, Float32 format) */
-const BYTES_PER_SAMPLE = 8;
 /** we never initiate encoding of more than 2 seconds of samples at once to prevent the app from blocking too long */
 const MAX_SAMPLES_PER_LOOP = 2 * 48000;
 
@@ -73,7 +71,7 @@ const addFileToStream = (session) => {
 
       //TODO: we need to implement mixing and cross-fade between songs
       //the time in samples at which to start adding this song to the stream
-      songWrapper.startTime = previousSong.startTime + previousSong.totalLength;
+      songWrapper.startTime = previousSong.startTime + previousSong.totalLength - 15 * 48000;
       //the offset (in samples) into the song at which to start mixing, e.g. to skip silence at the beginning
       songWrapper.offset = 0;
 
@@ -120,7 +118,7 @@ const addToBuffer = async (session) => {
       //Get an array of songs that should be written to the current stream, and the offset into their waveform
       for (let i = 0; i < songs.length; i += 1) {
         const song = songs[i];
-        const waveform = new Float32Array(await audioManager.getWaveform(song.songRef));
+        const waveform = new Float32Array(await audioManager.getWaveform(song.songRef));//TODO: do not await in a loop
         const songPosition = session.encoderPosition - song.startTime;
         const bufferStart = songPosition < 0 ? -songPosition : 0;
         const bufferEnd = (song.startTime + song.totalLength < endTime) ?

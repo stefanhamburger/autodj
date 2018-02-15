@@ -48,7 +48,7 @@ const addFileToStream = (session) => {
 
       //do tempo recognition - for first song, we do not need to wait until it is done
       try {
-        startTempoRecognition(session, songWrapper, true);
+        await startTempoRecognition(session, songWrapper, true);
       } catch (error) {
         //TODO: tempo recognition failed, we need to immediately switch to another random song
       }

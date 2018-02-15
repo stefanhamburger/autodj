@@ -71,7 +71,7 @@ const addFileToStream = (session, isFirstSong = false) => {
     });
 
     songWrapper.ready = false;
-    songWrapper.readyPromise = new Promise(async (resolve, reject) => {
+    songWrapper.readyPromise = new Promise(async (resolve) => {
       const previousSongs = session.currentSongs.filter(entry => entry.id !== songWrapper.id);
 
       //wait until previous songs have finished processing
@@ -79,7 +79,7 @@ const addFileToStream = (session, isFirstSong = false) => {
 
       //find the song that is right before this one (= song with the highest starting time)
       const previousSong = previousSongs.reduce((accumulator, curSong) => {
-        if (curSong.startTime > accumulator.startTime) {
+        if (curSong.ready === true && curSong.startTime > accumulator.startTime) {
           return curSong;
         } else {
           return accumulator;
@@ -103,7 +103,7 @@ const addFileToStream = (session, isFirstSong = false) => {
         //remove this song and start converting another song
         audioManager.removeReference(songWrapper.songRef, { sid: session.sid, id: songWrapper.id });
         session.currentSongs.splice(session.currentSongs.findIndex(entry => entry.id === songWrapper.id), 1);
-        reject();
+        resolve();
         addFileToStream(session);
         return;
       }

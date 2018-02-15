@@ -2,8 +2,8 @@ import Worker from 'tiny-worker';
 import * as audioManager from './audioManager.mjs';
 import * as consoleColors from './consoleColors.mjs';
 
-/** Sampling rate of the waveform data */
-const SAMPLE_RATE = 48000;
+/** Sampling rate of the waveform data (48k Hz stereo = 2 channels) */
+const SAMPLE_RATE = 48000 * 2;
 /** How many samples a song must at least have before we detect beginning and end separately. Must be ≥60 seconds */
 const SONG_MIN_LENGTH = 120 * SAMPLE_RATE;
 /** How many samples we use from the beginning of the song to detect tempo */

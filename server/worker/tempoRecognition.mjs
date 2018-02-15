@@ -15,12 +15,15 @@ let pos = 0;
 
 onmessage = function messageHandler(ev) {
   if (!hasReceivedLength) {
-    //create array of the given length
-    waveform = new Float32Array(Number(ev.data));
+    //create array of the given length (divided by 2 since we convert stereo to mono)
+    waveform = new Float32Array(Number(ev.data / 2));
     hasReceivedLength = true;
   } else {
-    waveform.set(ev.data, pos);
-    pos += ev.data.length;
+    //add received data to array, converting stereo to mono
+    for (let i = 0, il = ev.data.length; i < il; i += 2) {
+      waveform[pos + (i >>> 2)] = (ev.data[i] + ev.data[i + 1]) / 2;
+    }
+    pos += ev.data.length / 2;
 
     //if we are done
     if (pos === waveform.length) {

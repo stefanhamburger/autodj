@@ -30,6 +30,7 @@ const init = (onVolumeChange, onPause) => {
   state.bpmEnd = undefined;
   state.thumbnailMin = undefined;
   state.thumbnailMax = undefined;
+  state.nextSong = undefined;
 
   container = document.createElement('div');
   rootEle.appendChild(container);
@@ -54,6 +55,7 @@ const setSong = (songId = curSongId) => {
     const songInfo = model.getSongInfo(songId);
 
     state.songName = songInfo.name;
+    if (state.songName === state.nextSong) state.nextSong = undefined;
     state.songStart = songInfo.startTime;
     state.songDuration = songInfo.duration !== undefined ? songInfo.duration : 0;
     state.songElapsed = (state.totalTime - state.songStart) * 48000;

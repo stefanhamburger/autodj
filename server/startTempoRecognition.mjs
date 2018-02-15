@@ -66,6 +66,6 @@ export default async function startTempoRecognition(session, song, isFirstSong =
     const bpmEnd = await createWorker(waveformArray.slice(waveformArray.length - SONG_END_LENGTH));
     console.log(`${consoleColors.magenta(`[${session.sid}]`)} Song ${consoleColors.green(song.songRef.name)} ends with ${bpmEnd} bpm`);
     if (bpmEnd === 0) throw new Error('Tempo detection failed');
-    song.bpmStart = bpmEnd;
+    song.bpmEnd = bpmEnd;
   }
 }

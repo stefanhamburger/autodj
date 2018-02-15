@@ -102,6 +102,7 @@ const addFileToStream = (session) => {
       } catch (error) {
         console.log(`${consoleColors.magenta(`[${session.sid}]`)} Tempo detection failed; skipping ${consoleColors.green(songWrapper.songRef.name)}...`);
         //remove this song and start converting another song
+        audioManager.removeReference(songWrapper.songRef, { sid: session.sid, id: songWrapper.id });
         session.currentSongs.splice(session.currentSongs.findIndex(entry => entry.id === songWrapper.id), 1);
         reject();
         addFileToStream(session);

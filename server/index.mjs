@@ -4,6 +4,7 @@ import './mathExtensions.mjs';//import statements must be at the top, so define 
 import * as settings from './settings.mjs';
 import * as fileManager from './fileManager.mjs';
 import initServer from './server.mjs';
+import * as consoleColors from './consoleColors.mjs';
 
 //Exit on async error to prevent further bugs and provide better debug messages
 process.on('unhandledRejection', (err) => {
@@ -27,5 +28,5 @@ process.on('uncaughtException', (err) => {
   //start setting up server
   initServer();
 
-  console.log(`=== Server is running! ${new Date().toString()} ===`);
+  console.log(consoleColors.cyan(`=== Server is running! ${new Date().toString()} ===`));
 })());

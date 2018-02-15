@@ -45,8 +45,12 @@ const addFileToStream = (session) => {
         duration: songWrapper.totalLength,
       });
 
-      //do tempo recognition
-      startTempoRecognition(session, songWrapper, true);
+      //do tempo recognition - for first song, we do not need to wait until it is done
+      try {
+        startTempoRecognition(session, songWrapper, true);
+      } catch (error) {
+        //TODO: tempo recognition failed, we need to immediately switch to another random song
+      }
 
       resolve();
       songWrapper.ready = true;
@@ -91,8 +95,12 @@ const addFileToStream = (session) => {
         duration: songWrapper.totalLength,
       });
 
-      //do tempo recognition
-      startTempoRecognition(session, songWrapper);
+      //do tempo recognition - and only use song if recognition was successful
+      try {
+        await startTempoRecognition(session, songWrapper);
+      } catch (error) {
+        //TODO: tempo recognition failed, reject this song and find another song
+      }
 
       resolve();
       songWrapper.ready = true;
@@ -116,9 +124,8 @@ const addToBuffer = async (session) => {
       const outBuffer = new Float32Array(numSamplesToWrite * 2);//input is always stereo (two channels)
 
       //Get an array of songs that should be written to the current stream, and the offset into their waveform
-      for (let i = 0; i < songs.length; i += 1) {
-        const song = songs[i];
-        const waveform = new Float32Array(await audioManager.getWaveform(song.songRef));//TODO: do not await in a loop
+      await Promise.all(songs.map(async (song) => {
+        const waveform = new Float32Array(await audioManager.getWaveform(song.songRef));
         const songPosition = session.encoderPosition - song.startTime;
         const bufferStart = songPosition < 0 ? -songPosition : 0;
         const bufferEnd = (song.startTime + song.totalLength < endTime) ?
@@ -138,7 +145,7 @@ const addToBuffer = async (session) => {
           //need to start encoding another song if we don't have any current songs left
           addFileToStream(session);
         }
-      }
+      }));
 
       session.encoderInput.write(Buffer.from(outBuffer.buffer));
       session.encoderPosition += numSamplesToWrite;

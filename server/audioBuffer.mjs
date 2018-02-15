@@ -139,14 +139,15 @@ const addFileToStream = (session, isFirstSong = false) => {
 /** Write a certain number of samples to the FFmpeg input stream so that they are encoded */
 const addToBuffer = async (session) => {
   if (session.samplesToAdd > 0) {
-    //Filter session.currentSongs to only get songs that are ready for processing
-    const numSamplesToWrite = Math.min(session.samplesToAdd, MAX_SAMPLES_PER_LOOP);
+    let numSamplesToWrite = Math.min(session.samplesToAdd, MAX_SAMPLES_PER_LOOP);
     const endTime = session.encoderPosition + numSamplesToWrite;
+    //Only use songs that are 1. ready for processing 2. have already started playing 3. have not yet finished playing
     const songs = session.currentSongs.filter(song => song.ready === true && endTime > song.startTime && session.encoderPosition < song.startTime + song.totalLength);
 
     //only encode when we have at least one song to encode (at the start of a session, it takes a couple seconds until we can encode a song)
     if (songs.length > 0) {
-      //TODO: also ensure that songs don't end prematurely: If there isn't at least one song to cover till endTime, reduce numSamplesToWrite accordingly
+      //ensure that songs don't end prematurely: If there isn't at least one song to cover till endTime, reduce numSamplesToWrite accordingly
+      numSamplesToWrite = Math.min(numSamplesToWrite, ...songs.map(song => song.startTime + song.totalLength - session.encoderPosition));
 
       const outBuffer = new Float32Array(numSamplesToWrite * 2);//input is always stereo (two channels)
 
@@ -180,7 +181,7 @@ const addToBuffer = async (session) => {
     }
   }
 
-  //Only add more waveform data if it's still needed, otherwise pause until we receive message from client
+  //Only continue adding waveform data if it's still needed, otherwise pause until we receive message from client
   if (session.samplesToAdd <= 0) {
     session.pauseEncoding();
   } else {

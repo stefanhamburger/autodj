@@ -6,7 +6,7 @@ function UpcomingSong({
   return (
     <React.Fragment>
       <b style={{ marginRight: '5px' }}>Upcoming:</b>
-      {name === undefined ? 'TBD' : name}
+      {name === undefined ? 'TBD' : name.replace(/ - /g, ' – ')}
     </React.Fragment>
   );
 }

@@ -1,5 +1,5 @@
 import React from 'react';
-import getViridisColor from '../client/view/viridis.mjs';
+import getViridisColor from '../view/viridis.mjs';
 
 /** Canvas element dimensions. Width must match THUMBNAIL_WIDTH in server/audioManager.mjs */
 const CANVAS_WIDTH = 600;

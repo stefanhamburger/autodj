@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import spectrogram from './spectrogram.mjs';
 import model from '../model.mjs';
-import PlaybackContainer from '../../components/PlaybackContainer.mjs';
+import PlaybackContainer from '../components/PlaybackContainer.mjs';
 
 let container;
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import getViridisColor from '../client/view/viridis.mjs';
+import getViridisColor from '../view/viridis.mjs';
 
 const Container = styled.label`
   &:hover > input {

@@ -2,11 +2,11 @@ const path = require('path');
 
 module.exports = {
   devtool: 'inline-source-map',
-  entry: './client/init.js',
+  entry: './client/init.mjs',
   module: {
     loaders: [
       {
-        test: /\.m?js$/,
+        test: /\.mjs$/,
         exclude: /node_modules/,
         loader: 'babel-loader',
       },

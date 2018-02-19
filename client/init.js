@@ -67,6 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
       //TODO: we can also add the volume change buttons
       if (event.key === 'MediaPlayPause') {
         onPause();
+        event.preventDefault();
       }
     });
 

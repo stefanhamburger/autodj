@@ -54,9 +54,7 @@ const processEvents = events => events && events.forEach(async (event) => {
     case 'TEMPO_BEATS': {
       const { id, beats } = event;
       songPlaylist.filter(song => song.id === id).forEach((song) => {
-        console.log(beats);
         song.beats = beats;
-        setSong();
       });
       break;
     }

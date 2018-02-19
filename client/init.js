@@ -66,7 +66,6 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('keydown', (event) => {
       //TODO: we can also add the volume change buttons
       if (event.key === 'MediaPlayPause') {
-        console.log('keydown');
         onPause();
         //try to not send the pause keypress to other audio players running on the user's device
         event.preventDefault();

@@ -47,25 +47,36 @@ export default async function startTempoRecognition(session, song, isFirstSong =
 
   //if song is too short, we detect tempo across the whole song
   if (waveformArray.length < SONG_MIN_LENGTH) {
-    const bpm = await createWorker(waveformArray);
+    const { bpm, beats } = await createWorker(waveformArray);
     console.log(`${consoleColors.magenta(`[${session.sid}]`)} Song ${consoleColors.green(song.songRef.name)} starts and ends with ${bpm} bpm`);
     if (bpm === 0) throw new Error('Tempo detection failed');
     song.bpmStart = bpm;
     song.bpmEnd = bpm;
+    song.beats = beats;
   } else { //otherwise, we only detect the beginning and end of the song
     //if this is the first song we are playing, tempo at beginning doesn't matter
     if (!isFirstSong) {
       //tempo at beginning of song
-      const bpmStart = await createWorker(waveformArray.slice(0, SONG_START_LENGTH));
+      const { bpm: bpmStart, beats: beatsStart } = await createWorker(waveformArray.slice(0, SONG_START_LENGTH));
       console.log(`${consoleColors.magenta(`[${session.sid}]`)} Song ${consoleColors.green(song.songRef.name)} starts with ${bpmStart} bpm`);
       if (bpmStart === 0) throw new Error('Tempo detection failed');
       song.bpmStart = bpmStart;
+      song.beats = beatsStart;
     }
 
     //tempo at end of song
-    const bpmEnd = await createWorker(waveformArray.slice(waveformArray.length - SONG_END_LENGTH));
+    const endPos = waveformArray.length - SONG_END_LENGTH;
+    const { bpm: bpmEnd, beats: beatsResult } = await createWorker(waveformArray.slice(endPos));
     console.log(`${consoleColors.magenta(`[${session.sid}]`)} Song ${consoleColors.green(song.songRef.name)} ends with ${bpmEnd} bpm`);
     if (bpmEnd === 0) throw new Error('Tempo detection failed');
     song.bpmEnd = bpmEnd;
+    //the beat times are relative to the last minute, so add offset to get correct time
+    const beatsEnd = beatsResult.map(time => Math.round((endPos / SAMPLE_RATE + time) * 10000) / 10000);
+    //append to array if beginning was already detected
+    if (song.beats !== undefined) {
+      song.beats.push(beatsEnd);
+    } else {
+      song.beats = beatsEnd;
+    }
   }
 }

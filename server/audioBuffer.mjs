@@ -54,6 +54,7 @@ const addFileToStream = (session, isFirstSong = false) => {
       }
 
       session.emitEvent({ type: 'TEMPO_INFO_END', id: songWrapper.id, bpm: songWrapper.bpmEnd });
+      session.emitEvent({ type: 'TEMPO_BEATS', id: songWrapper.id, beats: songWrapper.beats });
 
       //Notify client that waveform data is ready
       await thumbnailPromise.then(() => {
@@ -123,6 +124,7 @@ const addFileToStream = (session, isFirstSong = false) => {
 
       session.emitEvent({ type: 'TEMPO_INFO_START', id: songWrapper.id, bpm: songWrapper.bpmStart });
       session.emitEvent({ type: 'TEMPO_INFO_END', id: songWrapper.id, bpm: songWrapper.bpmEnd });
+      session.emitEvent({ type: 'TEMPO_BEATS', id: songWrapper.id, beats: songWrapper.beats });
 
       //Notify client that waveform data is ready
       await thumbnailPromise.then(() => {

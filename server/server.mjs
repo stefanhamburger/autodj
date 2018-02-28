@@ -15,10 +15,14 @@ app.use(express.static('public'));
 
 //main HTML
 app.get('/', (req, res) => {
-  let output = fs.readFileSync('./index.html');
-  const collectionsString = Object.keys(getSettings().collections).map(key => `<option>${key}</option>`).join('');
-  output = output.toString().replace(/__INSERT_COLLECTIONS__/, collectionsString);
-  res.send(output);
+  fs.readFile('./index.html', (err, fileContents) => {
+    if (err) {
+      res.status(500).end();
+      return;
+    }
+    const collectionsString = Object.keys(getSettings().collections).map(key => `<option>${key}</option>`).join('');
+    res.send(fileContents.toString().replace(/__INSERT_COLLECTIONS__/, collectionsString));
+  });
 });
 
 

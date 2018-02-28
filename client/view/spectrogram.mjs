@@ -60,7 +60,7 @@ const addData = (fftManagerHi, binSizeHi, fftManagerLo, binSizeLo, newTime) => {
 
   //If user tabbed out and returns, skip older pixels for better performance
   let startPixel = 0;
-  if (pixelsToMove > 50) {
+  if (pixelsToMove > 30) {
     ctx.fillStyle = SPECTROGRAM_BACKGROUND;
     ctx.fillRect(oldWidth - pixelsToMove, 0, pixelsToMove - 20, oldHeight);
     startPixel = pixelsToMove - 20;

@@ -96,7 +96,7 @@ const heartbeat = (time) => {
 const getSongInfo = (songId) => {
   const requestedSong = songPlaylist.filter(song => song.id === songId)[0];
 
-  //Use if statement until object spread becomes natively supported in webpack
+  //Use if statement until object spread becomes natively supported in babel
   if (!requestedSong) {
     return {
       name: '',
@@ -111,11 +111,11 @@ const getSongInfo = (songId) => {
     return requestedSong;
   }
 
-  /*//Override default values with values from requestedSong, if they exist, then return object - not supported by webpack
+  /*//Override default values with values from requestedSong, if they exist, then return object - not supported by babel
   return {
     name: '',
     startTime: 0,
-    duration: 0,
+    duration: undefined,
     bpmStart: undefined,
     bpmEnd: undefined,
     thumbnailMin: undefined,

@@ -2,13 +2,13 @@ import React from 'react';
 import styled from 'styled-components';
 import getViridisColor from '../view/viridis.mjs';
 
-const Container = styled.label`
+const Container = styled.default.label`
   &:hover > input {
     display: inline-block;
   }
 `;
 
-const Button = styled.button`
+const Button = styled.default.button`
   display: inline-block;
   width: 24px;
   height: 24px;
@@ -19,7 +19,7 @@ const Button = styled.button`
   text-align: center;
 `;
 
-const Slider = styled.input`
+const Slider = styled.default.input`
   display: none;
   width: 100px;
   height: 15px;

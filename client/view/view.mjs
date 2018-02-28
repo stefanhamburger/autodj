@@ -55,6 +55,7 @@ const setSong = (songId = curSongId) => {
     const songInfo = model.getSongInfo(songId);
 
     state.songName = songInfo.name;
+    document.title = `${songInfo.name.replace(/ - /g, ' – ')} – AutoDJ`;
     if (state.songName === state.nextSong) state.nextSong = undefined;
     state.songStart = songInfo.startTime;
     state.songDuration = songInfo.duration !== undefined ? songInfo.duration : 0;

@@ -18,9 +18,13 @@ export default function PlaybackContainer({ state }) {
         <ButtonPause isPaused={state.isPaused} pauseCallback={state.onPause} />
         <VolumeControl volumeChangeCallback={state.onVolumeChange} />
       </div>
-      <div>
-        <b>Currently playing:</b>
-        {state.currentSongs.map(song => <div key={song.id}><CurrentSong songInfo={song} /></div>)}
+      <b>Currently playing:</b>
+      <div style={{ display: 'flex', justifyContent: 'start' }}>
+        {state.currentSongs.map(song => (
+          <div key={song.id} style={{ marginRight: '10px' }}>
+            <CurrentSong songInfo={song} />
+          </div>
+        ))}
       </div>
       <div>
         <UpcomingSong name={state.nextSong} />

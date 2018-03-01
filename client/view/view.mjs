@@ -1,7 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import spectrogram from './spectrogram.mjs';
-import model from '../model.mjs';
 import PlaybackContainer from '../components/PlaybackContainer.mjs';
 
 let container;
@@ -37,25 +36,21 @@ const init = (onVolumeChange, onPause) => {
   rootEle.appendChild(canvas);
 };
 
-let curSongId;
 /**
  * Tells the view to update its state based on the current model.
  * If a song id is given, also update the current song to the given id.
  * @param songId
  */
-const setSong = (songId = curSongId) => {
-  if (songId !== undefined) {
-    curSongId = songId;
-    const songInfo = model.getSongInfo(songId);
-    document.title = `${songInfo.name.replace(/ - /g, ' – ')} – AutoDJ`;
+const setSong = (songs = []) => {
+  if (songs.length > 0) {
+    state.currentSongs = songs.map(song => ({
+      ...song,
+      elapsed: (state.totalTime - song.startTime) * 48000,
+    }));
 
-    state.currentSongs = [];
-    state.currentSongs[0] = {
-      ...songInfo,
-      elapsed: (state.totalTime - songInfo.startTime) * 48000,
-    };
-    if (state.nextSong === songInfo.name) state.nextSong = undefined;
-
+    const lastSong = state.currentSongs[state.currentSongs.length - 1];
+    document.title = `${lastSong.name.replace(/ - /g, ' – ')} – AutoDJ`;
+    if (state.nextSong === lastSong.name) state.nextSong = undefined;
     rerender();
   }
 };

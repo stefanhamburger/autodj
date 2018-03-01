@@ -102,28 +102,12 @@ const heartbeat = (time) => {
     }
   }
 
-  //Set the first of the current songs to be currently playing
-  //TODO: Need to be able to handle multiple current songs
-  if (currentSongs.length > 0) {
-    externals.setSong(currentSongs[0].id);
-  }
-};
-
-/** Get state information about the current song, or default values if song was not found. */
-const getSongInfo = (songId) => {
-  const requestedSong = songPlaylist.filter(song => song.id === songId)[0];
-
-  //Override default values with values from requestedSong, if they exist, then return object
-  return {
-    name: '',
-    startTime: 0,
-    ...requestedSong,
-  };
+  //Send currently playing songs to view
+  externals.setSong(currentSongs);
 };
 
 export default {
   init,
   processEvents,
   heartbeat,
-  getSongInfo,
 };

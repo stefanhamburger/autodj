@@ -41,7 +41,8 @@ const init = (onVolumeChange, onPause) => {
  * If a song id is given, also update the current song to the given id.
  * @param songId
  */
-const updateSongs = (songs = []) => {
+const updateSongs = (newTime, songs = []) => {
+  state.totalTime = newTime;
   if (songs.length > 0) {
     state.currentSongs = songs.map(song => ({
       ...song,
@@ -64,18 +65,9 @@ const setIsPaused = (isPaused) => {
   rerender();
 };
 
-const updateTime = (newTime) => {
-  state.totalTime = newTime;
-  state.currentSongs.forEach((song) => {
-    song.elapsed = (state.totalTime - song.startTime) * 48000;
-  });
-  rerender();
-};
-
 export default {
   init,
   updateSongs,
   setUpcoming,
   setIsPaused,
-  updateTime,
 };

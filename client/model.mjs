@@ -96,7 +96,7 @@ const heartbeat = (time) => {
   }
 
   //Send currently playing songs to view
-  view.updateSongs(currentSongs);
+  view.updateSongs(time, currentSongs);
 };
 
 export default {

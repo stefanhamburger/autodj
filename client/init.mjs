@@ -105,11 +105,10 @@ document.addEventListener('DOMContentLoaded', () => {
     //Create view
     view.init(onVolumeChange, onPause);
 
-    //Update model and view
+    //Update model (which itself will update view)
     //The onprogress handler is called once per second, while requestAnimationFrame() is called up to 60 HZ as long as tab is open
     const updateModelView = () => {
       model.heartbeat(audioEle.currentTime);
-      view.updateTime(audioEle.currentTime);
     };
     audioEle.addEventListener('progress', updateModelView);
     updateModelView();

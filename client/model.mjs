@@ -1,17 +1,15 @@
+const externals = {};
 const songPlaylist = [];
-let setSong;
-let setUpcoming;
-let sid;
 
 const init = (setSongIn, setUpcomingIn, sidIn) => {
   //reference to view.setSong()
-  setSong = setSongIn;
+  externals.setSong = setSongIn;
 
   //reference to view.setUpcoming()
-  setUpcoming = setUpcomingIn;
+  externals.setUpcoming = setUpcomingIn;
 
   //session id as fetched in init.js
-  sid = sidIn;
+  externals.sid = sidIn;
 };
 
 const processEvents = events => events && events.forEach(async (event) => {
@@ -27,7 +25,7 @@ const processEvents = events => events && events.forEach(async (event) => {
       const { id, duration } = event;
       songPlaylist.filter(song => song.id === id).forEach((song) => {
         song.duration = duration;//given in samples
-        setSong();
+        externals.setSong();
       });
       break;
     }
@@ -37,7 +35,7 @@ const processEvents = events => events && events.forEach(async (event) => {
       if (bpm === undefined) bpm = 0;
       songPlaylist.filter(song => song.id === id).forEach((song) => {
         song.bpmStart = bpm;
-        setSong();
+        externals.setSong();
       });
       break;
     }
@@ -47,7 +45,7 @@ const processEvents = events => events && events.forEach(async (event) => {
       if (bpm === undefined) bpm = 0;
       songPlaylist.filter(song => song.id === id).forEach((song) => {
         song.bpmEnd = bpm;
-        setSong();
+        externals.setSong();
       });
       break;
     }
@@ -60,20 +58,20 @@ const processEvents = events => events && events.forEach(async (event) => {
     }
     case 'THUMBNAIL_READY': {
       const { id } = event;
-      const thumbnailResult = await fetch(`thumbnail?sid=${sid}&song=${id}`, { cache: 'no-store' });
+      const thumbnailResult = await fetch(`thumbnail?sid=${externals.sid}&song=${id}`, { cache: 'no-store' });
       const thumbnailBuffer = await thumbnailResult.arrayBuffer();
       const thumbnailMin = new Float32Array(thumbnailBuffer, 0, 600);
       const thumbnailMax = new Float32Array(thumbnailBuffer, 600 * 4);
       songPlaylist.filter(song => song.id === id).forEach((song) => {
         song.thumbnailMin = thumbnailMin;
         song.thumbnailMax = thumbnailMax;
-        setSong();
+        externals.setSong();
       });
       break;
     }
     case 'NEXT_SONG': {
       const { songName } = event;
-      setUpcoming(songName);
+      externals.setUpcoming(songName);
       break;
     }
     default:
@@ -86,7 +84,7 @@ const heartbeat = (time) => {
   for (let i = songPlaylist.length - 1; i >= 0; i -= 1) {
     const song = songPlaylist[i];
     if (song.startTime <= time) {
-      setSong(song.id);
+      externals.setSong(song.id);
       break;
     }
   }

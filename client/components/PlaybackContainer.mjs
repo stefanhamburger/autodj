@@ -19,15 +19,7 @@ export default function PlaybackContainer({ state }) {
         <VolumeControl volumeChangeCallback={state.onVolumeChange} />
       </div>
       <div>
-        <CurrentSong
-          name={state.songName}
-          bpmStart={state.bpmStart}
-          bpmEnd={state.bpmEnd}
-          elapsed={state.songElapsed}
-          duration={state.songDuration}
-          thumbnailMin={state.thumbnailMin}
-          thumbnailMax={state.thumbnailMax}
-        />
+        <CurrentSong songInfo={state.currentSong} />
       </div>
       <div>
         <UpcomingSong name={state.nextSong} />

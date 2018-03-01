@@ -18,41 +18,35 @@ const tempoToString = (bpm) => {
   }
 };
 
-export default function CurrentSong({
-  name,
-  bpmStart,
-  bpmEnd,
-  duration,
-  elapsed,
-  thumbnailMin,
-  thumbnailMax,
-}) {
+export default function CurrentSong({ songInfo }) {
   //Generate JSX from bpm value
   let jsxTempo;
-  if (bpmStart === undefined && bpmEnd === undefined) {
+  if (songInfo.bpmStart === undefined && songInfo.bpmEnd === undefined) {
     jsxTempo = ' [Detecting tempo...]';
-  } else if ((bpmStart === 0 && bpmEnd === 0) || (bpmStart === 0 && bpmEnd === undefined) || (bpmStart === undefined && bpmEnd === 0)) {
+  } else if ((songInfo.bpmStart === 0 && songInfo.bpmEnd === 0) || (songInfo.bpmStart === 0 && songInfo.bpmEnd === undefined) || (songInfo.bpmStart === undefined && songInfo.bpmEnd === 0)) {
     jsxTempo = ' [Tempo detection failed]';
-  } else if (bpmStart === undefined) {
-    jsxTempo = <React.Fragment> [Ends with {tempoToString(bpmEnd)} bpm]</React.Fragment>;
+  } else if (songInfo.bpmStart === undefined) {
+    jsxTempo = <React.Fragment> [Ends with {tempoToString(songInfo.bpmEnd)} bpm]</React.Fragment>;
   } else {
-    jsxTempo = <React.Fragment> [{tempoToString(bpmStart)} bpm → {tempoToString(bpmEnd)} bpm]</React.Fragment>;
+    jsxTempo = <React.Fragment> [{tempoToString(songInfo.bpmStart)} bpm → {tempoToString(songInfo.bpmEnd)} bpm]</React.Fragment>;
   }
+
+  const duration = songInfo.duration !== undefined ? songInfo.duration : 0;
 
   return (
     <React.Fragment>
       <b style={{ marginRight: '5px' }}>Currently playing:</b>
-      {timeToString(elapsed)} / {timeToString(duration)} |{' '}
-      {name !== '' ? name.replace(/ - /g, ' – ') : 'Loading...'}
+      {timeToString(songInfo.elapsed)} / {timeToString(duration)} |{' '}
+      {songInfo.name !== undefined ? songInfo.name.replace(/ - /g, ' – ') : 'Loading...'}
       {jsxTempo}
       <br />
       <SongWaveform
-        bpmStart={bpmStart}
-        bpmEnd={bpmEnd}
+        bpmStart={songInfo.bpmStart}
+        bpmEnd={songInfo.bpmEnd}
         duration={duration}
-        elapsed={elapsed}
-        thumbnailMin={thumbnailMin}
-        thumbnailMax={thumbnailMax}
+        elapsed={songInfo.elapsed}
+        thumbnailMin={songInfo.thumbnailMin}
+        thumbnailMax={songInfo.thumbnailMax}
       />
     </React.Fragment>
   );

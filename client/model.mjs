@@ -117,11 +117,6 @@ const getSongInfo = (songId) => {
   return {
     name: '',
     startTime: 0,
-    duration: undefined,
-    bpmStart: undefined,
-    bpmEnd: undefined,
-    thumbnailMin: undefined,
-    thumbnailMax: undefined,
     ...requestedSong,
   };
 };

@@ -22,14 +22,8 @@ const init = (onVolumeChange, onPause) => {
   state.onVolumeChange = onVolumeChange;
   state.onPause = onPause;
   state.isPaused = false;
-  state.songName = '';
-  state.songStart = 0;
-  state.songElapsed = 0;
-  state.songDuration = 0;
-  state.bpmStart = undefined;
-  state.bpmEnd = undefined;
-  state.thumbnailMin = undefined;
-  state.thumbnailMax = undefined;
+  state.totalTime = 0;
+  state.currentSong = {};
   state.nextSong = undefined;
 
   container = document.createElement('div');
@@ -53,19 +47,13 @@ const setSong = (songId = curSongId) => {
   if (songId !== undefined) {
     curSongId = songId;
     const songInfo = model.getSongInfo(songId);
-
-    state.songName = songInfo.name;
     document.title = `${songInfo.name.replace(/ - /g, ' – ')} – AutoDJ`;
-    if (state.songName === state.nextSong) state.nextSong = undefined;
-    state.songStart = songInfo.startTime;
-    state.songDuration = songInfo.duration !== undefined ? songInfo.duration : 0;
-    state.songElapsed = (state.totalTime - state.songStart) * 48000;
 
-    state.bpmStart = songInfo.bpmStart;
-    state.bpmEnd = songInfo.bpmEnd;
-
-    state.thumbnailMin = songInfo.thumbnailMin;
-    state.thumbnailMax = songInfo.thumbnailMax;
+    state.currentSong = {
+      ...songInfo,
+      elapsed: (state.totalTime - songInfo.startTime) * 48000,
+    };
+    if (state.nextSong === songInfo.name) state.nextSong = undefined;
 
     rerender();
   }
@@ -82,7 +70,11 @@ const setIsPaused = (isPaused) => {
 
 const updateTime = (newTime) => {
   state.totalTime = newTime;
-  state.songElapsed = (state.totalTime - state.songStart) * 48000;
+  if (state.currentSong.startTime !== undefined) {
+    state.currentSong.elapsed = (state.totalTime - state.currentSong.startTime) * 48000;
+  } else {
+    state.currentSong.elapsed = 0;
+  }
   rerender();
 };
 

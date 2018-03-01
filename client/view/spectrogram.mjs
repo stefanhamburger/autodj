@@ -49,9 +49,14 @@ const init = (canvas) => {
 
 /**
  * Upon new data, moves the graph to the left and inserts the input on the right side
- * @param {Uint8Array} data
  */
-const addData = (fftManagerHi, binSizeHi, fftManagerLo, binSizeLo, newTime) => {
+const addData = ({
+  fftManagerHi,
+  binSizeHi,
+  fftManagerLo,
+  binSizeLo,
+  newTime,
+}) => {
   const pixelsToMove = Math.floor((newTime - prevTime) / SPECTROGRAM_SAMPLES_PER_PIXEL);
 
   //move existing graph to the left

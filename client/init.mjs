@@ -132,7 +132,13 @@ document.addEventListener('DOMContentLoaded', () => {
       const bufferLo = fftManagerLo.getNewBuffer(audioEle.currentTime * sampleRate);
       analyserNodeLo.getByteFrequencyData(bufferLo);
 
-      spectrogram.addData(fftManagerHi, binSizeHi, fftManagerLo, binSizeLo, audioEle.currentTime * sampleRate);
+      spectrogram.addData({
+        fftManagerHi,
+        binSizeHi,
+        fftManagerLo,
+        binSizeLo,
+        newTime: audioEle.currentTime * sampleRate,
+      });
 
       fftManagerHi.garbageCollection(audioEle.currentTime * sampleRate);
       fftManagerLo.garbageCollection(audioEle.currentTime * sampleRate);

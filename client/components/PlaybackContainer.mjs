@@ -19,6 +19,7 @@ export default function PlaybackContainer({ state }) {
         <VolumeControl volumeChangeCallback={state.onVolumeChange} />
       </div>
       <div>
+        <b>Currently playing:</b>
         {state.currentSongs.map(song => <div key={song.id}><CurrentSong songInfo={song} /></div>)}
       </div>
       <div>

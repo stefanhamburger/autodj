@@ -35,9 +35,8 @@ export default function CurrentSong({ songInfo }) {
 
   return (
     <React.Fragment>
-      <b style={{ marginRight: '5px' }}>Currently playing:</b>
       {timeToString(songInfo.elapsed)} / {timeToString(duration)} |{' '}
-      {songInfo.name !== undefined ? songInfo.name.replace(/ - /g, ' – ') : 'Loading...'}
+      {songInfo.name.replace(/ - /g, ' – ')}
       {jsxTempo}
       <br />
       <SongWaveform

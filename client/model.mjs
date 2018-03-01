@@ -1,5 +1,7 @@
 const externals = {};
 const songPlaylist = [];
+const upcomingSongs = [];
+const currentSongs = [];
 
 const init = (setSongIn, setUpcomingIn, sidIn) => {
   //reference to view.setSong()
@@ -14,13 +16,16 @@ const init = (setSongIn, setUpcomingIn, sidIn) => {
 
 const processEvents = events => events && events.forEach(async (event) => {
   switch (event.type) {
-    case 'SONG_START':
-      songPlaylist.push({
+    case 'SONG_START': {
+      const song = {
         id: event.id,
         name: event.songName,
         startTime: event.time, //given in seconds
-      });
+      };
+      songPlaylist.push(song);
+      upcomingSongs.push(song);
       break;
+    }
     case 'SONG_DURATION': {
       const { id, duration } = event;
       songPlaylist.filter(song => song.id === id).forEach((song) => {
@@ -80,13 +85,27 @@ const processEvents = events => events && events.forEach(async (event) => {
 });
 
 const heartbeat = (time) => {
-  //Find the current song by looking at the last song that is still being played in the present time
-  for (let i = songPlaylist.length - 1; i >= 0; i -= 1) {
-    const song = songPlaylist[i];
-    if (song.startTime <= time) {
-      externals.setSong(song.id);
-      break;
+  //Move all songs that have started playing from upcomingSongs to currentSongs
+  for (let i = upcomingSongs.length - 1; i >= 0; i -= 1) {
+    const song = upcomingSongs[i];
+    if (time >= song.startTime) {
+      upcomingSongs.splice(i, 1);
+      currentSongs.push(song);
     }
+  }
+
+  //Remove all songs from currentSongs that have finished playing
+  for (let i = currentSongs.length - 1; i >= 0; i -= 1) {
+    const song = currentSongs[i];
+    if (song.duration !== undefined && time > song.startTime + song.duration / 48000) {
+      currentSongs.splice(i, 1);
+    }
+  }
+
+  //Set the first of the current songs to be currently playing
+  //TODO: Need to be able to handle multiple current songs
+  if (currentSongs.length > 0) {
+    externals.setSong(currentSongs[0].id);
   }
 };
 

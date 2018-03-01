@@ -31,22 +31,13 @@ export default function CurrentSong({ songInfo }) {
     jsxTempo = <React.Fragment> [{tempoToString(songInfo.bpmStart)} bpm → {tempoToString(songInfo.bpmEnd)} bpm]</React.Fragment>;
   }
 
-  const duration = songInfo.duration !== undefined ? songInfo.duration : 0;
-
   return (
     <React.Fragment>
-      {timeToString(songInfo.elapsed)} / {timeToString(duration)} |{' '}
+      {timeToString(songInfo.elapsed)} / {timeToString(songInfo.duration)} |{' '}
       {songInfo.name.replace(/ - /g, ' – ')}
       {jsxTempo}
       <br />
-      <SongWaveform
-        bpmStart={songInfo.bpmStart}
-        bpmEnd={songInfo.bpmEnd}
-        duration={duration}
-        elapsed={songInfo.elapsed}
-        thumbnailMin={songInfo.thumbnailMin}
-        thumbnailMax={songInfo.thumbnailMax}
-      />
+      <SongWaveform songInfo={songInfo} />
     </React.Fragment>
   );
 }

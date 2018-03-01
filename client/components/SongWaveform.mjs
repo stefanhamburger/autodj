@@ -20,34 +20,35 @@ export default class SongWaveform extends React.Component {
     this.updateCanvas();
   }
   updateCanvas() {
+    const { songInfo } = this.props;
     const ctx = this.canvas.getContext('2d');
-    const position = Math.round((this.props.duration === 0) ? 0 : this.props.elapsed / this.props.duration * CANVAS_WIDTH);
+    const position = Math.round((songInfo.duration === 0) ? 0 : songInfo.elapsed / songInfo.duration * CANVAS_WIDTH);
 
     //draw background
     ctx.fillStyle = COLOR_BACKGROUND;
     ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
     //fill first and last minute
-    if (this.props.duration !== 0) {
+    if (songInfo.duration !== 0) {
       ctx.fillStyle = COLOR_BACKGROUND_EDGE;
-      const minuteWidth = Math.round(CANVAS_WIDTH * 60 * 48000 / this.props.duration);
-      if (this.props.bpmStart !== undefined && this.props.bpmStart !== 0) {
+      const minuteWidth = Math.round(CANVAS_WIDTH * 60 * 48000 / songInfo.duration);
+      if (songInfo.bpmStart !== undefined && songInfo.bpmStart !== 0) {
         ctx.fillRect(0, 0, minuteWidth, CANVAS_HEIGHT);
       }
-      if (this.props.bpmEnd !== undefined && this.props.bpmEnd !== 0) {
+      if (songInfo.bpmEnd !== undefined && songInfo.bpmEnd !== 0) {
         ctx.fillRect(CANVAS_WIDTH - minuteWidth, 0, minuteWidth, CANVAS_HEIGHT);
       }
     }
 
     //draw waveform
-    if (this.props.thumbnailMin !== undefined && this.props.thumbnailMax !== undefined) {
+    if (songInfo.thumbnailMin !== undefined && songInfo.thumbnailMax !== undefined) {
       for (let i = 0; i < CANVAS_WIDTH; i += 1) {
         //grey if this pixel was already played, otherwise black
         ctx.fillStyle = (i <= position) ? COLOR_FOREGROUND_PLAYED : COLOR_FOREGROUND;
 
         //need to lerp from [-1, 1] to [0, 40]
-        const minValue = (this.props.thumbnailMin[i] + 1) / 2 * CANVAS_HEIGHT;
-        const maxValue = (this.props.thumbnailMax[i] + 1) / 2 * CANVAS_HEIGHT;
+        const minValue = (songInfo.thumbnailMin[i] + 1) / 2 * CANVAS_HEIGHT;
+        const maxValue = (songInfo.thumbnailMax[i] + 1) / 2 * CANVAS_HEIGHT;
         ctx.fillRect(i, minValue, 1, maxValue - minValue);
       }
     }

@@ -21,6 +21,7 @@ const processEvents = events => events && events.forEach(async (event) => {
         id: event.id,
         name: event.songName,
         startTime: event.time, //given in seconds
+        duration: 0,
       };
       songPlaylist.push(song);
       upcomingSongs.push(song);

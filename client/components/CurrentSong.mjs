@@ -8,34 +8,11 @@ const timeToString = (timeIn) => {
   return `${minutes}:${seconds.toString().padStart(2, '0')}`;
 };
 
-const tempoToString = (bpm) => {
-  if (bpm === undefined) {
-    return '...';
-  } else if (bpm === 0) {
-    return '???';
-  } else {
-    return bpm.toString();
-  }
-};
-
 export default function CurrentSong({ songInfo }) {
-  //Generate JSX from bpm value
-  let jsxTempo;
-  if (songInfo.bpmStart === undefined && songInfo.bpmEnd === undefined) {
-    jsxTempo = ' [Detecting tempo...]';
-  } else if ((songInfo.bpmStart === 0 && songInfo.bpmEnd === 0) || (songInfo.bpmStart === 0 && songInfo.bpmEnd === undefined) || (songInfo.bpmStart === undefined && songInfo.bpmEnd === 0)) {
-    jsxTempo = ' [Tempo detection failed]';
-  } else if (songInfo.bpmStart === undefined) {
-    jsxTempo = <React.Fragment> [Ends with {tempoToString(songInfo.bpmEnd)} bpm]</React.Fragment>;
-  } else {
-    jsxTempo = <React.Fragment> [{tempoToString(songInfo.bpmStart)} bpm → {tempoToString(songInfo.bpmEnd)} bpm]</React.Fragment>;
-  }
-
   return (
     <React.Fragment>
       {timeToString(songInfo.elapsed)} / {timeToString(songInfo.duration)} |{' '}
       {songInfo.name.replace(/ - /g, ' – ')}
-      {jsxTempo}
       <br />
       <SongWaveform songInfo={songInfo} />
     </React.Fragment>

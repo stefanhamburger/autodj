@@ -11,6 +11,7 @@ const COLOR_BACKGROUND_EDGE = '#700';
 const COLOR_FOREGROUND = getViridisColor(0.4).replace(/^rgb\((.+)\)$/, 'rgba($1,0.6)');
 const COLOR_FOREGROUND_PLAYED = getViridisColor(1.0).replace(/^rgb\((.+)\)$/, 'rgba($1,0.6)');
 const COLOR_TRACK_LINE = '#fff';
+const COLOR_BPM_TEXT = '#fff';
 
 export default class SongWaveform extends React.Component {
   componentDidMount() {
@@ -56,6 +57,18 @@ export default class SongWaveform extends React.Component {
     //draw current position
     ctx.fillStyle = COLOR_TRACK_LINE;
     ctx.fillRect(position, 0, 1, CANVAS_HEIGHT);
+
+    //draw bpm
+    ctx.fillStyle = COLOR_BPM_TEXT;
+    ctx.font = '12px sans-serif';
+    if (songInfo.bpmStart !== undefined && songInfo.bpmStart !== 0) {
+      ctx.textAlign = 'start';
+      ctx.fillText(`${songInfo.bpmStart.toString()} bpm`, 3, CANVAS_HEIGHT - 6);
+    }
+    if (songInfo.bpmEnd !== undefined && songInfo.bpmEnd !== 0) {
+      ctx.textAlign = 'end';
+      ctx.fillText(`${songInfo.bpmEnd.toString()} bpm`, CANVAS_WIDTH - 3, CANVAS_HEIGHT - 6);
+    }
   }
   render() {
     return (

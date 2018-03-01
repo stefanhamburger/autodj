@@ -22,6 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const response = await fetch(`init?collection=${encodeURIComponent(collection)}&numChannels=${encodeURIComponent(channels)}`, { cache: 'no-store' });
     const json = await response.json();
     const { sid } = json;
+    model.init(sid);
 
     const audioEle = new Audio();
 
@@ -71,8 +72,6 @@ document.addEventListener('DOMContentLoaded', () => {
         event.preventDefault();
       }
     });
-
-    model.init(view.setSong, view.setUpcoming, sid);
 
     //Set up Web Audio API to create volume slider and generate FFT data
     const audioCtx = new AudioContext({

@@ -1,15 +1,11 @@
+import view from './view/view.mjs';
+
 const externals = {};
 const songPlaylist = [];
 const upcomingSongs = [];
 const currentSongs = [];
 
-const init = (setSongIn, setUpcomingIn, sidIn) => {
-  //reference to view.setSong()
-  externals.setSong = setSongIn;
-
-  //reference to view.setUpcoming()
-  externals.setUpcoming = setUpcomingIn;
-
+const init = (sidIn) => {
   //session id as fetched in init.js
   externals.sid = sidIn;
 };
@@ -31,7 +27,6 @@ const processEvents = events => events && events.forEach(async (event) => {
       const { id, duration } = event;
       songPlaylist.filter(song => song.id === id).forEach((song) => {
         song.duration = duration;//given in samples
-        externals.setSong();
       });
       break;
     }
@@ -41,7 +36,6 @@ const processEvents = events => events && events.forEach(async (event) => {
       if (bpm === undefined) bpm = 0;
       songPlaylist.filter(song => song.id === id).forEach((song) => {
         song.bpmStart = bpm;
-        externals.setSong();
       });
       break;
     }
@@ -51,7 +45,6 @@ const processEvents = events => events && events.forEach(async (event) => {
       if (bpm === undefined) bpm = 0;
       songPlaylist.filter(song => song.id === id).forEach((song) => {
         song.bpmEnd = bpm;
-        externals.setSong();
       });
       break;
     }
@@ -71,13 +64,12 @@ const processEvents = events => events && events.forEach(async (event) => {
       songPlaylist.filter(song => song.id === id).forEach((song) => {
         song.thumbnailMin = thumbnailMin;
         song.thumbnailMax = thumbnailMax;
-        externals.setSong();
       });
       break;
     }
     case 'NEXT_SONG': {
       const { songName } = event;
-      externals.setUpcoming(songName);
+      view.setUpcoming(songName);
       break;
     }
     default:
@@ -104,7 +96,7 @@ const heartbeat = (time) => {
   }
 
   //Send currently playing songs to view
-  externals.setSong(currentSongs);
+  view.updateSongs(currentSongs);
 };
 
 export default {

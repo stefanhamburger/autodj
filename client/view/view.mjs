@@ -41,7 +41,7 @@ const init = (onVolumeChange, onPause) => {
  * If a song id is given, also update the current song to the given id.
  * @param songId
  */
-const setSong = (songs = []) => {
+const updateSongs = (songs = []) => {
   if (songs.length > 0) {
     state.currentSongs = songs.map(song => ({
       ...song,
@@ -74,7 +74,7 @@ const updateTime = (newTime) => {
 
 export default {
   init,
-  setSong,
+  updateSongs,
   setUpcoming,
   setIsPaused,
   updateTime,

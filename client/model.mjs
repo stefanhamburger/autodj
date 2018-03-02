@@ -52,6 +52,7 @@ const processEvents = events => events && events.forEach(async (event) => {
       const { id, beats } = event;
       songPlaylist.filter(song => song.id === id).forEach((song) => {
         song.beats = beats;
+        song.beatsPos = 0;
       });
       break;
     }
@@ -99,8 +100,11 @@ const heartbeat = (time) => {
   view.updateSongs(time, currentSongs);
 };
 
+const getCurrentSongs = () => currentSongs;
+
 export default {
   init,
   processEvents,
   heartbeat,
+  getCurrentSongs,
 };

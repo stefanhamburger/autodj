@@ -1,12 +1,15 @@
 import getViridisColor from './viridis.mjs';
 import frequencyToVolume from './equalLoudnessContour.mjs';
+import model from './../model.mjs';
 
+/** Sampling rate of the Web Audio API */
+const SAMPLE_RATE = 44100;
 /** The height in pixels of the top navigation, the spectrogram is drawn below it */
 const TOP_NAVIGATION_HEIGHT = 140;
 /** How fast the spectrogram moves to the left, in pixels per second. This number should be a multiple of 60 because we redraw up to 60Hz */
 const SPECTROGRAM_SPEED = 120;
 /** How many samples are in one pixel */
-const SPECTROGRAM_SAMPLES_PER_PIXEL = 44100 / SPECTROGRAM_SPEED;
+const SPECTROGRAM_SAMPLES_PER_PIXEL = SAMPLE_RATE / SPECTROGRAM_SPEED;
 /** The background color of the spectrogram is purple by default, rgb(68,1,84), which equals 0 in the Viridis color map */
 const SPECTROGRAM_BACKGROUND = getViridisColor(0);
 
@@ -58,6 +61,7 @@ const addData = ({
   newTime,
 }) => {
   const pixelsToMove = Math.floor((newTime - prevTime) / SPECTROGRAM_SAMPLES_PER_PIXEL);
+  const currentSongs = model.getCurrentSongs();
 
   //move existing graph to the left
   //getImageData()/putImageData() takes 8-16 ms which is too slow, so we use drawImage() which takes <0.2ms
@@ -75,7 +79,6 @@ const addData = ({
   for (let i = startPixel; i < pixelsToMove; i += 1) {
     const nearestBuffersHi = fftManagerHi.getNearestBuffers(prevTime);
     const nearestBuffersLo = fftManagerLo.getNearestBuffers(prevTime);
-    prevTime += SPECTROGRAM_SAMPLES_PER_PIXEL;
 
     //add new pixels on the right side based on input data
     for (let j = oldHeight - 1; j >= 0; j -= 1) {
@@ -123,8 +126,29 @@ const addData = ({
       //set background color based on amplitude
       ctx.fillStyle = getViridisColor(amplitude);
       //fill this pixel
-      ctx.fillRect(oldWidth - pixelsToMove + i, oldHeight - j, 1, 1);
+      ctx.fillRect(oldWidth - pixelsToMove + i, (oldHeight - 1) - j, 1, 1);
     }
+
+    //Draw beat lines
+    for (let j = 0; j < currentSongs.length; j += 1) {
+      const song = currentSongs[j];
+      //Ignore this song if beats have not yet been detected, or all beat lines were already drawn
+      if (song.beats !== undefined && song.beatsPos < song.beats.length) {
+        //Check that a beat occurs on this pixel
+        const beatTime = (song.startTime + song.beats[song.beatsPos]) * SAMPLE_RATE;
+        if (beatTime <= prevTime + SPECTROGRAM_SAMPLES_PER_PIXEL) { //if end of pixel is after this beat
+          if (prevTime <= beatTime) { //if beginning of pixel is before this beat
+            //If yes, draw a white line
+            ctx.fillStyle = '#fff';
+            ctx.fillRect(oldWidth - pixelsToMove + i, 0, 1, oldHeight);
+          }
+          //Increase beats position so we know in the next loop we need to check the next beat
+          song.beatsPos += 1;
+        }
+      }
+    }
+
+    prevTime += SPECTROGRAM_SAMPLES_PER_PIXEL;
   }
 };
 

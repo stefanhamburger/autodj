@@ -74,7 +74,7 @@ export default async function startTempoRecognition(session, song, isFirstSong =
     const beatsEnd = beatsResult.map(time => Math.round((endPos / SAMPLE_RATE + time) * 10000) / 10000);
     //append to array if beginning was already detected
     if (song.beats !== undefined) {
-      song.beats.push(beatsEnd);
+      song.beats.push(...beatsEnd);
     } else {
       song.beats = beatsEnd;
     }

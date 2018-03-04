@@ -18,6 +18,7 @@ app.get('/', (req, res) => {
   fs.readFile('./index.html', (err, fileContents) => {
     if (err) {
       res.status(500).end();
+      console.error('Error: Could not read index.html file.');
       return;
     }
     const collectionsString = Object.keys(getSettings().collections).map(key => `<option>${key}</option>`).join('');

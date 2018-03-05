@@ -74,9 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     //Set up Web Audio API to create volume slider and generate FFT data
-    const audioCtx = new AudioContext({
-      sampleRate: 44100, //ideally, we'd use a 48,000 sample rate but this is not yet supported by browsers
-    });
+    const audioCtx = new AudioContext();
 
     //Microsoft Edge does not support the constructors, so we need to call the factory methods instead
     const audioSourceNode = audioCtx.createMediaElementSource(audioEle);
@@ -138,10 +136,11 @@ document.addEventListener('DOMContentLoaded', () => {
         fftManagerLo,
         binSizeLo,
         newTime: audioEle.currentTime * sampleRate,
+        sampleRate,
       });
 
-      fftManagerHi.garbageCollection(audioEle.currentTime * sampleRate);
-      fftManagerLo.garbageCollection(audioEle.currentTime * sampleRate);
+      fftManagerHi.garbageCollection(audioEle.currentTime * sampleRate, sampleRate);
+      fftManagerLo.garbageCollection(audioEle.currentTime * sampleRate, sampleRate);
     };
     requestAnimationFrame(redrawSpectrogram);
   });

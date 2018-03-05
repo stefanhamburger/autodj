@@ -68,18 +68,20 @@ export default async function startTempoRecognition(session, song, isFirstSong =
     }
 
     //tempo at end of song
-    const endPos = waveformArray.length - SONG_END_LENGTH;
-    const { bpm: bpmEnd, beats: beatsResult } = await createWorker(waveformArray.slice(endPos));
-    console.log(`${consoleColors.magenta(`[${session.sid}]`)} Song ${consoleColors.green(song.songRef.name)} ends with ${bpmEnd} bpm`);
-    if (bpmEnd === undefined) throw new Error('Tempo detection failed');
-    song.bpmEnd = bpmEnd;
-    //the beat times are relative to the last minute, so add offset to get correct time
-    const beatsEnd = beatsResult.map(time => Math.round((endPos / SAMPLE_RATE + time) * 10000) / 10000);
-    //append to array if beginning was already detected
-    if (song.beats !== undefined) {
-      song.beats.push(...beatsEnd);
-    } else {
-      song.beats = beatsEnd;
+    {
+      const endPos = waveformArray.length - SONG_END_LENGTH;
+      const { bpm: bpmEnd, beats: beatsResult } = await createWorker(waveformArray.slice(endPos));
+      console.log(`${consoleColors.magenta(`[${session.sid}]`)} Song ${consoleColors.green(song.songRef.name)} ends with ${bpmEnd} bpm`);
+      if (bpmEnd === undefined) throw new Error('Tempo detection failed');
+      song.bpmEnd = bpmEnd;
+      //the beat times are relative to the last minute, so add offset to get correct time
+      const beatsEnd = beatsResult.map(time => Math.round((endPos / SAMPLE_RATE + time) * 10000) / 10000);
+      //append to array if beginning was already detected
+      if (song.beats !== undefined) {
+        song.beats.push(...beatsEnd);
+      } else {
+        song.beats = beatsEnd;
+      }
     }
   }
 }

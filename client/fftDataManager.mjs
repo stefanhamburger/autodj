@@ -12,7 +12,7 @@ const fftDataManager = (windowSize) => {
       fftArrays.push({ time: curTime, data: curArray });
       return curArray;
     },
-    getNearestBuffers(requestedTime) {
+    getNearestBuffers(requestedTime, sampleRate) {
       //If we have no data, return zero
       if (fftArrays.length === 0) {
         return {
@@ -35,7 +35,7 @@ const fftDataManager = (windowSize) => {
       //If all of our buffers are after the request time, return first buffer in list but scale it down depending on time
       if (indexBeforeTime === -1) {
         //0 if right after request time, 1 if one second or later after requested time
-        const weight = Math.min((fftArrays[0].time - requestedTime) / 44100, 1.0);
+        const weight = Math.min((fftArrays[0].time - requestedTime) / sampleRate, 1.0);
         return {
           minWeight: weight,
           minArray: nullArray,
@@ -64,10 +64,10 @@ const fftDataManager = (windowSize) => {
         maxArray: fftArrays[indexBeforeTime + 1].data,
       };
     },
-    garbageCollection(curTime) {
+    garbageCollection(curTime, sampleRate) {
       //go through fftArrays, remove all entries where time is more than 3 seconds ago, and move array into unusedArrays
       while (fftArrays[0]) {
-        if (curTime - fftArrays[0].time > 3 * 44100) {
+        if (curTime - fftArrays[0].time > 3 * sampleRate) {
           const removedElement = fftArrays.shift();
           unusedArrays.push(removedElement.data);
         } else {

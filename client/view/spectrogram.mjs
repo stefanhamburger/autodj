@@ -2,14 +2,10 @@ import getViridisColor from './viridis.mjs';
 import frequencyToVolume from './equalLoudnessContour.mjs';
 import model from './../model.mjs';
 
-/** Sampling rate of the Web Audio API */
-const SAMPLE_RATE = 44100;
 /** The height in pixels of the top navigation, the spectrogram is drawn below it */
 const TOP_NAVIGATION_HEIGHT = 140;
 /** How fast the spectrogram moves to the left, in pixels per second. This number should be a multiple of 60 because we redraw up to 60Hz */
 const SPECTROGRAM_SPEED = 120;
-/** How many samples are in one pixel */
-const SPECTROGRAM_SAMPLES_PER_PIXEL = SAMPLE_RATE / SPECTROGRAM_SPEED;
 /** The background color of the spectrogram is purple by default, rgb(68,1,84), which equals 0 in the Viridis color map */
 const SPECTROGRAM_BACKGROUND = getViridisColor(0);
 
@@ -59,7 +55,10 @@ const addData = ({
   fftManagerLo,
   binSizeLo,
   newTime,
+  sampleRate,
 }) => {
+  /** How many samples are in one pixel */
+  const SPECTROGRAM_SAMPLES_PER_PIXEL = sampleRate / SPECTROGRAM_SPEED;
   const pixelsToMove = Math.floor((newTime - prevTime) / SPECTROGRAM_SAMPLES_PER_PIXEL);
   const currentSongs = model.getCurrentSongs();
 
@@ -77,8 +76,8 @@ const addData = ({
   }
 
   for (let i = startPixel; i < pixelsToMove; i += 1) {
-    const nearestBuffersHi = fftManagerHi.getNearestBuffers(prevTime);
-    const nearestBuffersLo = fftManagerLo.getNearestBuffers(prevTime);
+    const nearestBuffersHi = fftManagerHi.getNearestBuffers(prevTime, sampleRate);
+    const nearestBuffersLo = fftManagerLo.getNearestBuffers(prevTime, sampleRate);
 
     //add new pixels on the right side based on input data
     for (let j = oldHeight - 1; j >= 0; j -= 1) {
@@ -135,7 +134,7 @@ const addData = ({
       //Ignore this song if beats have not yet been detected, or all beat lines were already drawn
       if (song.beats !== undefined && song.beatsPos < song.beats.length) {
         //Check that a beat occurs on this pixel
-        const beatTime = (song.startTime + song.beats[song.beatsPos]) * SAMPLE_RATE;
+        const beatTime = (song.startTime + song.beats[song.beatsPos]) * sampleRate;
         if (beatTime <= prevTime + SPECTROGRAM_SAMPLES_PER_PIXEL) { //if end of pixel is after this beat
           if (prevTime <= beatTime) { //if beginning of pixel is before this beat
             //If yes, draw a white line

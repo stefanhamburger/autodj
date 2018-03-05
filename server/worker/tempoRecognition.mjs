@@ -42,7 +42,7 @@ onmessage = function messageHandler(ev) {
           beats: mt.beats.map(time => Math.round(time * 10000) / 10000),
         });
       } catch (error) {
-        postMessage(0);
+        postMessage({ bpm: undefined, beats: [] });
       }
     }
   }

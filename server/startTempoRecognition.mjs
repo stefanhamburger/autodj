@@ -45,8 +45,7 @@ function createWorker(waveformArray) {
 
 /** Does a tempo detection on the given song and emits the bpm via session events */
 export default async function startTempoRecognition(session, song, isFirstSong = false) {
-  const waveformBuffer = await audioManager.getWaveform(song.songRef);
-  const waveformArray = new Float32Array(waveformBuffer);
+  const waveformArray = await audioManager.getWaveform(song.songRef);
 
   //if song is too short, we detect tempo across the whole song
   if (waveformArray.length < SONG_MIN_LENGTH) {

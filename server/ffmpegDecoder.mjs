@@ -30,7 +30,7 @@ export default path => new Promise((resolve, reject) => {
     },
     (error, stdout) => {
       if (error) reject(error);
-      resolve(stdout.buffer);
+      resolve(new Float32Array(stdout.buffer));
     },
   );
 });

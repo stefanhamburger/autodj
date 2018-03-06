@@ -155,7 +155,7 @@ const addToBuffer = async (session) => {
 
       //Get an array of songs that should be written to the current stream, and the offset into their waveform
       await Promise.all(songs.map(async (song) => {
-        const waveform = new Float32Array(await audioManager.getWaveform(song.songRef));
+        const waveform = await audioManager.getWaveform(song.songRef);
         const songPosition = session.encoderPosition - song.startTime;
         const bufferStart = songPosition < 0 ? -songPosition : 0;
         const bufferEnd = (song.startTime + song.totalLength < endTime) ?

@@ -61,6 +61,7 @@ const addData = ({
   const SPECTROGRAM_SAMPLES_PER_PIXEL = sampleRate / SPECTROGRAM_SPEED;
 
   const pixelsToMove = Math.floor((newTime - prevTime) / SPECTROGRAM_SAMPLES_PER_PIXEL);
+  if (pixelsToMove === 0) return;
   const currentSongs = model.getCurrentSongs();
 
   //move existing graph to the left

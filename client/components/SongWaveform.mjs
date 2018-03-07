@@ -58,6 +58,16 @@ export default class SongWaveform extends React.Component {
     ctx.fillStyle = COLOR_TRACK_LINE;
     ctx.fillRect(position, 0, 1, CANVAS_HEIGHT);
 
+    //show tempo adjustment next to current position (either to the left or right of white line)
+    const tempoChange = '+10%';
+    if (position < CANVAS_WIDTH / 2) {
+      ctx.textAlign = 'start';
+      ctx.fillText(tempoChange, position + 2, 13);
+    } else {
+      ctx.textAlign = 'end';
+      ctx.fillText(tempoChange, position - 2, 13);
+    }
+
     //draw bpm
     ctx.fillStyle = COLOR_BPM_TEXT;
     ctx.font = '12px sans-serif';

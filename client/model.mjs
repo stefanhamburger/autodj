@@ -30,28 +30,12 @@ const processEvents = events => events && events.forEach(async (event) => {
       });
       break;
     }
-    case 'TEMPO_INFO_START': {
+    case 'TEMPO_INFO': {
       const { id } = event;
-      let { bpm } = event;
-      if (bpm === undefined) bpm = 0;
       songPlaylist.filter(song => song.id === id).forEach((song) => {
-        song.bpmStart = bpm;
-      });
-      break;
-    }
-    case 'TEMPO_INFO_END': {
-      const { id } = event;
-      let { bpm } = event;
-      if (bpm === undefined) bpm = 0;
-      songPlaylist.filter(song => song.id === id).forEach((song) => {
-        song.bpmEnd = bpm;
-      });
-      break;
-    }
-    case 'TEMPO_BEATS': {
-      const { id, beats } = event;
-      songPlaylist.filter(song => song.id === id).forEach((song) => {
-        song.beats = beats;
+        song.bpmStart = event.bpmStart;
+        song.bpmEnd = event.bpmEnd;
+        song.beats = event.beats;
         song.beatsPos = 0;
       });
       break;

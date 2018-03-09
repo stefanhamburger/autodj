@@ -3,6 +3,7 @@
 
 import decodeAudio from './ffmpegDecoder.mjs';
 import * as consoleColors from './consoleColors.mjs';
+import changeTempo from './tempo-change/tempo-change.mjs';
 
 /** byte length is 8 bytes per sample (2 channels, Float32 format) */
 const BYTES_PER_SAMPLE = 8;
@@ -28,10 +29,27 @@ export const addReference = async (song, { sid, id }) => {
 
 
 /**
- * Get the waveform data for the given song
+ * Get the original waveform data for the given song
  * @param {*} song The song to use
  */
 export const getWaveform = song => audioWaveforms[song.path].buffer;
+
+const adjustedWaveforms = {};
+/** Get the song's waveform, with all tempo adjustments already made */
+export const getFinalWaveform = async (song) => {
+  //TODO: This introduces a memory leak because we never clean up the waveform data.
+  //      Eventually, we will not adjust the whole song, but only the part that is requested.
+  //      Then we'll no longer need to store it in memory and there's no more memory leak
+  const path = `${song.songRef.path}-${song.tempoAdjustment.toString()}`;
+  if (adjustedWaveforms[path] === undefined) {
+    const origBuffer = await getWaveform(song.songRef);
+    const adjustedBuffer = changeTempo(origBuffer, song.tempoAdjustment);
+    adjustedWaveforms[path] = adjustedBuffer;
+    return adjustedBuffer;
+  } else {
+    return adjustedWaveforms[path];
+  }
+};
 
 
 /**

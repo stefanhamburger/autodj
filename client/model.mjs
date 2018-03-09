@@ -1,4 +1,5 @@
 import view from './view/view.mjs';
+import calculateDuration from '../shared/calculateDuration.mjs';
 
 const externals = {};
 const songPlaylist = [];
@@ -24,9 +25,10 @@ const processEvents = events => events && events.forEach(async (event) => {
       break;
     }
     case 'SONG_DURATION': {
-      const { id, duration } = event;
-      songPlaylist.filter(song => song.id === id).forEach((song) => {
-        song.duration = duration;//given in samples
+      songPlaylist.filter(song => song.id === event.id).forEach((song) => {
+        //Original duration is given in samples. Need to apply tempo adjustment to get actual duration
+        song.duration = calculateDuration(event.origDuration, 1.1);
+        song.endTime = song.startTime + song.duration / 48000;
       });
       break;
     }
@@ -75,7 +77,7 @@ const heartbeat = (time) => {
   //Remove all songs from currentSongs that have finished playing
   for (let i = currentSongs.length - 1; i >= 0; i -= 1) {
     const song = currentSongs[i];
-    if (song.duration !== undefined && time > song.startTime + song.duration / 48000) {
+    if (song.duration !== undefined && time > song.endTime) {
       currentSongs.splice(i, 1);
     }
   }

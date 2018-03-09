@@ -2,6 +2,7 @@ import * as fileManager from './fileManager.mjs';
 import startTempoRecognition from './startTempoRecognition.mjs';
 import * as consoleColors from './consoleColors.mjs';
 import * as audioManager from './audioManager.mjs';
+import calculateDuration from '../shared/calculateDuration.mjs';
 
 /**
  * Pick a random song, start decoding it and add it to the playlist.
@@ -24,6 +25,8 @@ const addFileToStream = (session, isFirstSong = false) => {
     songWrapper.startTime = 0;
     songWrapper.offset = 0;
     songWrapper.totalLength = 30 * 48000;//we assume the song is at least 30 seconds long, this will be overwritten as soon as we have the correct duration
+    songWrapper.endTime = songWrapper.totalLength;//to be overwritten by correct end time later
+    songWrapper.tempoAdjustment = 1.1;//TODO: we can only set this after next song has been analysed
     session.emitEvent({
       type: 'SONG_START',
       id: songWrapper.id,
@@ -34,10 +37,12 @@ const addFileToStream = (session, isFirstSong = false) => {
     songWrapper.readyPromise = new Promise(async (resolve) => {
       songWrapper.totalLength = await audioManager.getDuration(songWrapper.songRef);
       //TODO: we should only send the duration if we are sure we are going to keep this song, or at least allow overriding it
+      songWrapper.endTime = songWrapper.startTime + calculateDuration(songWrapper.totalLength, songWrapper.tempoAdjustment);
       session.emitEvent({
         type: 'SONG_DURATION',
         id: songWrapper.id,
-        duration: songWrapper.totalLength,
+        origDuration: songWrapper.totalLength,
+        tempoAdjustment: songWrapper.tempoAdjustment,
       });
 
       //do tempo recognition - for first song, we do not need to wait until it is done
@@ -107,6 +112,9 @@ const addFileToStream = (session, isFirstSong = false) => {
         return;
       }
 
+      songWrapper.tempoAdjustment = 1.1;
+      songWrapper.endTime = songWrapper.startTime + calculateDuration(songWrapper.totalLength, songWrapper.tempoAdjustment);
+
       session.emitEvent({
         type: 'SONG_START',
         id: songWrapper.id,
@@ -117,7 +125,8 @@ const addFileToStream = (session, isFirstSong = false) => {
       session.emitEvent({
         type: 'SONG_DURATION',
         id: songWrapper.id,
-        duration: songWrapper.totalLength,
+        origDuration: songWrapper.totalLength,
+        tempoAdjustment: songWrapper.tempoAdjustment,
       });
 
       session.emitEvent({

@@ -73,6 +73,7 @@ app.get('/thumbnail', (req, res) => {
   try {
     res.send(Buffer.from(audioManager.getThumbnail(sid, song).buffer));
   } catch (error) {
+    console.error(`Error when getting thumbnail: ${error.toString()}`);
     res.status(404).end();
   }
 });

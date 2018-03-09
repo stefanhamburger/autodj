@@ -1,7 +1,6 @@
 //Audio decoder - from any format to 32-bit floating point PCM
 
 import childProcess from 'child_process';
-import changeTempo from './tempo-change/tempo-change.mjs';
 
 /** How much buffer we read from FFmpeg */
 const MAX_FFMPEG_BUFFER = 8 * 48000 * 60 * 20;//up to 20 minutes of audio, or 460.8 MB
@@ -31,7 +30,7 @@ export default path => new Promise((resolve, reject) => {
     },
     (error, stdout) => {
       if (error) reject(error);
-      resolve(changeTempo(new Float32Array(stdout.buffer), 1.1));
+      resolve(new Float32Array(stdout.buffer));
     },
   );
 });

@@ -14,21 +14,21 @@ const addToBuffer = async (session) => {
     let numSamplesToWrite = Math.min(session.samplesToAdd, MAX_SAMPLES_PER_LOOP);
     const endTime = session.encoderPosition + numSamplesToWrite;
     //Only use songs that are 1. ready for processing 2. have already started playing 3. have not yet finished playing
-    const songs = session.currentSongs.filter(song => song.ready === true && endTime > song.startTime && session.encoderPosition < song.startTime + song.totalLength);
+    const songs = session.currentSongs.filter(song => song.ready === true && endTime > song.startTime && session.encoderPosition < song.endTime);
 
     //only encode when we have at least one song to encode (at the start of a session, it takes a couple seconds until we can encode a song)
     if (songs.length > 0) {
       //ensure that songs don't end prematurely: If there isn't at least one song to cover till endTime, reduce numSamplesToWrite accordingly
-      numSamplesToWrite = Math.min(numSamplesToWrite, ...songs.map(song => song.startTime + song.totalLength - session.encoderPosition));
+      numSamplesToWrite = Math.min(numSamplesToWrite, ...songs.map(song => song.endTime - session.encoderPosition));
 
       const outBuffer = new Float32Array(numSamplesToWrite * 2);//input is always stereo (two channels)
 
       //Get an array of songs that should be written to the current stream, and the offset into their waveform
       await Promise.all(songs.map(async (song) => {
-        const waveform = await audioManager.getWaveform(song.songRef);
+        const waveform = await audioManager.getFinalWaveform(song);
         const songPosition = session.encoderPosition - song.startTime;
         const bufferStart = songPosition < 0 ? -songPosition : 0;
-        const bufferEnd = (song.startTime + song.totalLength < endTime) ?
+        const bufferEnd = (song.endTime < endTime) ?
           (numSamplesToWrite - (endTime - (song.startTime + song.totalLength))) :
           numSamplesToWrite;
         //Loop through numSamplesToWrite, add both channels to buffer
@@ -37,7 +37,7 @@ const addToBuffer = async (session) => {
           outBuffer[j * 2 + 1] += waveform[(songPosition + j) * 2 + 1];
         }
 
-        if (endTime > song.startTime + song.totalLength) {
+        if (endTime > song.endTime) {
           //need to move song from currentSongs into finshedSongs if we reached its end
           session.currentSongs.splice(session.currentSongs.findIndex(ele => ele === song), 1);
           session.finishedSongs.push(song);

@@ -29,7 +29,7 @@ const addToBuffer = async (session) => {
         const songPosition = session.encoderPosition - song.startTime;
         const bufferStart = songPosition < 0 ? -songPosition : 0;
         const bufferEnd = (song.endTime < endTime) ?
-          (numSamplesToWrite - (endTime - (song.startTime + song.totalLength))) :
+          (numSamplesToWrite - (endTime - song.endTime)) :
           numSamplesToWrite;
         //Loop through numSamplesToWrite, add both channels to buffer
         for (let j = bufferStart; j < bufferEnd; j += 1) {

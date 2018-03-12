@@ -92,12 +92,13 @@ const addFileToStream = (session, isFirstSong = false) => {
 
       //TODO: we need to implement mixing and cross-fade between songs
       //the time in samples at which to start adding this song to the stream
-      songWrapper.startTime = previousSong.startTime + previousSong.totalLength - 15 * 48000;
+      songWrapper.startTime = previousSong.endTime - 15 * 48000;
       //the offset (in samples) into the song at which to start mixing, e.g. to skip silence at the beginning
       songWrapper.offset = 0;
 
       //how long we want to play this song, e.g. to skip the ending
       songWrapper.totalLength = (await audioManager.getDuration(songWrapper.songRef)) - songWrapper.offset;
+      songWrapper.endTime = songWrapper.startTime + songWrapper.totalLength;//to be overwritten by correct end time later
 
       //do tempo recognition - and only use song if recognition was successful
       try {

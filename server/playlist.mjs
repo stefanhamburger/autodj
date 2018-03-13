@@ -49,7 +49,7 @@ const addFileToStream = (session, isFirstSong = false) => {
     songWrapper.offset = 0;
     songWrapper.totalLength = 30 * 48000;//we assume the song is at least 30 seconds long, this will be overwritten as soon as we have the correct duration
     songWrapper.endTime = songWrapper.totalLength;//to be overwritten by correct end time later
-    songWrapper.tempoAdjustment = 1.1;//TODO: we can only set this after next song has been analysed
+    songWrapper.tempoAdjustment = 1;//we only change speed of follow-up songs for now. TODO: override this after next song has been analysed for better transition
     session.emitEvent({
       type: 'SONG_START',
       id: songWrapper.id,

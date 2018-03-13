@@ -18,8 +18,11 @@ const initAudio = async ({
     );
 
     //Read metadata, e.g. current song
-    const metadataEvents = JSON.parse(decodeURI(response.headers.get('X-Metadata')));
-    if (typeof metadataEvents === 'object') model.processEvents(metadataEvents);
+    if (response.headers.has('X-Metadata')) {
+      const headerValue = response.headers.get('X-Metadata');
+      const metadataEvents = JSON.parse(decodeURI(headerValue));
+      if (typeof metadataEvents === 'object') model.processEvents(metadataEvents);
+    }
 
     return response.arrayBuffer();
   };

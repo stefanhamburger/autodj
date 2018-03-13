@@ -52,7 +52,9 @@ app.get('/part', (req, res) => {
 
     //Get metadata
     const metadata = session.flushEvents();
-    res.set('X-Metadata', encodeURI(JSON.stringify(metadata)));
+    if (metadata.length > 0) {
+      res.set('X-Metadata', encodeURI(JSON.stringify(metadata)));
+    }
 
     //send as many bytes as there in session.ffmpegData since last output position
     const ffmpegBuffer = session.getEncoderOutput();

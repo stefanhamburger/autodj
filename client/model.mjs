@@ -29,6 +29,7 @@ const processEvents = events => events && events.forEach(async (event) => {
         //Original duration is given in samples. Need to apply tempo adjustment to get actual duration
         song.duration = calculateDuration(event.origDuration, 1.1);
         song.endTime = song.startTime + song.duration / 48000;
+        song.tempoAdjustment = event.tempoAdjustment;
       });
       break;
     }

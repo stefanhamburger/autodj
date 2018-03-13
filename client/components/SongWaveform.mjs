@@ -59,7 +59,7 @@ export default class SongWaveform extends React.Component {
     ctx.fillRect(position, 0, 1, CANVAS_HEIGHT);
 
     //show tempo adjustment next to current position (either to the left or right of white line)
-    if (songInfo.tempoAdjustment !== undefined) {
+    if (songInfo.tempoAdjustment !== undefined && songInfo.elapsed > 0) {
       const tempoSign = (songInfo.tempoAdjustment < 1) ? '−' : '+';
       const tempoChange = `${tempoSign}${Math.round(Math.abs(songInfo.tempoAdjustment - 1) * 1000) / 10}%`;
       if (position < CANVAS_WIDTH / 2) {

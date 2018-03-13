@@ -46,7 +46,6 @@ const addFileToStream = (session, isFirstSong = false) => {
   //If this is the first song in the stream, start playing immediately without worrying about mixing
   if (isFirstSong === true) {
     songWrapper.startTime = 0;
-    songWrapper.offset = 0;
     songWrapper.totalLength = 30 * 48000;//we assume the song is at least 30 seconds long, this will be overwritten as soon as we have the correct duration
     songWrapper.endTime = songWrapper.totalLength;//to be overwritten by correct end time later
     songWrapper.tempoAdjustment = 1;//we only change speed of follow-up songs for now. TODO: override this after next song has been analysed for better transition
@@ -116,11 +115,9 @@ const addFileToStream = (session, isFirstSong = false) => {
       //TODO: we need to implement mixing and cross-fade between songs
       //the time in samples at which to start adding this song to the stream
       songWrapper.startTime = previousSong.endTime - 15 * 48000;
-      //the offset (in samples) into the song at which to start mixing, e.g. to skip silence at the beginning
-      songWrapper.offset = 0;
 
       //how long we want to play this song, e.g. to skip the ending
-      songWrapper.totalLength = (await audioManager.getDuration(songWrapper.songRef)) - songWrapper.offset;
+      songWrapper.totalLength = (await audioManager.getDuration(songWrapper.songRef));
       songWrapper.endTime = songWrapper.startTime + songWrapper.totalLength;//to be overwritten by correct end time later
 
       //do tempo recognition - and only use song if recognition was successful

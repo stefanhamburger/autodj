@@ -72,11 +72,11 @@ export default class SongWaveform extends React.Component {
     //draw bpm
     ctx.fillStyle = COLOR_BPM_TEXT;
     ctx.font = '12px sans-serif';
-    if (songInfo.bpmStart !== undefined && songInfo.bpmStart !== 0) {
+    if (songInfo.bpmStart !== undefined) {
       ctx.textAlign = 'start';
       ctx.fillText(`${songInfo.bpmStart.toString()} bpm`, 3, CANVAS_HEIGHT - 6);
     }
-    if (songInfo.bpmEnd !== undefined && songInfo.bpmEnd !== 0) {
+    if (songInfo.bpmEnd !== undefined) {
       ctx.textAlign = 'end';
       ctx.fillText(`${songInfo.bpmEnd.toString()} bpm`, CANVAS_WIDTH - 3, CANVAS_HEIGHT - 6);
     }

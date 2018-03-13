@@ -27,9 +27,9 @@ const processEvents = events => events && events.forEach(async (event) => {
     case 'SONG_DURATION': {
       songPlaylist.filter(song => song.id === event.id).forEach((song) => {
         //Original duration is given in samples. Need to apply tempo adjustment to get actual duration
-        song.duration = calculateDuration(event.origDuration, 1.1);
-        song.endTime = song.startTime + song.duration / 48000;
         song.tempoAdjustment = event.tempoAdjustment;
+        song.duration = calculateDuration(event.origDuration, song.tempoAdjustment);
+        song.endTime = song.startTime + song.duration / 48000;
       });
       break;
     }

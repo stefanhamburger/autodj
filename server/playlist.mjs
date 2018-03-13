@@ -4,6 +4,29 @@ import * as consoleColors from './consoleColors.mjs';
 import * as audioManager from './audioManager.mjs';
 import calculateDuration from '../shared/calculateDuration.mjs';
 
+const SONG_ID_LENGTH = 16;
+const alphabet = '0123456789abcdefghijklmnopqrstuvwxyz';
+/** Generates a new random song id */
+const generateId = (session) => {
+  /** Get a list of previous ids based on current and finished songs */
+  const previousIds = new Map([...session.currentSongs, ...session.finishedSongs].map(song => [song.id, true]));
+
+  const innerGenerate = () => {
+    let out = '';
+    for (let i = 0; i < SONG_ID_LENGTH; i += 1) {
+      out += alphabet[Math.floor(Math.random() * alphabet.length)];
+    }
+
+    //if song id is already in use, find another one - highly unlikely, that this happens
+    if (previousIds.has(out)) return innerGenerate();
+
+    return out;
+  };
+
+  return innerGenerate();
+};
+
+
 /**
  * Pick a random song, start decoding it and add it to the playlist.
  * @param {module:session.Session} session
@@ -13,7 +36,7 @@ const addFileToStream = (session, isFirstSong = false) => {
   const files = fileManager.getFiles(session.collection);
 
   const randomFile = files[Math.floor(Math.random() * files.length)];
-  const id = String(Math.random());//TODO: use a better id format than Math.random(), similar to session id
+  const id = generateId(session);
   const songWrapper = { id, songRef: randomFile };
   session.currentSongs.push(songWrapper);
   audioManager.addReference(randomFile, { sid: session.sid, id });

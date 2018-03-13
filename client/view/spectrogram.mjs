@@ -136,7 +136,7 @@ const addData = ({
       //Ignore this song if beats have not yet been detected, or all beat lines were already drawn
       if (song.beats !== undefined && song.beatsPos < song.beats.length) {
         //Check that a beat occurs on this pixel
-        const beatTime = song.beats[song.beatsPos];//in seconds
+        const beatTime = song.beats[song.beatsPos] / song.tempoAdjustment;//in seconds
         const beatAbsTime = (song.startTime + beatTime) * sampleRate;//in samples
         if (beatAbsTime <= prevTime + SPECTROGRAM_SAMPLES_PER_PIXEL) { //if end of pixel is after this beat
           if (prevTime <= beatAbsTime) { //if beginning of pixel is before this beat

@@ -1,10 +1,12 @@
 //Wrapper around storing waveform data for the audio files.
 //Ensures waveform data is kept in memory as long as needed, and cleaned up as soon as possible
 
+import Worker from 'tiny-worker';
 import decodeAudio from './ffmpegDecoder.mjs';
 import * as consoleColors from './consoleColors.mjs';
-import changeTempo from './tempo-change/tempo-change.mjs';
 
+/** sample rate is 48 Hz in stereo */
+const SAMPLE_RATE = 48000 * 2;
 /** byte length is 8 bytes per sample (2 channels, Float32 format) */
 const BYTES_PER_SAMPLE = 8;
 
@@ -36,20 +38,60 @@ export const getWaveform = song => audioWaveforms[song.path].buffer;
 
 const adjustedWaveforms = {};
 /** Get the song's waveform, with all tempo adjustments already made */
-export const getFinalWaveform = async (song) => {
+export const getFinalWaveform = song => new Promise(async (resolve) => {
+  //do not adjust song if tempo stays the same (e.g. first song)
+  if (song.tempoAdjustment === 1) {
+    resolve(getWaveform(song.songRef));
+    return;
+  }
+
   //TODO: This introduces a memory leak because we never clean up the waveform data.
   //      Eventually, we will not adjust the whole song, but only the part that is requested.
   //      Then we'll no longer need to store it in memory and there's no more memory leak
   const path = `${song.songRef.path}-${song.tempoAdjustment.toString()}`;
   if (adjustedWaveforms[path] === undefined) {
+    const worker = new Worker('server/tempo-change/tempo-change.mjs');
+
+    //add listener to result
+    {
+      let hasReceivedLength = false;
+      let adjustedBuffer;
+      let pos = 0;
+      worker.onmessage = (msg) => {
+        if (!hasReceivedLength) {
+          adjustedBuffer = new Float32Array(msg.data);
+          adjustedWaveforms[path] = adjustedBuffer;
+          hasReceivedLength = true;
+        } else {
+          for (let i = 0; i < msg.data.length; i += 1) {
+            adjustedBuffer[pos + i] = msg.data[i];
+          }
+          pos += msg.data.length;
+          if (pos >= adjustedBuffer.length) {
+            resolve(adjustedBuffer);
+            worker.terminate();
+          }
+        }
+      };
+    }
+
+    //send data to worker
     const origBuffer = await getWaveform(song.songRef);
-    const adjustedBuffer = changeTempo(origBuffer, song.tempoAdjustment);
-    adjustedWaveforms[path] = adjustedBuffer;
-    return adjustedBuffer;
+    worker.postMessage([origBuffer.length, song.tempoAdjustment]);
+
+    let pos = 0;
+    const sendNextSamples = () => {
+      worker.postMessage(Array.from(origBuffer.slice(pos, pos + 1 * SAMPLE_RATE)));
+      pos += 1 * SAMPLE_RATE;
+      if (pos < origBuffer.length) {
+        setTimeout(sendNextSamples);
+      }
+    };
+    sendNextSamples();
   } else {
-    return adjustedWaveforms[path];
+    resolve(adjustedWaveforms[path]);
   }
-};
+});
 
 
 /**

@@ -162,6 +162,10 @@ const addFileToStream = (session, isFirstSong = false) => {
 
       resolve();
       songWrapper.ready = true;
+
+      //As soon as the new tempo is known, we can start converting the audio
+      //This way, the app doesn't need to wait when this song starts playing. We don't care about the result though
+      setTimeout(audioManager.getFinalWaveform.bind(null, songWrapper), 5000);
     });
   }
 };

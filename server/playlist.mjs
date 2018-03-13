@@ -136,7 +136,7 @@ const addFileToStream = (session, isFirstSong = false) => {
         return;
       }
 
-      songWrapper.tempoAdjustment = 1.1;
+      songWrapper.tempoAdjustment = previousSong.tempoAdjustment * previousSong.bpmEnd / songWrapper.bpmStart;
       songWrapper.endTime = songWrapper.startTime + calculateDuration(songWrapper.totalLength, songWrapper.tempoAdjustment);
 
       session.emitEvent({

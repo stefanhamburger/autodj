@@ -38,7 +38,7 @@ onmessage = function messageHandler(ev) {
 
         //send recognized tempo to main thread
         postMessage({
-          bpm: mt.tempo,
+          bpm: 60 / mt.beatInterval,
           beats: mt.beats.map(time => Math.round(time * 10000) / 10000),
         });
       } catch (error) {

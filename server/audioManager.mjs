@@ -34,11 +34,11 @@ export const addReference = async (song, { sid, id }) => {
  * Get the original waveform data for the given song
  * @param {*} song The song to use
  */
-export const getWaveform = song => audioWaveforms[song.path].buffer;
+export const getWaveform = song => audioWaveforms[song.path] !== undefined && audioWaveforms[song.path].buffer;
 
 const adjustedWaveforms = {};
 /** Get the song's waveform, with all tempo adjustments already made */
-export const getFinalWaveform = song => new Promise(async (resolve) => {
+export const getFinalWaveform = song => new Promise(async (resolve, reject) => {
   //do not adjust song if tempo stays the same (e.g. first song)
   if (song.tempoAdjustment === 1) {
     resolve(getWaveform(song.songRef));
@@ -77,6 +77,7 @@ export const getFinalWaveform = song => new Promise(async (resolve) => {
 
     //send data to worker
     const origBuffer = await getWaveform(song.songRef);
+    if (!(origBuffer instanceof Float32Array)) reject();
     worker.postMessage([origBuffer.length, song.tempoAdjustment]);
 
     let pos = 0;

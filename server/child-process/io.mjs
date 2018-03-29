@@ -32,7 +32,6 @@ export function sendMessage(id, msgObj) {
 
 
 //Sends the Uint8Array to the parent
-//TODO: we need to set an id field to identify waveform thumbnails vs. replies for waveform requests
 export function sendBuffer(id, buffer) {
   const input = new Uint8Array(buffer);
   const out = new Uint8Array(9 + input.byteLength);

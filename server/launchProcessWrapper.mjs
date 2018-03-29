@@ -35,7 +35,11 @@ export default async function analyseSong(audioFile, isFirstSong) {
           throw new Error('Received message from child process with unknown id');
       }
     } else {
-      promise.resolve(String(id), contents);
+      if (id === 0) {
+        promise.resolve('thumbnail', contents);
+      } else {
+        promise.resolve(String(id), contents);
+      }
     }
   };
 
@@ -43,8 +47,9 @@ export default async function analyseSong(audioFile, isFirstSong) {
     const { sendObject, destroy } = launchProcess(callback, audioFile, isFirstSong);
     out.destroy = destroy;
     out.getPiece = ({ offset, length, tempoChange }) => {
+      //create a random id. -- 0 is reserved for thumbnails and can't be used
+      const id = 1 + Math.floor(Math.random() * 0xFFFFFE);
       //send message to child process
-      const id = Math.floor(Math.random() * 0xFFFF);
       sendObject({
         id,
         offset,

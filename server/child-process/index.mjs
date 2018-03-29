@@ -47,4 +47,5 @@ let processMessages;
 
   //generate waveform thumbnail
   //TODO
+  //sendBuffer(0, new Float32Array(600).buffer);
 })();

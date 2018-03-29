@@ -38,7 +38,7 @@ export default async function analyseSong(audioFile, isFirstSong) {
       if (id === 0) {
         promise.resolve('thumbnail', contents);
       } else {
-        promise.resolve(String(id), contents);
+        promise.resolve(`piece-${id}`, contents);
       }
     }
   };
@@ -58,7 +58,7 @@ export default async function analyseSong(audioFile, isFirstSong) {
       });
 
       //return promise that will be resolved once child replies to our message
-      return promise.create(String(id));
+      return promise.create(`piece-${id}`);
     };
   } catch (error) {
     //TODO: the error is thrown in a callback, not in the main function, so this try-catch won't work

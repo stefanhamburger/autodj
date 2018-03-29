@@ -18,7 +18,6 @@ export default async function createThumbnail(waveform) {
   const samplesPerPixel = waveform.length / 2 / THUMBNAIL_WIDTH;
 
   //Go through the waveform data, consuming two frames at once since waveform is always stereo interleaved
-  //TODO: we should probably rate-limit this function, to prevent it from blocking the server. But right now, this blocks for 80-120ms, which is acceptable
   for (let i = 0, il = waveform.length; i < il; i += 2) {
     //Calculate which bin this sample belongs into, and insert if needed
     //Ideally, we would blend samples into nearby pixels for anti-aliasing, but for our use case this may be overkill

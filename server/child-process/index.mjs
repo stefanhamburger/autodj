@@ -3,6 +3,7 @@
 import { setUpReceiver, sendMessage, sendBuffer } from './io.mjs';
 import decodeAudio from './ffmpegDecoder.mjs';
 import tempoDetection from './tempoDetection.mjs';
+import createThumbnail from './createThumbnail.mjs';
 
 const isFirstSong = process.argv[3] === 'true';
 
@@ -16,7 +17,7 @@ let processMessages;
     messages.push(msg);
     if (processMessages !== undefined) processMessages();
   });
-  sendMessage(0, { ready: true });
+  sendMessage(0);//child process is ready to receive messages
 
   //decode audio
   const audioBuffer = await decodeAudio(process.argv[2]);
@@ -46,6 +47,6 @@ let processMessages;
   }
 
   //generate waveform thumbnail
-  //TODO
-  //sendBuffer(0, new Float32Array(600).buffer);
+  const thumbnail = createThumbnail(audioBuffer);
+  sendBuffer(0, thumbnail.buffer);
 })();

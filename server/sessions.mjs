@@ -1,4 +1,4 @@
-import * as consoleColors from './consoleColors.mjs';
+import * as consoleColors from './lib/consoleColors.mjs';
 
 const sessions = {};
 

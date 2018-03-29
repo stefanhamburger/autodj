@@ -1,6 +1,6 @@
 import * as fileManager from './fileManager.mjs';
 import startTempoRecognition from './startTempoRecognition.mjs';
-import * as consoleColors from './consoleColors.mjs';
+import * as consoleColors from './lib/consoleColors.mjs';
 import * as audioManager from './audioManager.mjs';
 import calculateDuration from '../shared/calculateDuration.mjs';
 
@@ -31,7 +31,7 @@ const generateId = (session) => {
  * Pick a random song, start decoding it and add it to the playlist.
  * @param {module:session.Session} session
 */
-const addFileToStream = (session, isFirstSong = false) => {
+export default function addFileToStream(session, isFirstSong = false) {
   //wait until list of files was loaded
   const files = fileManager.getFiles(session.collection);
 
@@ -168,6 +168,4 @@ const addFileToStream = (session, isFirstSong = false) => {
       setTimeout(audioManager.getFinalWaveform.bind(null, songWrapper), 5000);
     });
   }
-};
-
-export default addFileToStream;
+}

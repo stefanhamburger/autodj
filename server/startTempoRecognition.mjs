@@ -1,6 +1,6 @@
 import Worker from 'tiny-worker';
 import * as audioManager from './audioManager.mjs';
-import * as consoleColors from './consoleColors.mjs';
+import * as consoleColors from './lib/consoleColors.mjs';
 
 /** Sampling rate of the waveform data (48k Hz stereo = 2 channels) */
 const SAMPLE_RATE = 48000 * 2;

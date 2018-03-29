@@ -2,8 +2,8 @@
 //Ensures waveform data is kept in memory as long as needed, and cleaned up as soon as possible
 
 import Worker from 'tiny-worker';
-import decodeAudio from './ffmpegDecoder.mjs';
-import * as consoleColors from './consoleColors.mjs';
+import decodeAudio from './child-process/ffmpegDecoder.mjs';
+import * as consoleColors from './lib/consoleColors.mjs';
 
 /** sample rate is 48 Hz in stereo */
 const SAMPLE_RATE = 48000 * 2;

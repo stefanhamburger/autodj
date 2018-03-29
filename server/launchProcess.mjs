@@ -1,50 +1,71 @@
 import childProcess from 'child_process';
 
-export default function launchProcess(audioFile, callback) {
-  const process = childProcess.spawn('node', [
+/**
+ * Launches a new Node process to analyse the given audio file
+ * @param audioFile Path to the audio file as string
+ */
+export default function launchProcess(callback, audioFile, isFirstSong) {
+  const spawnedProcess = childProcess.spawn('node', [
+    '--experimental-modules',
     'server/child-process/index.mjs',
-    '--audio-file', audioFile,
-  ], {
-    //TODO
-  });
+    audioFile,
+    (isFirstSong === true) ? 'true' : 'false',
+  ]);
 
 
   //Register event handler for messages received from child process
-  process.stdout.on('data', (...args) => {
-    callback(...args);
+  spawnedProcess.stdout.on('data', (buffer) => {
+    const dv = new DataView(buffer.buffer);
+    //parse header (type + length), perform length integrity check
+    const type = dv.getUint8(0);
+    const id = dv.getUint32(1, true);
+    const length = dv.getUint32(5, true);
+    if (buffer.byteLength !== 9 + length) {
+      throw new Error(`Message length check failed, expected message to be ${9 + length} but was ${buffer.byteLength}`);
+    }
+
+    const bufferBody = buffer.slice(9);
+
+    if (type === 0) { //string
+      //convert ArrayBuffer to string
+      const text = String.fromCharCode.apply(null, new Uint8Array(bufferBody));
+      //parse JSON
+      try {
+        const obj = JSON.parse(text);
+        callback(true, id, obj);
+      } catch (err) {
+        throw new Error('Could not read JSON message from child');
+      }
+    } else if (type === 1) { //binary
+      callback(false, id, bufferBody);
+    } else {
+      throw new Error(`Unknown message type ${type} from child`);
+    }
   });
 
 
-  //Set up functions to send binary messages to child process
-  const sendBuffer = (buffer) => {
-    const typedArray = new Uint8Array(5 + buffer.byteLength);
-    const dv = new DataView(typedArray);
-    dv.setUint8(0, 2);//array buffer
-    dv.setUint32(1, buffer.byteLength, true);
-    for (let i = 0; i < buffer.byteLength; i += 1) {
-      typedArray[5 + i] = buffer[i];
+  //Handle error messages in main thread, instead of ignoring them
+  spawnedProcess.stderr.setEncoding('utf8');
+  spawnedProcess.stderr.on('data', (error) => {
+    //don't halt on warning message that we are using experimental features
+    if (!String(error).includes('ExperimentalWarning: The ESM module loader is experimental.')) {
+      throw new Error(error);
     }
-    process.stdin.write(typedArray);
-  };
+  });
 
 
   //Set up functions to send JSON messages to child process
+  spawnedProcess.stdin.setEncoding('utf8');
   const sendObject = (obj) => {
     //create string from JSON object
     const objAsString = JSON.stringify(obj);
-
-    //construct ArrayBuffer filled with object
-    const typedArray = new Uint8Array(5 + objAsString.length);
-    const dv = new DataView(typedArray.buffer);
-    dv.setUint8(0, 1);//JSON
-    dv.setUint32(1, objAsString.length, true);
-    for (let i = 0; i < objAsString.length; i += 1) {
-      typedArray[5 + i] = objAsString.charCodeAt(i);
-    }
-
-    //send ArrayBuffer to child process
-    process.stdin.write(typedArray);
+    spawnedProcess.stdin.write(objAsString);
   };
 
-  return { sendBuffer, sendObject };
+  const destroy = () => {
+    spawnedProcess.kill();
+  };
+
+  //Return a function to send a JSON, and a function to kill the process
+  return { sendObject, destroy };
 }

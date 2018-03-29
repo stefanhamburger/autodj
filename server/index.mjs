@@ -1,10 +1,10 @@
 //Main entrypoint for the server process
 
-import './mathExtensions.mjs';//import statements must be at the top, so define Math functions in a separate file
+import './lib/mathExtensions.mjs';//import statements must be at the top, so define Math functions in a separate file
 import * as settings from './settings.mjs';
 import * as fileManager from './fileManager.mjs';
 import initServer from './server.mjs';
-import * as consoleColors from './consoleColors.mjs';
+import * as consoleColors from './lib/consoleColors.mjs';
 
 //Exit on async error to prevent further bugs and provide better debug messages
 process.on('unhandledRejection', (err) => {

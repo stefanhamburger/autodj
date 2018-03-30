@@ -14,6 +14,10 @@ const COLOR_TRACK_LINE = '#fff';
 const COLOR_BPM_TEXT = '#fff';
 
 export default class SongWaveform extends React.Component {
+  constructor(props) {
+    super(props);
+    this.canvas = React.createRef();
+  }
   componentDidMount() {
     this.updateCanvas();
   }
@@ -22,7 +26,7 @@ export default class SongWaveform extends React.Component {
   }
   updateCanvas() {
     const { songInfo } = this.props;
-    const ctx = this.canvas.getContext('2d');
+    const ctx = this.canvas.current.getContext('2d');
     const position = Math.round((songInfo.duration === 0) ? 0 : songInfo.elapsed / songInfo.duration * CANVAS_WIDTH);
 
     //draw background
@@ -85,7 +89,7 @@ export default class SongWaveform extends React.Component {
   }
   render() {
     return (
-      <canvas ref={(ele) => { this.canvas = ele; }} width={CANVAS_WIDTH} height={CANVAS_HEIGHT} />
+      <canvas ref={this.canvas} width={CANVAS_WIDTH} height={CANVAS_HEIGHT} />
     );
   }
 }

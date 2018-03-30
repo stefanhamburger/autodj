@@ -29,7 +29,9 @@ export default path => new Promise((resolve, reject) => {
       maxBuffer: MAX_FFMPEG_BUFFER, //maximum buffer size, affects the longest audio duration that we accept
     },
     (error, stdout) => {
-      if (error) reject(error);
+      if (error) {
+        reject(error);
+      }
       resolve(new Float32Array(stdout.buffer));
     },
   );

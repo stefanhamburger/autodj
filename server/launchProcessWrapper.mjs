@@ -51,10 +51,10 @@ export default async function analyseSong(audioFile, isFirstSong) {
       const id = 1 + Math.floor(Math.random() * 0xFFFFFE);
       //send message to child process
       sendObject({
-        id,
-        offset,
-        length,
-        tempoChange,
+        id, //a random id to uniquely identify messages and their replies
+        offset, //offset into the file based on final, tempo-adjusted time
+        length, //length of the piece we need, based on final, tempo-adjusted time
+        tempoChange, //the amount by which the song is tempo adjusted, e.g. 1.1 to increase tempo by +10%
       });
 
       //return promise that will be resolved once child replies to our message

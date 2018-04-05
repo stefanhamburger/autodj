@@ -33,6 +33,7 @@ let processMessages;
   processMessages = () => {
     //remove all messages from array and process them
     messages.splice(0, messages.length).forEach((msg) => {
+      //TODO: adjust tempo based on msg.tempoChange
       const out = new Float32Array(msg.length * 2);
       for (let i = 0; i < msg.length; i += 1) {
         out[i * 2] = audioBuffer[msg.offset * 2 + i * 2];

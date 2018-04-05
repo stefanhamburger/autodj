@@ -15,7 +15,7 @@ const timeStretch = (inputData, stretchFactor) => {
   kali.setup(SAMPLE_RATE, stretchFactor, USE_QUICK_SEARCH);
 
   // Create an array for the stretched output
-  const completed = new Float32Array(Math.floor((numInputFrames / stretchFactor) * NUM_CHANNELS + 1));
+  const completed = new Float32Array(Math.ceil(numInputFrames / stretchFactor) * NUM_CHANNELS);
 
   let inputOffset = 0;
   let completedOffset = 0;

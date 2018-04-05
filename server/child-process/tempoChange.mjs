@@ -39,7 +39,7 @@ const timeStretch = (inputData, stretchFactor) => {
   return completed;
 };
 
-export default function startProcessing(waveform, stretchFactor) {
+export default function startTempoChange(waveform, stretchFactor) {
   const dataLength = waveform.length;
   const leftChannel = new Float32Array(dataLength / 2);
   const rightChannel = new Float32Array(dataLength / 2);

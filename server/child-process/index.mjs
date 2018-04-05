@@ -4,8 +4,13 @@ import { setUpReceiver, sendMessage, sendBuffer } from './io.mjs';
 import decodeAudio from './ffmpegDecoder.mjs';
 import tempoDetection from './tempoDetection.mjs';
 import createThumbnail from './createThumbnail.mjs';
+import calculateTiming from '../../shared/calculateTiming.mjs';
+import startTempoChange from './tempoChange.mjs';
 
 const isFirstSong = process.argv[3] === 'true';
+
+/** always stereo audio (2 channels) */
+const NUM_CHANNELS = 2;
 
 //We store the list of received messages, and later a function to handle the messages
 const messages = [];
@@ -33,13 +38,13 @@ let processMessages;
   processMessages = () => {
     //remove all messages from array and process them
     messages.splice(0, messages.length).forEach((msg) => {
-      //TODO: adjust tempo based on msg.tempoChange
-      const out = new Float32Array(msg.length * 2);
-      for (let i = 0; i < msg.length; i += 1) {
-        out[i * 2] = audioBuffer[msg.offset * 2 + i * 2];
-        out[i * 2 + 1] = audioBuffer[msg.offset * 2 + i * 2 + 1];
-      }
-      sendBuffer(msg.id, out.buffer);
+      //calculate correct timing values based on tempo adjustment
+      const convertedTiming = calculateTiming(msg.offset, msg.length, msg.tempoChange);
+      //adjust tempo based on msg.tempoChange
+      const inputBuffer = audioBuffer.slice(convertedTiming.startingSample * NUM_CHANNELS, (convertedTiming.endingSample - 1) * NUM_CHANNELS + 1);
+      const tempoAdjustedBuffer = startTempoChange(inputBuffer, msg.tempoChange);
+      const outBuffer = tempoAdjustedBuffer.slice(convertedTiming.offsetAfterAdj * NUM_CHANNELS);
+      sendBuffer(msg.id, outBuffer.buffer);
     });
   };
   //immediately process messages that are already in queue

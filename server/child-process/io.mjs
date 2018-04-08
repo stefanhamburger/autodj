@@ -32,9 +32,9 @@ export function sendMessage(id, msgObj = {}) {
 
 
 //Sends the Uint8Array to the parent
-export function sendBuffer(id, buffer, offset = 0) {
+export function sendBuffer(id, buffer, offset = 0, length = undefined) {
   const input = new Uint8Array(buffer);
-  const dataLength = input.byteLength - offset * 4;
+  const dataLength = length !== undefined ? length : (input.byteLength - offset);
 
   const out = new Uint8Array(9 + dataLength);
   const dv = new DataView(out.buffer);
@@ -42,7 +42,7 @@ export function sendBuffer(id, buffer, offset = 0) {
   dv.setUint32(1, id, true);//id
   dv.setUint32(5, dataLength, true);//length
   for (let i = 0; i < dataLength; i += 1) {
-    dv.setUint8(9 + i, input[offset * 4 + i]);
+    dv.setUint8(9 + i, input[offset + i]);
   }
   process.stdout.write(out);
 }

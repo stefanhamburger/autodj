@@ -25,17 +25,18 @@ const addToBuffer = async (session) => {
 
       //Get an array of songs that should be written to the current stream, and the offset into their waveform
       await Promise.all(songs.map(async (song) => {
-        //const waveform = await audioManager.getFinalWaveform(song);
-        const songPosition = session.encoderPosition - song.startTime;
-        const bufferStart = songPosition < 0 ? -songPosition : 0;
-        const bufferEnd = (song.endTime < endTime) ?
-          (numSamplesToWrite - (endTime - song.endTime)) :
-          numSamplesToWrite;
-        const waveform = await song.song.getPiece({ offset: songPosition, length: bufferEnd, tempoChange: song.tempoAdjustment });
+        //calculate positions, all numbers given in samples
+        const songPieceStart = Math.max(0, session.encoderPosition - song.startTime);
+        const songPieceEnd = Math.min(song.endTime, session.encoderPosition + numSamplesToWrite);
+        const songPieceLength = songPieceEnd - songPieceStart;
+        const outBufferOffset = Math.max(0, song.startTime - session.encoderPosition);
+
+        const waveform = await song.song.getPiece({ offset: songPieceStart, length: songPieceLength, tempoChange: song.tempoAdjustment });
+
         //Loop through numSamplesToWrite, add both channels to buffer
-        for (let j = 0; j < bufferEnd; j += 1) {
-          outBuffer[(bufferStart + j) * 2] += waveform[j * 2];
-          outBuffer[(bufferStart + j) * 2 + 1] += waveform[j * 2 + 1];
+        for (let j = 0; j < songPieceLength; j += 1) {
+          outBuffer[(outBufferOffset + j) * 2] += waveform[j * 2];
+          outBuffer[(outBufferOffset + j) * 2 + 1] += waveform[j * 2 + 1];
         }
 
         if (endTime > song.endTime) {

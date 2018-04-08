@@ -49,7 +49,7 @@ let processMessages;
       //adjust tempo based on msg.tempoChange
       const inputBuffer = audioBuffer.slice(convertedTiming.startingSample * NUM_CHANNELS, (convertedTiming.endingSample - 1) * NUM_CHANNELS + 1);
       const tempoAdjustedBuffer = startTempoChange(inputBuffer, msg.tempoChange);
-      sendBuffer(msg.id, tempoAdjustedBuffer.buffer, convertedTiming.offsetAfterAdj * NUM_CHANNELS);
+      sendBuffer(msg.id, tempoAdjustedBuffer.buffer, convertedTiming.offsetAfterAdj * NUM_CHANNELS * 4, msg.length * NUM_CHANNELS * 4);
     });
   };
   //immediately process messages that are already in queue

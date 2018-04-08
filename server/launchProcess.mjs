@@ -1,5 +1,5 @@
 import childProcess from 'child_process';
-import inputHandler from './childProcessInputHandler.mjs';
+import inputHandler from './launchProcessInputHandler.mjs';
 
 /**
  * Launches a new Node process to analyse the given audio file

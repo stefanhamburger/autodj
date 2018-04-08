@@ -6,6 +6,7 @@ export default function inputHandler(callback, buffer) {
   const id = dv.getUint32(1, true);
   const length = dv.getUint32(5, true);
   if (arrayBuffer.byteLength !== 9 + length) {
+    //TODO: do not throw error but temporarily store buffer contents, and check length again upon next message, see Buffer.concat()
     throw new Error(`Message length check failed, expected message to be ${9 + length} but was ${arrayBuffer.byteLength}`);
   }
 

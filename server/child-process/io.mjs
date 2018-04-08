@@ -38,11 +38,13 @@ export function sendBuffer(id, buffer, offset = 0, length = undefined) {
 
   const out = new Uint8Array(9 + dataLength);
   const dv = new DataView(out.buffer);
+  //Write header
   dv.setUint8(0, 1);//type: 1 = binary
   dv.setUint32(1, id, true);//id
   dv.setUint32(5, dataLength, true);//length
-  for (let i = 0; i < dataLength; i += 1) {
-    dv.setUint8(9 + i, input[offset + i]);
-  }
+  //Write body
+  const inputPart = input.subarray(offset, offset + dataLength);
+  out.set(inputPart, 9);
+
   process.stdout.write(out);
 }

@@ -20,7 +20,7 @@ export default async function analyseSong(session, audioFile, isFirstSong) {
   out.tempo = promise.create('tempo');
   out.thumbnail = promise.create('thumbnail');
 
-  const callback = (isJSON, id, contents) => {
+  const onInputCallback = (isJSON, id, contents) => {
     if (isJSON) {
       switch (id) {
         case 0:
@@ -46,8 +46,15 @@ export default async function analyseSong(session, audioFile, isFirstSong) {
     }
   };
 
+  const onErrorCallback = (error) => {
+    //reject promises
+    promise.reject('duration', error);
+    promise.reject('tempo', error);
+    promise.reject('thumbnail', error);
+  };
+
   try {
-    const { sendObject, destroy } = launchProcess(callback, audioFile.path, isFirstSong);
+    const { sendObject, destroy } = launchProcess(audioFile.path, isFirstSong, onInputCallback, onErrorCallback);
     out.destroy = destroy;
     out.getPiece = ({ offset, length, tempoChange }) => {
       //create a random id. -- 0 is reserved for thumbnails and can't be used
@@ -64,12 +71,8 @@ export default async function analyseSong(session, audioFile, isFirstSong) {
       return promise.create(`piece-${id}`);
     };
   } catch (error) {
-    //TODO: the error is thrown in a callback, not in the main function, so this try-catch won't work
     console.error('error: child process failed', error);
-    //reject all promises
-    promise.reject('duration');
-    promise.reject('tempo');
-    promise.reject('thumbnail');
+    onErrorCallback(error);
   }
 
   //wait for ready message

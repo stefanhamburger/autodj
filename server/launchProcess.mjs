@@ -5,7 +5,7 @@ import getInputHandler from './launchProcessInputHandler.mjs';
  * Launches a new Node process to analyse the given audio file
  * @param audioFile Path to the audio file as string
  */
-export default function launchProcess(callback, audioFile, isFirstSong) {
+export default function launchProcess(audioFile, isFirstSong, onInputCallback, onErrorCallback) {
   const spawnedProcess = childProcess.spawn('node', [
     '--experimental-modules',
     'server/child-process/index.mjs',
@@ -14,14 +14,14 @@ export default function launchProcess(callback, audioFile, isFirstSong) {
   ]);
 
   //Register event handler for messages received from child process
-  spawnedProcess.stdout.on('data', getInputHandler(callback));
+  spawnedProcess.stdout.on('data', getInputHandler(onInputCallback));
 
   //Handle error messages in main thread, instead of ignoring them
   spawnedProcess.stderr.setEncoding('utf8');
   spawnedProcess.stderr.on('data', (error) => {
     //don't halt on warning message that we are using experimental features
     if (!String(error).includes('ExperimentalWarning: The ESM module loader is experimental.')) {
-      throw new Error(error);
+      onErrorCallback(error);
     }
   });
 

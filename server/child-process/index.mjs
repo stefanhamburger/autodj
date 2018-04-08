@@ -32,7 +32,12 @@ let processMessages;
   sendMessage(1, { duration: audioBuffer.byteLength / 8 });
 
   //do tempo detection
-  const mt = tempoDetection(audioBuffer, isFirstSong);
+  //first convert stereo audio to mono since the library expects mono audio
+  const monoBuffer = new Float32Array(audioBuffer.length / 2);
+  for (let i = 0; i < audioBuffer.length; i += 2) {
+    monoBuffer[i >>> 1] = (audioBuffer[i] + audioBuffer[i + 1]) / 2;
+  }
+  const mt = tempoDetection(monoBuffer, isFirstSong);
   sendMessage(2, mt);
 
   //at this point, we can start responding to messages
@@ -44,8 +49,7 @@ let processMessages;
       //adjust tempo based on msg.tempoChange
       const inputBuffer = audioBuffer.slice(convertedTiming.startingSample * NUM_CHANNELS, (convertedTiming.endingSample - 1) * NUM_CHANNELS + 1);
       const tempoAdjustedBuffer = startTempoChange(inputBuffer, msg.tempoChange);
-      const outBuffer = tempoAdjustedBuffer.slice(convertedTiming.offsetAfterAdj * NUM_CHANNELS);
-      sendBuffer(msg.id, outBuffer.buffer);
+      sendBuffer(msg.id, tempoAdjustedBuffer.buffer, convertedTiming.offsetAfterAdj * NUM_CHANNELS);
     });
   };
   //immediately process messages that are already in queue

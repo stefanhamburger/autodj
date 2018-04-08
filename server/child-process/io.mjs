@@ -10,7 +10,7 @@ export function setUpReceiver(callback) {
       const dataObj = JSON.parse(dataString);
       callback(dataObj);
     } catch (err) {
-      process.stderr.write(`Error deserealizing JSON: ${err}`);
+      process.stderr.write(`Error processing message: ${err}`);
     }
   });
 }
@@ -32,15 +32,17 @@ export function sendMessage(id, msgObj = {}) {
 
 
 //Sends the Uint8Array to the parent
-export function sendBuffer(id, buffer) {
+export function sendBuffer(id, buffer, offset = 0) {
   const input = new Uint8Array(buffer);
-  const out = new Uint8Array(9 + input.byteLength);
+  const dataLength = input.byteLength - offset * 4;
+
+  const out = new Uint8Array(9 + dataLength);
   const dv = new DataView(out.buffer);
   dv.setUint8(0, 1);//type: 1 = binary
   dv.setUint32(1, id, true);//id
-  dv.setUint32(5, input.byteLength, true);//length
-  for (let i = 0; i < input.byteLength; i += 1) {
-    dv.setUint8(9 + i, input[i]);
+  dv.setUint32(5, dataLength, true);//length
+  for (let i = 0; i < dataLength; i += 1) {
+    dv.setUint8(9 + i, input[offset * 4 + i]);
   }
   process.stdout.write(out);
 }

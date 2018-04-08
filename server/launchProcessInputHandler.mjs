@@ -12,9 +12,10 @@ export default function getInputHandler(callback) {
 
       //set up buffer to store full message, and add body from received message
       fullBuffer = new Uint8Array(header.length);
-      for (let i = 9; i < buffer.length; i += 1) {
-        fullBuffer[i - 9] = buffer.readUInt8(i);
-      }
+
+      const input = new Uint8Array(buffer.buffer);
+      fullBuffer.set(input.slice(9));
+
       totalLength += buffer.length - 9;
     } else {
       //add complete received buffer

@@ -7,12 +7,13 @@ import createThumbnail from './createThumbnail.mjs';
 import calculateTiming from '../../shared/calculateTiming.mjs';
 import startTempoChange from './tempoChange.mjs';
 
+const audioFile = process.argv[2];
 const isFirstSong = process.argv[3] === 'true';
 
 /** always stereo audio (2 channels) */
 const NUM_CHANNELS = 2;
 
-//We store the list of received messages, and later a function to handle the messages
+//We store the list of received messages, and later a function to handle the messages in queue
 const messages = [];
 let processMessages;
 
@@ -25,7 +26,7 @@ let processMessages;
   sendMessage(0);//child process is ready to receive messages
 
   //decode audio
-  const audioBuffer = await decodeAudio(process.argv[2]);
+  const audioBuffer = await decodeAudio(audioFile);
 
   //get duration
   sendMessage(1, { duration: audioBuffer.byteLength / 8 });

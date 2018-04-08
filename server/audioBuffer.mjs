@@ -1,5 +1,5 @@
 import createEncoder from './ffmpegEncoder.mjs';
-import * as audioManager from './audioManager.mjs';
+//import * as audioManager from './audioManager.mjs';
 import addFileToStream from './playlist.mjs';
 
 /** number of samples to preload - this controls how fast the server can react to input from the client, so should be kept as small as possible */
@@ -25,23 +25,25 @@ const addToBuffer = async (session) => {
 
       //Get an array of songs that should be written to the current stream, and the offset into their waveform
       await Promise.all(songs.map(async (song) => {
-        const waveform = await audioManager.getFinalWaveform(song);
+        //const waveform = await audioManager.getFinalWaveform(song);
         const songPosition = session.encoderPosition - song.startTime;
         const bufferStart = songPosition < 0 ? -songPosition : 0;
         const bufferEnd = (song.endTime < endTime) ?
           (numSamplesToWrite - (endTime - song.endTime)) :
           numSamplesToWrite;
+        const waveform = await song.song.getPiece({ offset: songPosition, length: bufferEnd, tempoChange: 1 });
         //Loop through numSamplesToWrite, add both channels to buffer
-        for (let j = bufferStart; j < bufferEnd; j += 1) {
-          outBuffer[j * 2] += waveform[(songPosition + j) * 2];
-          outBuffer[j * 2 + 1] += waveform[(songPosition + j) * 2 + 1];
+        for (let j = 0; j < bufferEnd; j += 1) {
+          outBuffer[(bufferStart + j) * 2] += waveform[j * 2];
+          outBuffer[(bufferStart + j) * 2 + 1] += waveform[j * 2 + 1];
         }
 
         if (endTime > song.endTime) {
           //need to move song from currentSongs into finshedSongs if we reached its end
           session.currentSongs.splice(session.currentSongs.findIndex(ele => ele === song), 1);
           session.finishedSongs.push(song);
-          audioManager.removeReference(song.songRef, { sid: session.sid, id: song.id });
+          //audioManager.removeReference(song.songRef, { sid: session.sid, id: song.id });
+          song.song.destroy();
           //need to start encoding another song if we don't have any current songs left
           addFileToStream(session);
         }
@@ -72,7 +74,8 @@ export const init = (session) => {
     //remove audio buffer from memory
     for (let i = 0; i < session.currentSongs.length; i += 1) {
       try {
-        audioManager.removeReference(session.currentSongs[i].songRef, { sid: session.sid, id: session.currentSongs[i].id });
+        //audioManager.removeReference(session.currentSongs[i].songRef, { sid: session.sid, id: session.currentSongs[i].id });
+        session.currentSongs[i].song.destroy();
       } finally {
         //ignore error
       }

@@ -66,11 +66,11 @@ const getFolderContents = async dirPath => new Promise((resolve) => {
 
 const files = {};
 
-export const init = async () => {
+export async function init() {
   const { collections } = settings.get();
   await Promise.all(Object.keys(collections).map(async (key) => {
     files[key] = await getFolderContents(collections[key]);
   }));
-};
+}
 
 export const getFiles = collection => files[collection];

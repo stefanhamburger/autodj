@@ -1,8 +1,9 @@
 import * as fileManager from './fileManager.mjs';
-import startTempoRecognition from './startTempoRecognition.mjs';
+//import startTempoRecognition from './startTempoRecognition.mjs';
 import * as consoleColors from './lib/consoleColors.mjs';
-import * as audioManager from './audioManager.mjs';
+//import * as audioManager from './audioManager.mjs';
 import calculateDuration from '../shared/calculateDuration.mjs';
+import analyseSong from './launchProcessWrapper.mjs';
 
 const SONG_ID_LENGTH = 16;
 const alphabet = '0123456789abcdefghijklmnopqrstuvwxyz';
@@ -32,16 +33,17 @@ const generateId = (session) => {
  * @param {module:session.Session} session
 */
 export default function addFileToStream(session, isFirstSong = false) {
-  //wait until list of files was loaded
+  //get random audio file
   const files = fileManager.getFiles(session.collection);
-
   const randomFile = files[Math.floor(Math.random() * files.length)];
+
   const id = generateId(session);
   const songWrapper = { id, songRef: randomFile };
   session.currentSongs.push(songWrapper);
-  audioManager.addReference(randomFile, { sid: session.sid, id });
-  console.log(`${consoleColors.magenta(`[${session.sid}]`)} Adding to playlist: ${consoleColors.green(randomFile.name)}...`);
-  const thumbnailPromise = audioManager.createThumbnail(session, songWrapper);
+  //audioManager.addReference(randomFile, { sid: session.sid, id });
+  songWrapper.song = analyseSong(session, songWrapper.songRef, isFirstSong);
+  console.log(`${consoleColors.magenta(`[${session.sid}]`)} Adding to playlist: ${consoleColors.green(songWrapper.songRef.name)}...`);
+  //const thumbnailPromise = audioManager.createThumbnail(session, songWrapper);
 
   //If this is the first song in the stream, start playing immediately without worrying about mixing
   if (isFirstSong === true) {
@@ -57,7 +59,8 @@ export default function addFileToStream(session, isFirstSong = false) {
     });
     songWrapper.ready = false;//we need to store ready state separately since we can't get a promise's state natively
     songWrapper.readyPromise = new Promise(async (resolve) => {
-      songWrapper.totalLength = await audioManager.getDuration(songWrapper.songRef);
+      songWrapper.song = await songWrapper.song;
+      songWrapper.totalLength = await songWrapper.song.duration;
       //TODO: we should only send the duration if we are sure we are going to keep this song, or at least allow overriding it
       songWrapper.endTime = songWrapper.startTime + calculateDuration(songWrapper.totalLength, songWrapper.tempoAdjustment);
       session.emitEvent({
@@ -68,23 +71,24 @@ export default function addFileToStream(session, isFirstSong = false) {
       });
 
       //do tempo recognition - for first song, we do not need to wait until it is done
-      try {
+      songWrapper.tempo = await songWrapper.song.tempo;
+      /*try {
         await startTempoRecognition(session, songWrapper, true);
       } catch (error) {
         //TODO: tempo recognition failed, we need to immediately switch to another random song
-      }
+      }*/
 
       session.emitEvent({
         type: 'TEMPO_INFO',
         id: songWrapper.id,
-        bpmEnd: songWrapper.bpmEnd,
-        beats: songWrapper.beats,
+        bpmEnd: songWrapper.tempo.bpmEnd,
+        beats: songWrapper.tempo.beats,
       });
 
       //Notify client that waveform data is ready
-      await thumbnailPromise.then(() => {
+      /*await thumbnailPromise.then(() => {
         session.emitEvent({ type: 'THUMBNAIL_READY', id: songWrapper.id });
-      });
+      });*/
 
       resolve();
       songWrapper.ready = true;
@@ -112,25 +116,28 @@ export default function addFileToStream(session, isFirstSong = false) {
         }
       }, { startTime: Number.NEGATIVE_INFINITY });
 
-      songWrapper.totalLength = (await audioManager.getDuration(songWrapper.songRef));
+      songWrapper.song = await songWrapper.song;
+      songWrapper.totalLength = await songWrapper.song.duration;
+      //songWrapper.totalLength = (await audioManager.getDuration(songWrapper.songRef));
 
       //do tempo recognition - and only use song if recognition was successful
-      try {
+      songWrapper.tempo = await songWrapper.song.tempo;
+      /*try {
         await startTempoRecognition(session, songWrapper);
       } catch (error) {
         console.log(`${consoleColors.magenta(`[${session.sid}]`)} Tempo detection failed; skipping ${consoleColors.green(songWrapper.songRef.name)}...`);
         //remove this song and start converting another song
-        audioManager.removeReference(songWrapper.songRef, { sid: session.sid, id: songWrapper.id });
+        //audioManager.removeReference(songWrapper.songRef, { sid: session.sid, id: songWrapper.id });
         session.currentSongs.splice(session.currentSongs.findIndex(entry => entry.id === songWrapper.id), 1);
         resolve();
         addFileToStream(session);
         return;
-      }
+      }*/
 
       //the time in samples at which to start adding this song to the stream
       songWrapper.startTime = previousSong.endTime - 15 * 48000;
 
-      songWrapper.tempoAdjustment = previousSong.tempoAdjustment * previousSong.bpmEnd / songWrapper.bpmStart;
+      songWrapper.tempoAdjustment = previousSong.tempoAdjustment * previousSong.tempo.bpmEnd / songWrapper.tempo.bpmStart;
       songWrapper.endTime = songWrapper.startTime + calculateDuration(songWrapper.totalLength, songWrapper.tempoAdjustment);
 
       session.emitEvent({
@@ -150,22 +157,22 @@ export default function addFileToStream(session, isFirstSong = false) {
       session.emitEvent({
         type: 'TEMPO_INFO',
         id: songWrapper.id,
-        bpmStart: songWrapper.bpmStart,
-        bpmEnd: songWrapper.bpmEnd,
-        beats: songWrapper.beats,
+        bpmStart: songWrapper.tempo.bpmStart,
+        bpmEnd: songWrapper.tempo.bpmEnd,
+        beats: songWrapper.tempo.beats,
       });
 
       //Notify client that waveform data is ready
-      await thumbnailPromise.then(() => {
+      /*await thumbnailPromise.then(() => {
         session.emitEvent({ type: 'THUMBNAIL_READY', id: songWrapper.id });
-      });
+      });*/
 
       resolve();
       songWrapper.ready = true;
 
       //As soon as the new tempo is known, we can start converting the audio
       //This way, the app doesn't need to wait when this song starts playing. We don't care about the result though
-      setTimeout(audioManager.getFinalWaveform.bind(null, songWrapper), 5000);
+      //setTimeout(audioManager.getFinalWaveform.bind(null, songWrapper), 5000);
     });
   }
 }

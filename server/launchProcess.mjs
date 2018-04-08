@@ -15,16 +15,17 @@ export default function launchProcess(callback, audioFile, isFirstSong) {
 
   //Register event handler for messages received from child process
   spawnedProcess.stdout.on('data', (buffer) => {
-    const dv = new DataView(buffer.buffer);
+    const arrayBuffer = buffer.buffer;
+    const dv = new DataView(arrayBuffer);
     //parse header (type + length), perform length integrity check
     const type = dv.getUint8(0);
     const id = dv.getUint32(1, true);
     const length = dv.getUint32(5, true);
-    if (buffer.byteLength !== 9 + length) {
-      throw new Error(`Message length check failed, expected message to be ${9 + length} but was ${buffer.byteLength}`);
+    if (arrayBuffer.byteLength !== 9 + length) {
+      throw new Error(`Message length check failed, expected message to be ${9 + length} but was ${arrayBuffer.byteLength}`);
     }
 
-    const bufferBody = buffer.slice(9);
+    const bufferBody = arrayBuffer.slice(9);
 
     if (type === 0) { //string
       //convert ArrayBuffer to string

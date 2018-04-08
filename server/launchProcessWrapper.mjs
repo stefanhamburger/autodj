@@ -2,6 +2,7 @@
 
 import launchProcess from './launchProcess.mjs';
 import PromiseStorage from './lib/promiseStorage.mjs';
+import * as consoleColors from './lib/consoleColors.mjs';
 
 /** Analyses the given song. We return:
  * a promise that resolves to the duration
@@ -10,7 +11,7 @@ import PromiseStorage from './lib/promiseStorage.mjs';
  * a callback for getting waveform pieces
  * a function to clean-up everything once the song has finished playing
 */
-export default async function analyseSong(audioFile, isFirstSong) {
+export default async function analyseSong(session, audioFile, isFirstSong) {
   const promise = PromiseStorage();
   const isReady = promise.create('isReady');
 
@@ -30,6 +31,8 @@ export default async function analyseSong(audioFile, isFirstSong) {
           break;
         case 2:
           promise.resolve('tempo', contents);
+          console.log(`${consoleColors.magenta(`[${session.sid}]`)} Song ${consoleColors.green(audioFile.name)} starts with ${contents.bpmStart} bpm`);
+          console.log(`${consoleColors.magenta(`[${session.sid}]`)} Song ${consoleColors.green(audioFile.name)} ends with ${contents.bpmEnd} bpm`);
           break;
         default:
           throw new Error('Received message from child process with unknown id');
@@ -38,13 +41,13 @@ export default async function analyseSong(audioFile, isFirstSong) {
       if (id === 0) {
         promise.resolve('thumbnail', contents);
       } else {
-        promise.resolve(`piece-${id}`, contents);
+        promise.resolve(`piece-${id}`, new Float32Array(contents));
       }
     }
   };
 
   try {
-    const { sendObject, destroy } = launchProcess(callback, audioFile, isFirstSong);
+    const { sendObject, destroy } = launchProcess(callback, audioFile.path, isFirstSong);
     out.destroy = destroy;
     out.getPiece = ({ offset, length, tempoChange }) => {
       //create a random id. -- 0 is reserved for thumbnails and can't be used
@@ -62,6 +65,7 @@ export default async function analyseSong(audioFile, isFirstSong) {
     };
   } catch (error) {
     //TODO: the error is thrown in a callback, not in the main function, so this try-catch won't work
+    console.error('error: child process failed', error);
     //reject all promises
     promise.reject('duration');
     promise.reject('tempo');

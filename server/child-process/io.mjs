@@ -17,7 +17,7 @@ export function setUpReceiver(callback) {
 
 
 //Send string message to parent
-export function sendMessage(id, msgObj) {
+export function sendMessage(id, msgObj = {}) {
   const msg = JSON.stringify(msgObj);
   const out = new Uint8Array(9 + msg.length);
   const dv = new DataView(out.buffer);

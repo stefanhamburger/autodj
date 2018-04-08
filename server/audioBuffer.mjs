@@ -31,7 +31,7 @@ const addToBuffer = async (session) => {
         const bufferEnd = (song.endTime < endTime) ?
           (numSamplesToWrite - (endTime - song.endTime)) :
           numSamplesToWrite;
-        const waveform = await song.song.getPiece({ offset: songPosition, length: bufferEnd, tempoChange: 1 });
+        const waveform = await song.song.getPiece({ offset: songPosition, length: bufferEnd, tempoChange: song.tempoAdjustment });
         //Loop through numSamplesToWrite, add both channels to buffer
         for (let j = 0; j < bufferEnd; j += 1) {
           outBuffer[(bufferStart + j) * 2] += waveform[j * 2];

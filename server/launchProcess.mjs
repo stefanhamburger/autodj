@@ -1,5 +1,5 @@
 import childProcess from 'child_process';
-import inputHandler from './launchProcessInputHandler.mjs';
+import getInputHandler from './launchProcessInputHandler.mjs';
 
 /**
  * Launches a new Node process to analyse the given audio file
@@ -14,7 +14,7 @@ export default function launchProcess(callback, audioFile, isFirstSong) {
   ]);
 
   //Register event handler for messages received from child process
-  spawnedProcess.stdout.on('data', inputHandler.bind(null, callback));
+  spawnedProcess.stdout.on('data', getInputHandler(callback));
 
   //Handle error messages in main thread, instead of ignoring them
   spawnedProcess.stderr.setEncoding('utf8');

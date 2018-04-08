@@ -28,7 +28,7 @@ export default function getInputHandler(callback) {
     } else { //full message received
       if (header.type === 0) { //string
         //convert ArrayBuffer to string
-        const text = String.fromCharCode.apply(null, new Uint8Array(fullBuffer));
+        const text = String.fromCharCode.apply(null, fullBuffer);
         //parse JSON
         try {
           const obj = JSON.parse(text);

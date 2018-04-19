@@ -4,6 +4,9 @@ import launchProcess from './launchProcess.mjs';
 import PromiseStorage from './lib/promiseStorage.mjs';
 import * as consoleColors from './lib/consoleColors.mjs';
 
+/** Stores thumbnails until they are requested by the client. */
+const audioThumbnails = {};
+
 /** Analyses the given song. We return:
  * a promise that resolves to the duration
  * a promise that resolves to the tempo information
@@ -11,7 +14,8 @@ import * as consoleColors from './lib/consoleColors.mjs';
  * a callback for getting waveform pieces
  * a function to clean-up everything once the song has finished playing
 */
-export default async function analyseSong(session, audioFile, isFirstSong) {
+export async function analyseSong(session, songWrapper, isFirstSong) {
+  const audioFile = songWrapper.songRef;
   const promise = PromiseStorage();
   const isReady = promise.create('isReady');
 
@@ -39,7 +43,10 @@ export default async function analyseSong(session, audioFile, isFirstSong) {
       }
     } else {
       if (id === 0) {
-        promise.resolve('thumbnail', contents);
+        //store thumbnail
+        audioThumbnails[`${session.sid}#${songWrapper.id}`] = contents;
+        //notify client that thumbnail has been generated
+        promise.resolve('thumbnail');
       } else {
         promise.resolve(`piece-${id}`, new Float32Array(contents));
       }
@@ -55,7 +62,12 @@ export default async function analyseSong(session, audioFile, isFirstSong) {
 
   try {
     const { sendObject, destroy } = launchProcess(audioFile.path, isFirstSong, onInputCallback, onErrorCallback);
-    out.destroy = destroy;
+    out.destroy = () => {
+      //remove thumbnail
+      delete audioThumbnails[`${session.sid}#${songWrapper.id}`];
+      //kill child process
+      destroy();
+    };
     out.getPiece = ({ offset, length, tempoChange }) => {
       //create a random id. -- 0 is reserved for thumbnails and can't be used
       const id = 1 + Math.floor(Math.random() * 0xFFFFFE);
@@ -80,3 +92,16 @@ export default async function analyseSong(session, audioFile, isFirstSong) {
 
   return out;
 }
+
+
+/** Gets the thumbnail that was previously generated for sending to the client */
+export const getThumbnail = (sid, song) => {
+  const key = `${sid}#${song}`;
+  const result = audioThumbnails[key];
+
+  if (result === undefined) {
+    throw new Error(`Expected thumbnail for ${key} but thumbnail was not found.`);
+  }
+
+  return result;
+};

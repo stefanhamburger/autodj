@@ -3,7 +3,7 @@
 import express from 'express';
 import fs from 'fs';
 import * as audioBuffer from './audioBuffer.mjs';
-//import * as audioManager from './audioManager.mjs';
+import { getThumbnail } from './launchProcessWrapper.mjs';
 import * as sessions from './sessions.mjs';
 import { get as getSettings } from './settings.mjs';
 
@@ -73,7 +73,7 @@ app.get('/part', (req, res) => {
 app.get('/thumbnail', (req, res) => {
   const { sid, song } = req.query;
   try {
-    //res.send(Buffer.from(audioManager.getThumbnail(sid, song).buffer));//TODO
+    res.send(Buffer.from(getThumbnail(sid, song)));
   } catch (error) {
     console.error(`Error when getting thumbnail: ${error.toString()}`);
     res.status(404).end();

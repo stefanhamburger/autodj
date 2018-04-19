@@ -3,7 +3,7 @@ import * as fileManager from './fileManager.mjs';
 import * as consoleColors from './lib/consoleColors.mjs';
 //import * as audioManager from './audioManager.mjs';
 import calculateDuration from '../shared/calculateDuration.mjs';
-import analyseSong from './launchProcessWrapper.mjs';
+import { analyseSong } from './launchProcessWrapper.mjs';
 
 const SONG_ID_LENGTH = 16;
 const alphabet = '0123456789abcdefghijklmnopqrstuvwxyz';
@@ -41,7 +41,7 @@ export default function addFileToStream(session, isFirstSong = false) {
   const songWrapper = { id, songRef: randomFile };
   session.currentSongs.push(songWrapper);
   //audioManager.addReference(randomFile, { sid: session.sid, id });
-  songWrapper.song = analyseSong(session, songWrapper.songRef, isFirstSong);
+  songWrapper.song = analyseSong(session, songWrapper, isFirstSong);
   console.log(`${consoleColors.magenta(`[${session.sid}]`)} Adding to playlist: ${consoleColors.green(songWrapper.songRef.name)}...`);
   //const thumbnailPromise = audioManager.createThumbnail(session, songWrapper);
 
@@ -86,9 +86,8 @@ export default function addFileToStream(session, isFirstSong = false) {
       });
 
       //Notify client that waveform data is ready
-      /*await thumbnailPromise.then(() => {
-        session.emitEvent({ type: 'THUMBNAIL_READY', id: songWrapper.id });
-      });*/
+      await songWrapper.song.thumbnail;
+      session.emitEvent({ type: 'THUMBNAIL_READY', id: songWrapper.id });
 
       resolve();
       songWrapper.ready = true;
@@ -163,9 +162,8 @@ export default function addFileToStream(session, isFirstSong = false) {
       });
 
       //Notify client that waveform data is ready
-      /*await thumbnailPromise.then(() => {
-        session.emitEvent({ type: 'THUMBNAIL_READY', id: songWrapper.id });
-      });*/
+      await songWrapper.song.thumbnail;
+      session.emitEvent({ type: 'THUMBNAIL_READY', id: songWrapper.id });
 
       resolve();
       songWrapper.ready = true;

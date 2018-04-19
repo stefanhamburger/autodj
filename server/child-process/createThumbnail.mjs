@@ -5,7 +5,7 @@
 */
 const THUMBNAIL_WIDTH = 600;
 
-export default async function createThumbnail(waveform) {
+export default function createThumbnail(waveform) {
   //prepare output arrays, containing minimum and maximum waveform data per pixel
   const outMax = new Float32Array(THUMBNAIL_WIDTH);
   const outMin = new Float32Array(THUMBNAIL_WIDTH);

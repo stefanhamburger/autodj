@@ -12,6 +12,8 @@ const isFirstSong = process.argv[3] === 'true';
 
 /** always stereo audio (2 channels) */
 const NUM_CHANNELS = 2;
+/** 32-bit floating point on 2 channels = 8 bytes per sample */
+const BYTES_PER_SAMPLE = NUM_CHANNELS * 4;
 
 //We store the list of received messages, and later a function to handle the messages in queue
 const messages = [];
@@ -49,7 +51,7 @@ let processMessages;
       //adjust tempo based on msg.tempoChange
       const inputBuffer = audioBuffer.slice(convertedTiming.startingSample * NUM_CHANNELS, (convertedTiming.endingSample - 1) * NUM_CHANNELS + 1);
       const tempoAdjustedBuffer = startTempoChange(inputBuffer, msg.tempoChange);
-      sendBuffer(msg.id, tempoAdjustedBuffer.buffer, convertedTiming.offsetAfterAdj * NUM_CHANNELS * 4, msg.length * NUM_CHANNELS * 4);
+      sendBuffer(msg.id, tempoAdjustedBuffer.buffer, convertedTiming.offsetAfterAdj * BYTES_PER_SAMPLE, msg.length * BYTES_PER_SAMPLE);
     });
   };
   //immediately process messages that are already in queue

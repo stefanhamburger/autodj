@@ -27,7 +27,7 @@ const addToBuffer = async (session) => {
       await Promise.all(songs.map(async (song) => {
         //calculate positions, all numbers given in samples
         const songPieceStart = Math.max(0, session.encoderPosition - song.startTime);
-        const songPieceEnd = Math.min(song.endTime, session.encoderPosition + numSamplesToWrite);
+        const songPieceEnd = Math.min(song.endTime, session.encoderPosition + numSamplesToWrite) - song.startTime;
         const songPieceLength = songPieceEnd - songPieceStart;
         const outBufferOffset = Math.max(0, song.startTime - session.encoderPosition);
 

@@ -39,8 +39,12 @@ let processMessages;
   for (let i = 0; i < audioBuffer.length; i += 2) {
     monoBuffer[i >>> 1] = (audioBuffer[i] + audioBuffer[i + 1]) / 2;
   }
-  const mt = tempoDetection(monoBuffer, isFirstSong);
-  sendMessage(2, mt);
+  try {
+    const mt = tempoDetection(monoBuffer, isFirstSong);
+    sendMessage(2, mt);
+  } catch (error) {
+    sendMessage(2, { error: true });
+  }
 
   //at this point, we can start responding to messages
   processMessages = () => {

@@ -34,7 +34,6 @@ export default function tempoDetection(waveformArray, isFirstSong) {
   //if song is too short, we detect tempo across the whole song
   if (waveformArray.length < SONG_MIN_LENGTH) {
     const { bpm, beats } = detectTempo(waveformArray);
-    if (bpm === undefined) throw new Error('Tempo detection failed');
     out.bpmStart = bpm;
     out.bpmEnd = bpm;
     out.beats = beats;
@@ -43,7 +42,6 @@ export default function tempoDetection(waveformArray, isFirstSong) {
     if (!isFirstSong) {
       //tempo at beginning of song
       const { bpm: bpmStart, beats: beatsStart } = detectTempo(waveformArray.slice(0, SONG_START_LENGTH));
-      if (bpmStart === undefined) throw new Error('Tempo detection failed');
       out.bpmStart = bpmStart;
       out.beats = beatsStart;
     }
@@ -52,7 +50,6 @@ export default function tempoDetection(waveformArray, isFirstSong) {
     {
       const endPos = waveformArray.length - SONG_END_LENGTH;
       const { bpm: bpmEnd, beats: beatsResult } = detectTempo(waveformArray.slice(endPos));
-      if (bpmEnd === undefined) throw new Error('Tempo detection failed');
       out.bpmEnd = bpmEnd;
       //the beat times are relative to the last minute, so add offset to get correct time
       const beatsEnd = beatsResult.map(time => Math.round((endPos / SAMPLE_RATE + time) * 10000) / 10000);

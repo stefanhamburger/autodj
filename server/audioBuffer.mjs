@@ -1,6 +1,6 @@
 import createEncoder from './ffmpegEncoder.mjs';
 //import * as audioManager from './audioManager.mjs';
-import addFileToStream from './playlist.mjs';
+import { addFirstSong, addFollowUpSong } from './playlist.mjs';
 
 /** number of samples to preload - this controls how fast the server can react to input from the client, so should be kept as small as possible */
 const PRELOAD_BUFFER_LENGTH = 5 * 48000;
@@ -46,7 +46,10 @@ const addToBuffer = async (session) => {
           //audioManager.removeReference(song.songRef, { sid: session.sid, id: song.id });
           song.song.destroy();
           //need to start encoding another song if we don't have any current songs left
-          addFileToStream(session);
+          if (song.hadTempoFailure !== true) {
+            //only add follow-up song if this was not the first song, since first songs automatically have a follow-up song
+            addFollowUpSong(session);
+          }
         }
       }));
 
@@ -108,11 +111,8 @@ export const init = (session) => {
     };
   }
 
-  addFileToStream(session, true);
+  addFirstSong(session);
   setTimeout(addToBuffer.bind(null, session));
-
-  //Also add a second song 15 seconds later
-  setTimeout(addFileToStream.bind(null, session), 15000);
 };
 
 

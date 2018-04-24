@@ -34,9 +34,13 @@ export async function analyseSong(session, songWrapper, isFirstSong) {
           promise.resolve('duration', contents.duration);
           break;
         case 2:
-          promise.resolve('tempo', contents);
-          console.log(`${consoleColors.magenta(`[${session.sid}]`)} Song ${consoleColors.green(audioFile.name)} starts with ${contents.bpmStart} bpm`);
-          console.log(`${consoleColors.magenta(`[${session.sid}]`)} Song ${consoleColors.green(audioFile.name)} ends with ${contents.bpmEnd} bpm`);
+          if (contents.error === undefined) {
+            promise.resolve('tempo', contents);
+            console.log(`${consoleColors.magenta(`[${session.sid}]`)} Song ${consoleColors.green(audioFile.name)} starts with ${contents.bpmStart} bpm`);
+            console.log(`${consoleColors.magenta(`[${session.sid}]`)} Song ${consoleColors.green(audioFile.name)} ends with ${contents.bpmEnd} bpm`);
+          } else {
+            promise.reject('tempo');
+          }
           break;
         default:
           throw new Error('Received message from child process with unknown id');
@@ -54,7 +58,9 @@ export async function analyseSong(session, songWrapper, isFirstSong) {
   };
 
   const onErrorCallback = (error) => {
-    console.error('Error in child process', String(error).trim());
+    const errorName = String(error).trim();
+    console.error('Error in child process', errorName);
+
     //reject promises
     promise.reject('duration', error);
     promise.reject('tempo', error);

@@ -30,11 +30,25 @@ const Slider = styled.default.input`
   background-color: rgba(240, 240, 240, 0.8);
 `;
 
-export default function VolumeControl({ volumeChangeCallback }) {
+/** Returns an appropriate emoji for this volume level (given in 0 to 1) */
+function getSymbol(volume) {
+  if (volume >= 0.5) return '🔊';//0.5 - 1.0
+  if (volume >= 0.1) return '🔉';//0.1 - 0.49
+  if (volume > 0) return '🔈';//0.01 - 0.09
+  return '🔇';//0
+}
+
+export default function VolumeControl({
+  muted,
+  volume,
+  mutedCallback,
+  volumeChangeCallback,
+}) {
+  const visibleVolume = muted ? 0 : volume;
   return (
     <Container>
-      <Button>🔉</Button>
-      <Slider type="range" min="0" defaultValue="10" max="100" step="1" onInput={event => volumeChangeCallback(Number(event.target.value) / 100)} />
+      <Button onClick={mutedCallback}>{getSymbol(visibleVolume)}</Button>
+      <Slider type="range" min="0" defaultValue={Math.round(visibleVolume * 100)} max="100" step="1" onInput={event => volumeChangeCallback(Number(event.target.value) / 100)} />
     </Container>
   );
 }

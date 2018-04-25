@@ -41,7 +41,7 @@ export function addFollowUpSong(session) {
   const id = generateId(session);
   const songWrapper = { id, songRef: randomFile };
   songWrapper.song = analyseSong(session, songWrapper, false);
-  console.log(`${consoleColors.magenta(`[${session.sid}]`)} Adding to playlist: ${consoleColors.green(songWrapper.songRef.name)}...`);
+  console.log(`${consoleColors.magenta(`[${session.sid}]`)} Analysing ${consoleColors.green(songWrapper.songRef.name)}...`);
 
   //inform client that we are considering this follow-up song - subject to successful tempo detection etc.
   session.emitEvent({
@@ -113,6 +113,7 @@ export function addFollowUpSong(session) {
     session.emitEvent({ type: 'THUMBNAIL_READY', id: songWrapper.id });
 
     session.currentSongs.push(songWrapper);
+    console.log(`${consoleColors.magenta(`[${session.sid}]`)} Adding to playlist: ${consoleColors.green(songWrapper.songRef.name)}.`);
 
     resolve();
     songWrapper.ready = true;

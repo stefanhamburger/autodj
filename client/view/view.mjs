@@ -15,10 +15,22 @@ const rerender = () => {
 };
 
 //Initializes the view
-const init = (onVolumeChange, onPause) => {
+const init = (volumeChangeCallback, onPause) => {
   const rootEle = document.getElementById('view');
 
-  state.onVolumeChange = onVolumeChange;
+  state.muted = false;
+  state.volume = 0.1;
+  state.onVolumeChange = (newVolume) => {
+    volumeChangeCallback(newVolume);
+    state.muted = false;
+    state.volume = newVolume;
+    rerender();
+  };
+  state.onMuted = () => {
+    state.muted = !state.muted;
+    volumeChangeCallback(state.muted ? 0 : state.volume);
+    rerender();
+  };
   state.onPause = onPause;
   state.isPaused = false;
   state.totalTime = 0;

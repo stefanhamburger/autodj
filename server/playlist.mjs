@@ -49,12 +49,11 @@ export async function addFollowUpSong(session) {
     songName: songWrapper.songRef.name,
   });
 
-  songWrapper.ready = false;
   const previousSongs = session.currentSongs.filter(entry => entry.id !== songWrapper.id);
 
   //find the song that is right before this one (= song with the highest starting time)
   const previousSong = previousSongs.reduce((accumulator, curSong) => {
-    if (curSong.ready === true && curSong.startTime > accumulator.startTime) {
+    if (curSong.startTime > accumulator.startTime) {
       return curSong;
     } else {
       return accumulator;
@@ -110,8 +109,6 @@ export async function addFollowUpSong(session) {
 
   session.currentSongs.push(songWrapper);
   console.log(`${consoleColors.magenta(`[${session.sid}]`)} Adding to playlist: ${consoleColors.green(songWrapper.songRef.name)}.`);
-
-  songWrapper.ready = true;
 }
 
 
@@ -129,7 +126,6 @@ export async function addFirstSong(session, offset = 0) {
 
   const id = generateId(session);
   const songWrapper = { id, songRef: randomFile };
-  session.currentSongs.push(songWrapper);
 
   songWrapper.song = analyseSong(session, songWrapper, true);
   console.log(`${consoleColors.magenta(`[${session.sid}]`)} Adding to playlist: ${consoleColors.green(songWrapper.songRef.name)}...`);
@@ -144,7 +140,6 @@ export async function addFirstSong(session, offset = 0) {
     songName: songWrapper.songRef.name,
     time: songWrapper.startTime / 48000,
   });
-  songWrapper.ready = false;//we need to store ready state separately since we can't get a promise's state natively
   songWrapper.song = await songWrapper.song;
   songWrapper.totalLength = await songWrapper.song.duration;
   //TODO: we should only send the duration if we are sure we are going to keep this song, or at least allow overriding it
@@ -156,7 +151,8 @@ export async function addFirstSong(session, offset = 0) {
     tempoAdjustment: songWrapper.tempoAdjustment,
   });
 
-  songWrapper.ready = true;
+  //we are now ready for playback
+  session.currentSongs.push(songWrapper);
 
   try {
     //do tempo recognition - for first song, we do not need to wait until it is done
@@ -181,7 +177,6 @@ export async function addFirstSong(session, offset = 0) {
 
     //select another song
     addFirstSong(session, songWrapper.endTime);
-    reject();
     return;
   }
 

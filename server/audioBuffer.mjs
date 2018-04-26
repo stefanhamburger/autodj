@@ -14,7 +14,7 @@ const addToBuffer = async (session) => {
     let numSamplesToWrite = Math.min(session.samplesToAdd, MAX_SAMPLES_PER_LOOP);
     const endTime = session.encoderPosition + numSamplesToWrite;
     //Only use songs that are 1. ready for processing 2. have already started playing 3. have not yet finished playing
-    const songs = session.currentSongs.filter(song => song.ready === true && endTime > song.startTime && session.encoderPosition < song.endTime);
+    const songs = session.currentSongs.filter(song => endTime > song.startTime && session.encoderPosition < song.endTime);
 
     //only encode when we have at least one song to encode (at the start of a session, it takes a couple seconds until we can encode a song)
     if (songs.length > 0) {

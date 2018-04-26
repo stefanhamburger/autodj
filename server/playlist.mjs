@@ -45,7 +45,7 @@ async function testFollowUpSong(session) {
   //inform client that we are considering this follow-up song - subject to successful tempo detection etc.
   session.emitEvent({
     type: 'NEXT_SONG',
-    songName: songWrapper.songRef.name,
+    songName: `[TBD] ${songWrapper.songRef.name}`,
   });
 
   const previousSongs = session.currentSongs.filter(entry => entry.id !== songWrapper.id);

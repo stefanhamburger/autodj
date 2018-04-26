@@ -42,6 +42,11 @@ async function testFollowUpSong(session) {
   const songWrapper = { id, songRef: randomFile };
   songWrapper.song = analyseSong(session, songWrapper, false);
   console.log(`${consoleColors.magenta(`[${session.sid}]`)} Analysing ${consoleColors.green(songWrapper.songRef.name)}...`);
+  //inform client that we are considering this follow-up song - subject to successful tempo detection etc.
+  session.emitEvent({
+    type: 'NEXT_SONG',
+    songName: songWrapper.songRef.name,
+  });
 
   const previousSongs = session.currentSongs.filter(entry => entry.id !== songWrapper.id);
 
@@ -81,11 +86,6 @@ export async function addFollowUpSong(session) {
   while (songs.length < 3) {
     try {
       const songWrapper = await testFollowUpSong(session);
-      //inform client that we are considering this follow-up song - subject to successful tempo detection etc.
-      session.emitEvent({
-        type: 'NEXT_SONG',
-        songName: songWrapper.songRef.name,
-      });
       songs.push(songWrapper);
     } catch (error) {
       //tempo detection failed, ignore this song

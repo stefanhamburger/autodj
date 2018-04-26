@@ -93,9 +93,16 @@ export async function addFollowUpSong(session) {
   }
 
   //Pick the song with the least tempo adjustment, and add it to the list
-  //TODO
   {
-    const songWrapper = songs[0];
+    //find the song that with least tempo adjustment (closest to 1.0)
+    const songWrapper = songs.reduce((accumulator, curSong) => {
+      const tempo = (curSong.tempoAdjustment < 1) ? 1 / curSong.tempoAdjustment : curSong.tempoAdjustment;
+      if (tempo < accumulator.tempo) {
+        return { tempo, song: curSong };
+      } else {
+        return accumulator;
+      }
+    }, { tempo: Number.POSITIVE_INFINITY }).song;
     session.currentSongs.push(songWrapper);
     console.log(`${consoleColors.magenta(`[${session.sid}]`)} Adding to playlist: ${consoleColors.green(songWrapper.songRef.name)}.`);
 

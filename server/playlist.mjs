@@ -66,10 +66,6 @@ async function testFollowUpSong(session) {
   songWrapper.tempoAdjustment = previousSong.tempoAdjustment * previousSong.tempo.bpmEnd / songWrapper.tempo.bpmStart;
   songWrapper.endTime = songWrapper.startTime + calculateDuration(songWrapper.totalLength, songWrapper.tempoAdjustment);
 
-  //Notify client that waveform data is ready
-  await songWrapper.song.thumbnail;
-  session.emitEvent({ type: 'THUMBNAIL_READY', id: songWrapper.id });
-
   return songWrapper;
 }
 
@@ -128,6 +124,10 @@ export async function addFollowUpSong(session) {
       bpmStart: songWrapper.tempo.bpmStart,
       bpmEnd: songWrapper.tempo.bpmEnd,
       beats: songWrapper.tempo.beats,
+    });
+    //Notify client that waveform data is ready
+    songWrapper.song.thumbnail.then(() => {
+      session.emitEvent({ type: 'THUMBNAIL_READY', id: songWrapper.id });
     });
   }
 }

@@ -29,11 +29,11 @@ const generateId = (session) => {
 
 
 /**
- * Adds a follow-up song. The follow-up song must be tempo-detected both at beginning and end.
- * If it fails, a different follow-up song is picked.
+ * Checks a follow-up song for correct tempo detection, and returns the song object with full information.
+ * Throws an error if the tempo detection fails.
  * @param session
  */
-export async function addFollowUpSong(session) {
+async function testFollowUpSong(session) {
   //get random audio file
   const files = fileManager.getFiles(session.collection);
   const randomFile = files[Math.floor(Math.random() * files.length)];
@@ -42,12 +42,6 @@ export async function addFollowUpSong(session) {
   const songWrapper = { id, songRef: randomFile };
   songWrapper.song = analyseSong(session, songWrapper, false);
   console.log(`${consoleColors.magenta(`[${session.sid}]`)} Analysing ${consoleColors.green(songWrapper.songRef.name)}...`);
-
-  //inform client that we are considering this follow-up song - subject to successful tempo detection etc.
-  session.emitEvent({
-    type: 'NEXT_SONG',
-    songName: songWrapper.songRef.name,
-  });
 
   const previousSongs = session.currentSongs.filter(entry => entry.id !== songWrapper.id);
 
@@ -64,17 +58,7 @@ export async function addFollowUpSong(session) {
   songWrapper.totalLength = await songWrapper.song.duration;
 
   //do tempo recognition - and only use song if recognition was successful
-  try {
-    songWrapper.tempo = await songWrapper.song.tempo;
-  } catch (error) {
-    console.log(`${consoleColors.magenta(`[${session.sid}]`)} Tempo detection failed for ${consoleColors.green(songWrapper.songRef.name)}; skipping this song.`);
-
-    //add another song
-    addFollowUpSong(session);
-
-    //stop processing this song
-    return;
-  }
+  songWrapper.tempo = await songWrapper.song.tempo;
 
   //the time in samples at which to start adding this song to the stream
   songWrapper.startTime = previousSong.endTime - 15 * 48000;
@@ -82,33 +66,70 @@ export async function addFollowUpSong(session) {
   songWrapper.tempoAdjustment = previousSong.tempoAdjustment * previousSong.tempo.bpmEnd / songWrapper.tempo.bpmStart;
   songWrapper.endTime = songWrapper.startTime + calculateDuration(songWrapper.totalLength, songWrapper.tempoAdjustment);
 
-  session.emitEvent({
-    type: 'SONG_START',
-    id: songWrapper.id,
-    songName: songWrapper.songRef.name,
-    time: songWrapper.startTime / 48000,
-  });
-  session.emitEvent({
-    type: 'SONG_DURATION',
-    id: songWrapper.id,
-    origDuration: songWrapper.totalLength,
-    tempoAdjustment: songWrapper.tempoAdjustment,
-  });
-
-  session.emitEvent({
-    type: 'TEMPO_INFO',
-    id: songWrapper.id,
-    bpmStart: songWrapper.tempo.bpmStart,
-    bpmEnd: songWrapper.tempo.bpmEnd,
-    beats: songWrapper.tempo.beats,
-  });
-
   //Notify client that waveform data is ready
   await songWrapper.song.thumbnail;
   session.emitEvent({ type: 'THUMBNAIL_READY', id: songWrapper.id });
 
-  session.currentSongs.push(songWrapper);
-  console.log(`${consoleColors.magenta(`[${session.sid}]`)} Adding to playlist: ${consoleColors.green(songWrapper.songRef.name)}.`);
+  return songWrapper;
+}
+
+
+/**
+ * Adds a follow-up song. The follow-up song must be tempo-detected both at beginning and end.
+ * If it fails, a different follow-up song is picked.
+ * @param session
+ */
+export async function addFollowUpSong(session) {
+  const songs = [];
+  //Find at least three songs
+  while (songs.length < 3) {
+    try {
+      const songWrapper = await testFollowUpSong(session);
+      //inform client that we are considering this follow-up song - subject to successful tempo detection etc.
+      session.emitEvent({
+        type: 'NEXT_SONG',
+        songName: songWrapper.songRef.name,
+      });
+      songs.push(songWrapper);
+    } catch (error) {
+      //tempo detection failed, ignore this song
+    }
+  }
+
+  //Pick the song with the least tempo adjustment, and add it to the list
+  //TODO
+  {
+    const songWrapper = songs[0];
+    session.currentSongs.push(songWrapper);
+    console.log(`${consoleColors.magenta(`[${session.sid}]`)} Adding to playlist: ${consoleColors.green(songWrapper.songRef.name)}.`);
+
+    //Inform client that we decided on this follow-up song
+    session.emitEvent({
+      type: 'NEXT_SONG',
+      songName: songWrapper.songRef.name,
+    });
+
+    //Send full song information to client
+    session.emitEvent({
+      type: 'SONG_START',
+      id: songWrapper.id,
+      songName: songWrapper.songRef.name,
+      time: songWrapper.startTime / 48000,
+    });
+    session.emitEvent({
+      type: 'SONG_DURATION',
+      id: songWrapper.id,
+      origDuration: songWrapper.totalLength,
+      tempoAdjustment: songWrapper.tempoAdjustment,
+    });
+    session.emitEvent({
+      type: 'TEMPO_INFO',
+      id: songWrapper.id,
+      bpmStart: songWrapper.tempo.bpmStart,
+      bpmEnd: songWrapper.tempo.bpmEnd,
+      beats: songWrapper.tempo.beats,
+    });
+  }
 }
 
 

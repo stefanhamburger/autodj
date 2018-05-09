@@ -124,6 +124,9 @@ export async function addFollowUpSong(session) {
       id: songWrapper.id,
       origDuration: songWrapper.totalLength,
       tempoAdjustment: songWrapper.tempoAdjustment,
+      tempo: [
+        { offset: 0, length: songWrapper.endTime - songWrapper.startTime, speed: songWrapper.tempoAdjustment },
+      ],
     });
     session.emitEvent({
       type: 'TEMPO_INFO',
@@ -177,6 +180,9 @@ export async function addFirstSong(session, offset = 0) {
     id: songWrapper.id,
     origDuration: songWrapper.totalLength,
     tempoAdjustment: songWrapper.tempoAdjustment,
+    tempo: [
+      { offset: 0, length: songWrapper.endTime - songWrapper.startTime, speed: songWrapper.tempoAdjustment },
+    ],
   });
 
   //we are now ready for playback
@@ -198,6 +204,9 @@ export async function addFirstSong(session, offset = 0) {
       id: songWrapper.id,
       origDuration: songWrapper.totalLength,
       tempoAdjustment: songWrapper.tempoAdjustment,
+      tempo: [
+        { offset: 0, length: songWrapper.endTime - songWrapper.startTime, speed: songWrapper.tempoAdjustment },
+      ],
     });
 
     //notify audio buffer that we pick a follow-up song ourselves and don't need audio buffer to do it

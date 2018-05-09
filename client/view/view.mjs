@@ -36,6 +36,8 @@ const init = (volumeChangeCallback, onPause) => {
   state.totalTime = 0;
   state.currentSongs = [];
   state.nextSong = undefined;
+  state.canSkip = false;
+  state.skipCallback = () => {};
 
   container = document.createElement('div');
   rootEle.appendChild(container);

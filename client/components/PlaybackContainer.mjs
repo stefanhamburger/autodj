@@ -1,5 +1,6 @@
 import React from 'react';
 import ButtonPause from './ButtonPause.mjs';
+import ButtonSkip from './ButtonSkip.mjs';
 import CurrentSong from './CurrentSong.mjs';
 import TotalDuration from './TotalDuration.mjs';
 import VolumeControl from './VolumeControl.mjs';
@@ -16,6 +17,7 @@ export default function PlaybackContainer({ state }) {
       <div>
         <TotalDuration time={state.totalTime} />
         <ButtonPause isPaused={state.isPaused} pauseCallback={state.onPause} />
+        <ButtonSkip canSkip={state.canSkip} skipCallback={state.onSkip} />
         <VolumeControl muted={state.muted} volume={state.volume} mutedCallback={state.onMuted} volumeChangeCallback={state.onVolumeChange} />
       </div>
       <div style={{ fontWeight: 'bold' }}>Currently playing:</div>

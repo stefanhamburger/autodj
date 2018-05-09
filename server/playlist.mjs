@@ -27,6 +27,54 @@ const generateId = (session) => {
   return innerGenerate();
 };
 
+/**
+ * After duration or tempo adjustment was changed, this function will recalculate various values to simplify calculations in audio buffer
+ */
+const fixPlaybackData = (songWrapper) => {
+  let curTime = songWrapper.startTime;
+
+  //go through entries in playback data
+  for (let i = 0, il = songWrapper.playbackData.length; i < il; i += 1) {
+    //calculate real-time values of this entry post-tempo adjustment
+    const entry = songWrapper.playbackData[i];
+    entry.realTimeStart = curTime;
+    entry.realTimeLength = calculateDuration(entry.sampleLength, entry.tempoAdjustment);
+
+    //change time to end of this entry
+    curTime += entry.realTimeLength;
+  }
+
+  //set endTime based on playbackData
+  songWrapper.endTime = curTime;
+};
+
+/**
+ * If tempo recognition has failed in first song, immediately revoke it
+ */
+const revokeSong = (songWrapper, encoderPosition) => {
+  //calculate current position in playbackData, then shorten this entry by current pos + 5 seconds, and remove all later entries
+
+  for (let i = 0, il = songWrapper.playbackData.length; i < il; i += 1) {
+    const entry = songWrapper.playbackData[i];
+
+    //if we are currently in this entry
+    if (encoderPosition < entry.realTimeStart + entry.realTimeLength) {
+      //calculate current sample
+      const currentSample = 345435345;
+
+      //shorten entry by current position + 5 seconds
+      entry.sampleLength = currentSample + Math.round(5 * 48000 * entry.tempoAdjustment);
+
+      //remove all future entries
+      songWrapper.playbackData.splice(i + 1);
+
+      fixPlaybackData(songWrapper);
+
+      return;
+    }
+  }
+};
+
 
 /**
  * Checks a follow-up song for correct tempo detection, and returns the song object with full information.
@@ -60,16 +108,15 @@ async function testFollowUpSong(session) {
   }, { startTime: Number.NEGATIVE_INFINITY });
 
   songWrapper.song = await songWrapper.song;
-  songWrapper.totalLength = await songWrapper.song.duration;
+  songWrapper.totalSampleLength = await songWrapper.song.duration;
 
   //do tempo recognition - and only use song if recognition was successful
   songWrapper.tempo = await songWrapper.song.tempo;
 
-  //the time in samples at which to start adding this song to the stream
+  //the time in samples at which to start adding this song to the stream - TODO: need to beatmatch
   songWrapper.startTime = previousSong.endTime - 15 * 48000;
 
   songWrapper.tempoAdjustment = previousSong.tempoAdjustment * previousSong.tempo.bpmEnd / songWrapper.tempo.bpmStart;
-  songWrapper.endTime = songWrapper.startTime + calculateDuration(songWrapper.totalLength, songWrapper.tempoAdjustment);
 
   return songWrapper;
 }
@@ -94,7 +141,7 @@ export async function addFollowUpSong(session) {
 
   //Pick the song with the least tempo adjustment, and add it to the list
   {
-    //find the song that with least tempo adjustment (closest to 1.0)
+    //find the song with least tempo adjustment (closest to 1.0)
     const songWrapper = songs.reduce((accumulator, curSong) => {
       const tempo = (curSong.tempoAdjustment < 1) ? 1 / curSong.tempoAdjustment : curSong.tempoAdjustment;
       if (tempo < accumulator.tempo) {
@@ -105,6 +152,16 @@ export async function addFollowUpSong(session) {
     }, { tempo: Number.POSITIVE_INFINITY }).song;
     session.currentSongs.push(songWrapper);
     console.log(`${consoleColors.magenta(`[${session.sid}]`)} Adding to playlist: ${consoleColors.green(songWrapper.songRef.name)}.`);
+
+    //Set playback data based on calculated tempo adjustment
+    songWrapper.playbackData = [
+      {
+        sampleOffset: 0,
+        sampleLength: songWrapper.totalSampleLength,
+        tempoAdjustment: songWrapper.tempoAdjustment,
+      },
+    ];
+    fixPlaybackData(songWrapper);
 
     //Inform client that we decided on this follow-up song
     session.emitEvent({
@@ -122,11 +179,9 @@ export async function addFollowUpSong(session) {
     session.emitEvent({
       type: 'SONG_DURATION',
       id: songWrapper.id,
-      origDuration: songWrapper.totalLength,
-      tempoAdjustment: songWrapper.tempoAdjustment,
-      tempo: [
-        { offset: 0, length: songWrapper.endTime - songWrapper.startTime, speed: songWrapper.tempoAdjustment },
-      ],
+      origDuration: songWrapper.totalSampleLength,
+      endTime: songWrapper.endTime,
+      playbackData: songWrapper.playbackData,
     });
     session.emitEvent({
       type: 'TEMPO_INFO',
@@ -162,9 +217,17 @@ export async function addFirstSong(session, offset = 0) {
   console.log(`${consoleColors.magenta(`[${session.sid}]`)} Adding to playlist: ${consoleColors.green(songWrapper.songRef.name)}...`);
 
   songWrapper.startTime = offset;
-  songWrapper.totalLength = 30 * 48000;//we assume the song is at least 30 seconds long, this will be overwritten as soon as we have the correct duration
-  songWrapper.endTime = songWrapper.totalLength;//to be overwritten by correct end time later
-  songWrapper.tempoAdjustment = 1;//we only change speed of follow-up songs for now. TODO: override this after next song has been analysed for better transition
+  songWrapper.totalSampleLength = 30 * 48000;//we assume the song is at least 30 seconds long, this will be overwritten as soon as we have the correct duration
+  songWrapper.tempoAdjustment = 1;//FIXME - remove this; right now it's required for tempo adjustment colculation in follow-up song
+  songWrapper.playbackData = [
+    {
+      sampleOffset: 0,
+      sampleLength: songWrapper.totalSampleLength,
+      tempoAdjustment: 1, //playback at normal speed for now, but speed may change later on
+    },
+  ];
+  fixPlaybackData(songWrapper);
+
   session.emitEvent({
     type: 'SONG_START',
     id: songWrapper.id,
@@ -172,17 +235,23 @@ export async function addFirstSong(session, offset = 0) {
     time: songWrapper.startTime / 48000,
   });
   songWrapper.song = await songWrapper.song;
-  songWrapper.totalLength = await songWrapper.song.duration;
-  //TODO: we should only send the duration if we are sure we are going to keep this song, or at least allow overriding it
-  songWrapper.endTime = songWrapper.startTime + songWrapper.totalLength;
+  songWrapper.totalSampleLength = await songWrapper.song.duration;
+
+  songWrapper.playbackData = [
+    {
+      sampleOffset: 0,
+      sampleLength: songWrapper.totalSampleLength,
+      tempoAdjustment: 1,
+    },
+  ];
+  fixPlaybackData(songWrapper);
+
   session.emitEvent({
     type: 'SONG_DURATION',
     id: songWrapper.id,
-    origDuration: songWrapper.totalLength,
-    tempoAdjustment: songWrapper.tempoAdjustment,
-    tempo: [
-      { offset: 0, length: songWrapper.endTime - songWrapper.startTime, speed: songWrapper.tempoAdjustment },
-    ],
+    origDuration: songWrapper.totalSampleLength,
+    endTime: songWrapper.endTime,
+    playbackData: songWrapper.playbackData,
   });
 
   //we are now ready for playback
@@ -195,18 +264,15 @@ export async function addFirstSong(session, offset = 0) {
     console.log(`${consoleColors.magenta(`[${session.sid}]`)} Tempo detection failed for ${consoleColors.green(songWrapper.songRef.name)}; finding new first song.`);
 
     //if tempo detection failed, end this song
-    songWrapper.endTime = Math.max(songWrapper.startTime, session.encoderPosition) + 5 * 48000;//allow 5 seconds to process next file
-    songWrapper.totalLength = songWrapper.endTime - songWrapper.startTime;
+    revokeSong(songWrapper, session.encoderPosition);
 
     //emit event that duration has changed
     session.emitEvent({
       type: 'SONG_DURATION',
       id: songWrapper.id,
-      origDuration: songWrapper.totalLength,
-      tempoAdjustment: songWrapper.tempoAdjustment,
-      tempo: [
-        { offset: 0, length: songWrapper.endTime - songWrapper.startTime, speed: songWrapper.tempoAdjustment },
-      ],
+      origDuration: songWrapper.totalSampleLength,
+      endTime: songWrapper.endTime,
+      playbackData: songWrapper.playbackData,
     });
 
     //notify audio buffer that we pick a follow-up song ourselves and don't need audio buffer to do it

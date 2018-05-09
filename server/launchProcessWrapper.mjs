@@ -75,13 +75,19 @@ export async function analyseSong(session, songWrapper, isFirstSong) {
       //kill child process
       destroy();
     };
-    out.getPiece = ({ offset, length, tempoChange }) => {
+    out.getPiece = ({
+      pieceStart,
+      offset,
+      length,
+      tempoChange,
+    }) => {
       //create a random id. -- 0 is reserved for thumbnails and can't be used
       const id = 1 + Math.floor(Math.random() * 0xFFFFFE);
       //send message to child process
       sendObject({
         id, //a random id to uniquely identify messages and their replies
-        offset, //offset into the file based on final, tempo-adjusted time
+        pieceStart, //offset into the song based on original, not-tempo-adjusted time
+        offset, //offset into the piece (starting at pieceStart) based on final, tempo-adjusted time
         length, //length of the piece we need, based on final, tempo-adjusted time
         tempoChange, //the amount by which the song is tempo adjusted, e.g. 1.1 to increase tempo by +10%
       });

@@ -25,25 +25,38 @@ const addToBuffer = async (session) => {
 
       //Get an array of songs that should be written to the current stream, and the offset into their waveform
       await Promise.all(songs.map(async (song) => {
-        //calculate positions, all numbers given in samples
-        const songPieceStart = Math.max(0, session.encoderPosition - song.startTime);
-        const songPieceEnd = Math.min(song.endTime, session.encoderPosition + numSamplesToWrite) - song.startTime;
-        const songPieceLength = songPieceEnd - songPieceStart;
-        const outBufferOffset = Math.max(0, song.startTime - session.encoderPosition);
+        //Go through playback data, and add relevant entries to output stream
+        await Promise.all(song.playbackData
+          .filter(entry => entry.realTimeStart < endTime && entry.realTimeStart + entry.realTimeLength > session.encoderPosition)
+          .map(async (entry) => {
+            //at which sample into the song this piece starts (before tempo adjustment)
+            const songPieceStart = entry.sampleOffset;
+            //the offset into the piece (after tempo adjustment), given in samples
+            const offsetIntoPiece = Math.max(0, session.encoderPosition - entry.realTimeStart);
+            //length of the piece (after tempo adjustment), given in samples
+            const songPieceLength = Math.min(endTime, entry.realTimeLength) - Math.max(entry.realTimeStart, session.encoderPosition);
 
-        const waveform = await song.song.getPiece({ offset: songPieceStart, length: songPieceLength, tempoChange: song.tempoAdjustment });
+            const waveform = await song.song.getPiece({
+              pieceStart: songPieceStart,
+              offset: offsetIntoPiece,
+              length: songPieceLength,
+              tempoChange: entry.tempoAdjustment,
+            });
 
-        //Loop through numSamplesToWrite, add both channels to buffer
-        for (let j = 0; j < songPieceLength; j += 1) {
-          outBuffer[(outBufferOffset + j) * 2] += waveform[j * 2];
-          outBuffer[(outBufferOffset + j) * 2 + 1] += waveform[j * 2 + 1];
-        }
+            //If the piece doesn't start with session.encoderPosition but slightly later, calculate the start time
+            const outBufferOffset = Math.max(0, entry.realTimeStart - session.encoderPosition);
+
+            //Loop through numSamplesToWrite, add both channels to buffer
+            for (let j = 0; j < songPieceLength; j += 1) {
+              outBuffer[(outBufferOffset + j) * 2] += waveform[j * 2];
+              outBuffer[(outBufferOffset + j) * 2 + 1] += waveform[j * 2 + 1];
+            }
+          }));
 
         if (endTime > song.endTime) {
           //need to move song from currentSongs into finshedSongs if we reached its end
           session.currentSongs.splice(session.currentSongs.findIndex(ele => ele === song), 1);
           session.finishedSongs.push(song);
-          //audioManager.removeReference(song.songRef, { sid: session.sid, id: song.id });
           song.song.destroy();
           //need to start encoding another song if we don't have any current songs left
           if (song.hadTempoFailure !== true) {

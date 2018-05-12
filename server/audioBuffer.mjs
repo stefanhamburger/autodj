@@ -34,8 +34,14 @@ const addToBuffer = async (session) => {
             //the offset into the piece (after tempo adjustment), given in samples
             const offsetIntoPiece = Math.max(0, session.encoderPosition - entry.realTimeStart);
             //length of the piece (after tempo adjustment), given in samples
-            const songPieceLength = Math.min(endTime, entry.realTimeLength) - Math.max(entry.realTimeStart, session.encoderPosition);
+            const songPieceLength = Math.min(endTime, entry.realTimeStart + entry.realTimeLength) - Math.max(entry.realTimeStart, session.encoderPosition);
 
+            console.log({
+              pieceStart: songPieceStart,
+              offset: offsetIntoPiece,
+              length: songPieceLength,
+              tempoChange: entry.tempoAdjustment,
+            });
             const waveform = await song.song.getPiece({
               pieceStart: songPieceStart,
               offset: offsetIntoPiece,

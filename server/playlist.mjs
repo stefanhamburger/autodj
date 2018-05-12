@@ -96,27 +96,11 @@ async function testFollowUpSong(session) {
     songName: `[TBD] ${songWrapper.songRef.name}`,
   });
 
-  const previousSongs = session.currentSongs.filter(entry => entry.id !== songWrapper.id);
-
-  //find the song that is right before this one (= song with the highest starting time)
-  const previousSong = previousSongs.reduce((accumulator, curSong) => {
-    if (curSong.startTime > accumulator.startTime) {
-      return curSong;
-    } else {
-      return accumulator;
-    }
-  }, { startTime: Number.NEGATIVE_INFINITY });
-
   songWrapper.song = await songWrapper.song;
   songWrapper.totalSampleLength = await songWrapper.song.duration;
 
   //do tempo recognition - and only use song if recognition was successful
   songWrapper.tempo = await songWrapper.song.tempo;
-
-  //the time in samples at which to start adding this song to the stream - TODO: need to beatmatch
-  songWrapper.startTime = previousSong.endTime - 15 * 48000;
-
-  songWrapper.tempoAdjustment = previousSong.tempoAdjustment * previousSong.tempo.bpmEnd / songWrapper.tempo.bpmStart;
 
   return songWrapper;
 }
@@ -128,8 +112,19 @@ async function testFollowUpSong(session) {
  * @param session
  */
 export async function addFollowUpSong(session) {
+  //find the song that is right before this one (= song with the highest starting time)
+  const previousSong = session.currentSongs.reduce((accumulator, curSong) => {
+    if (curSong.startTime > accumulator.startTime) {
+      return curSong;
+    } else {
+      return accumulator;
+    }
+  }, { startTime: Number.NEGATIVE_INFINITY });
+  const previousBpm = previousSong.tempo.bpmEnd * previousSong.playbackData[0].tempoAdjustment;
+
+
+  //Find at least three follow-up songs
   const songs = [];
-  //Find at least three songs
   while (songs.length < 3) {
     try {
       const songWrapper = await testFollowUpSong(session);
@@ -143,13 +138,19 @@ export async function addFollowUpSong(session) {
   {
     //find the song with least tempo adjustment (closest to 1.0)
     const songWrapper = songs.reduce((accumulator, curSong) => {
-      const tempo = (curSong.tempoAdjustment < 1) ? 1 / curSong.tempoAdjustment : curSong.tempoAdjustment;
+      const tempo = Math.abs(previousBpm - curSong.tempo.bpmStart);
       if (tempo < accumulator.tempo) {
         return { tempo, song: curSong };
       } else {
         return accumulator;
       }
     }, { tempo: Number.POSITIVE_INFINITY }).song;
+
+    //by how much to adjust the tempo of this song so it matches the previous song
+    const tempoAdjustment = previousBpm / songWrapper.tempo.bpmStart;
+    //the time in samples at which to start adding this song to the stream - TODO: need to beatmatch
+    songWrapper.startTime = previousSong.endTime - 15 * 48000;
+
     session.currentSongs.push(songWrapper);
     console.log(`${consoleColors.magenta(`[${session.sid}]`)} Adding to playlist: ${consoleColors.green(songWrapper.songRef.name)}.`);
 
@@ -158,7 +159,7 @@ export async function addFollowUpSong(session) {
       {
         sampleOffset: 0,
         sampleLength: songWrapper.totalSampleLength,
-        tempoAdjustment: songWrapper.tempoAdjustment,
+        tempoAdjustment,
       },
     ];
     fixPlaybackData(songWrapper);
@@ -218,7 +219,6 @@ export async function addFirstSong(session, offset = 0) {
 
   songWrapper.startTime = offset;
   songWrapper.totalSampleLength = 30 * 48000;//we assume the song is at least 30 seconds long, this will be overwritten as soon as we have the correct duration
-  songWrapper.tempoAdjustment = 1;//FIXME - remove this; right now it's required for tempo adjustment colculation in follow-up song
   songWrapper.playbackData = [
     {
       sampleOffset: 0,

@@ -27,16 +27,16 @@ export default class SongWaveform extends React.Component {
   updateCanvas() {
     const { songInfo } = this.props;
     const ctx = this.canvas.current.getContext('2d');
-    const position = Math.round((songInfo.duration === 0) ? 0 : songInfo.elapsed / songInfo.duration * CANVAS_WIDTH);
+    const position = Math.round((songInfo.origDuration === 0) ? 0 : songInfo.elapsed / songInfo.origDuration * CANVAS_WIDTH);
 
     //draw background
     ctx.fillStyle = COLOR_BACKGROUND;
     ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
     //fill first and last minute
-    if (songInfo.duration !== 0) {
+    if (songInfo.origDuration !== 0) {
       ctx.fillStyle = COLOR_BACKGROUND_EDGE;
-      const minuteWidth = Math.round(CANVAS_WIDTH * 60 * 48000 / songInfo.duration);
+      const minuteWidth = Math.round(CANVAS_WIDTH * 60 * 48000 / songInfo.origDuration);
       if (songInfo.bpmStart !== undefined && songInfo.bpmStart !== 0) {
         ctx.fillRect(0, 0, minuteWidth, CANVAS_HEIGHT);
       }

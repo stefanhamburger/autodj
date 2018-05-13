@@ -18,7 +18,7 @@ const processEvents = events => events && events.forEach(async (event) => {
         id: event.id,
         name: event.songName,
         startTime: event.time, //given in seconds
-        duration: 0,
+        origDuration: 0,
       };
       songPlaylist.push(song);
       upcomingSongs.push(song);
@@ -26,10 +26,9 @@ const processEvents = events => events && events.forEach(async (event) => {
     }
     case 'SONG_DURATION': {
       songPlaylist.filter(song => song.id === event.id).forEach((song) => {
-        //Original duration is given in samples. Need to apply tempo adjustment to get actual duration
-        song.tempoAdjustment = event.tempoAdjustment;
-        song.duration = calculateDuration(event.origDuration, song.tempoAdjustment);
-        song.endTime = song.startTime + song.duration / 48000;
+        song.origDuration = event.origDuration;
+        song.endTime = event.endTime / 48000;
+        song.playbackData = event.playbackData.map(entry => ({ ...entry, realTimeStart: entry.realTimeStart / 48000, realTimeLength: entry.realTimeLength / 48000 }));
       });
       break;
     }
@@ -78,7 +77,7 @@ const heartbeat = (time) => {
   //Remove all songs from currentSongs that have finished playing
   for (let i = currentSongs.length - 1; i >= 0; i -= 1) {
     const song = currentSongs[i];
-    if (song.duration !== undefined && time > song.endTime) {
+    if (song.origDuration > 0 && time > song.endTime) {
       currentSongs.splice(i, 1);
     }
   }

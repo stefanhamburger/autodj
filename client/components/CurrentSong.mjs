@@ -11,7 +11,7 @@ const timeToString = (timeIn) => {
 export default function CurrentSong({ songInfo }) {
   return (
     <React.Fragment>
-      {timeToString(songInfo.elapsed)} / {timeToString(songInfo.duration)} |{' '}
+      {timeToString(songInfo.elapsed)} / {timeToString(songInfo.origDuration)} |{' '}
       {songInfo.name.replace(/ - /g, ' – ')}
       <br />
       <SongWaveform songInfo={songInfo} />

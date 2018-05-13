@@ -33,7 +33,7 @@ const init = (volumeChangeCallback, onPause) => {
   };
   state.onPause = onPause;
   state.isPaused = false;
-  state.totalTime = 0;
+  state.totalTime = 0; //in seconds
   state.currentSongs = [];
   state.nextSong = undefined;
   state.canSkip = false;
@@ -58,10 +58,18 @@ const init = (volumeChangeCallback, onPause) => {
 const updateSongs = (newTime, songs = []) => {
   state.totalTime = newTime;
   if (songs.length > 0) {
-    state.currentSongs = songs.map(song => ({
-      ...song,
-      elapsed: (state.totalTime - song.startTime) * 48000,
-    }));
+    state.currentSongs = songs.map((song) => {
+      for (let i = 0; i < song.playbackData.length; i += 1) {
+        const entry = song.playbackData[i];
+        if (state.totalTime >= entry.realTimeStart && state.totalTime < entry.realTimeStart + entry.realTimeLength) {
+          return {
+            ...song,
+            elapsed: (state.totalTime - entry.realTimeStart) * entry.tempoAdjustment * 48000, //given in samples
+          };
+        }
+      }
+      return undefined;
+    }).filter(song => song !== undefined);
 
     const lastSong = state.currentSongs[state.currentSongs.length - 1];
     document.title = `${lastSong.name.replace(/ - /g, ' – ')} – AutoDJ`;

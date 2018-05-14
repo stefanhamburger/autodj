@@ -10,7 +10,7 @@ export function setUpReceiver(callback) {
       const dataObj = JSON.parse(dataString);
       callback(dataObj);
     } catch (err) {
-      process.stderr.write(`Error processing message: ${err}`);
+      process.stderr.write(`Error processing message ${dataString}: ${err}`);
     }
   });
 }

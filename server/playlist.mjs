@@ -124,6 +124,11 @@ export async function addFollowUpSong(session) {
       }
     }, { tempo: Number.POSITIVE_INFINITY }).song;
 
+    //Kill processes of other songs that were not picked
+    songs.filter(song => song.id !== songWrapper.id).forEach((song) => {
+      song.song.destroy();
+    });
+
     //by how much to adjust the tempo of this song so it matches the previous song
     const tempoAdjustment = previousBpm / songWrapper.tempo.bpmStart;
     //the time in samples at which to start adding this song to the stream - TODO: need to beatmatch

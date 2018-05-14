@@ -75,6 +75,9 @@ export const newSession = () => {
   session.skipSong = (songId) => {
     session.currentSongs.filter(song => song.id === songId).forEach((songWrapper) => {
       console.log(`${consoleColors.magenta(`[${session.sid}]`)} Skipping song ${consoleColors.green(songWrapper.songRef.name)}!`);
+
+      const oldLength = songWrapper.endTime - songWrapper.startTime;
+
       //Assuming that playbackData has only one entry
       const firstEntry = songWrapper.playbackData[0];
       //reduce first entry to end within 3 seconds
@@ -87,9 +90,16 @@ export const newSession = () => {
         tempoAdjustment: firstEntry.tempoAdjustment,
       };
       songWrapper.playbackData.push(newEntry);
+      //fix realTimeStart and realTimeLength in playbackData, as well as songWrapper.endTime
       fixPlaybackData(songWrapper);
 
-      //TODO: also need to change start time of follow-up song
+      const newLength = songWrapper.endTime - songWrapper.startTime;
+      const skipAmount = oldLength - newLength;
+
+      //Fix start time of follow-up song
+      const nextSong = session.currentSongs.filter(song => song.startTime > session.encoderPosition)[0];
+      nextSong.startTime -= skipAmount;
+      fixPlaybackData(nextSong);
     });
   };
 

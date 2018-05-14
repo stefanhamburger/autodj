@@ -30,7 +30,8 @@ export default function launchProcess(audioFile, isFirstSong, onInputCallback, o
   const sendObject = (obj) => {
     //create string from JSON object
     const objAsString = JSON.stringify(obj);
-    spawnedProcess.stdin.write(objAsString);
+    //Add a comma at the end so we can separate message in case another message is sent immediately afterwards
+    spawnedProcess.stdin.write(`${objAsString},`);
   };
 
   const destroy = () => {

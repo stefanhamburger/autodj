@@ -7,8 +7,10 @@ export function setUpReceiver(callback) {
   process.stdin.on('data', (dataString) => {
     //deserialize JSON
     try {
-      const dataObj = JSON.parse(dataString);
-      callback(dataObj);
+      //In rare cases, multiple messages can get appended together.
+      //To prevent this from happening, wrap messages in an array and process each array element on its own
+      const dataArr = JSON.parse(`[${dataString}{"ignore":true}]`);
+      dataArr.filter(obj => obj.ignore !== true).forEach((dataObj) => { callback(dataObj); });
     } catch (err) {
       process.stderr.write(`Error processing message ${dataString}: ${err}`);
     }

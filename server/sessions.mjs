@@ -126,7 +126,7 @@ export const newSession = () => {
   };
 
   //Do a sanity check on the client-provided audio playback time, and fix it if necessary. (clientTime is given in seconds)
-  //Otherwise, clients can overlad the server by quickly seeking to a later time and forcing the server to process new songs
+  //Otherwise, clients can overload the server by quickly seeking to a later time and forcing the server to process new songs
   //If the client is running out of buffer and lagging behind (e.g. due to network latency), this function has no effect
   session.prevTime = new Date() / 1000 - 0;
   session.verifyClientTime = (clientTime) => {

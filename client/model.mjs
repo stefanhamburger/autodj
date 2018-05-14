@@ -1,4 +1,6 @@
 import view from './view/view.mjs';
+import songCalcAbsoluteBeats from './view/songCalcAbsoluteBeats.mjs';
+import songFindNearestBeatIndex from './view/songFindNearestBeatIndex.mjs';
 
 const externals = {};
 const songPlaylist = [];
@@ -32,6 +34,7 @@ const processEvents = events => events && events.forEach(async (event) => {
         song.startTime = event.startTime / 48000;//in seconds
         song.endTime = event.endTime / 48000;//in seconds
         song.playbackData = event.playbackData.map(entry => ({ ...entry, realTimeStart: entry.realTimeStart / 48000, realTimeLength: entry.realTimeLength / 48000 }));
+        songCalcAbsoluteBeats(song);
       });
       break;
     }
@@ -41,7 +44,7 @@ const processEvents = events => events && events.forEach(async (event) => {
         song.bpmStart = event.bpmStart;
         song.bpmEnd = event.bpmEnd;
         song.beats = event.beats;
-        song.beatsPos = 0;
+        songCalcAbsoluteBeats(song);
       });
       break;
     }
@@ -91,6 +94,9 @@ const heartbeat = (time) => {
       currentSongs.splice(i, 1);
     }
   }
+
+  //Set upcoming beat index if required
+  currentSongs.filter(song => song.beatsPos === -1).forEach((song) => { songFindNearestBeatIndex(song, time); });
 
   //Send currently playing songs to view
   view.updateSongs(time, currentSongs);

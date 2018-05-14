@@ -77,16 +77,20 @@ export const newSession = () => {
       console.log(`${consoleColors.magenta(`[${session.sid}]`)} Skipping song ${consoleColors.green(songWrapper.songRef.name)}!`);
 
       const oldLength = songWrapper.endTime - songWrapper.startTime;
+      const nextSong = session.currentSongs.filter(song => song.startTime > session.encoderPosition)[0];
+      //Amount of overlap between current song and follow-up song - used to calculate where to skip to
+      const overlap = songWrapper.endTime - nextSong.startTime;
 
       //Assuming that playbackData has only one entry
       const firstEntry = songWrapper.playbackData[0];
-      //reduce first entry to end within 3 seconds
-      firstEntry.sampleLength = (session.encoderPosition - firstEntry.realTimeStart + 3 * 48000) * firstEntry.tempoAdjustment;
+      //reduce first entry to stop immediately
+      firstEntry.sampleLength = (session.encoderPosition - firstEntry.realTimeStart) * firstEntry.tempoAdjustment;
 
       //add another entry to cover the end of the song, where the mixing occurs
+      const remainingLength = overlap + 5 * 48000;
       const newEntry = {
-        sampleOffset: songWrapper.totalSampleLength - 20 * 48000,
-        sampleLength: 20 * 48000,
+        sampleOffset: songWrapper.totalSampleLength - remainingLength,
+        sampleLength: remainingLength,
         tempoAdjustment: firstEntry.tempoAdjustment,
       };
       songWrapper.playbackData.push(newEntry);
@@ -97,9 +101,27 @@ export const newSession = () => {
       const skipAmount = oldLength - newLength;
 
       //Fix start time of follow-up song
-      const nextSong = session.currentSongs.filter(song => song.startTime > session.encoderPosition)[0];
       nextSong.startTime -= skipAmount;
       fixPlaybackData(nextSong);
+
+      //Notify client of new timing for current song
+      session.emitEvent({
+        type: 'SONG_DURATION',
+        id: songWrapper.id,
+        origDuration: songWrapper.totalSampleLength,
+        startTime: songWrapper.startTime,
+        endTime: songWrapper.endTime,
+        playbackData: songWrapper.playbackData,
+      });
+      //Notify client of new timing for follow-up song
+      session.emitEvent({
+        type: 'SONG_DURATION',
+        id: nextSong.id,
+        origDuration: nextSong.totalSampleLength,
+        startTime: nextSong.startTime,
+        endTime: nextSong.endTime,
+        playbackData: nextSong.playbackData,
+      });
     });
   };
 

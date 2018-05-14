@@ -18,7 +18,7 @@ const processEvents = events => events && events.forEach(async (event) => {
       const song = {
         id: event.id,
         name: event.songName,
-        startTime: event.time, //given in seconds
+        startTime: event.time / 48000, //given in seconds
         origDuration: 0,
         canSkip: false,
       };
@@ -28,7 +28,8 @@ const processEvents = events => events && events.forEach(async (event) => {
     }
     case 'SONG_DURATION': {
       songPlaylist.filter(song => song.id === event.id).forEach((song) => {
-        song.origDuration = event.origDuration;
+        song.origDuration = event.origDuration;//in samples
+        song.startTime = event.startTime / 48000;//in seconds
         song.endTime = event.endTime / 48000;//in seconds
         song.playbackData = event.playbackData.map(entry => ({ ...entry, realTimeStart: entry.realTimeStart / 48000, realTimeLength: entry.realTimeLength / 48000 }));
       });

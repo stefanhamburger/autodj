@@ -105,7 +105,7 @@ export async function addFollowUpSong(session) {
   const songs = [];
   while (songs.length < 3) {
     try {
-      const songWrapper = await testFollowUpSong(session);
+      const songWrapper = await testFollowUpSong(session);//eslint-disable-line no-await-in-loop
       songs.push(songWrapper);
     } catch (error) {
       //tempo detection failed, ignore this song
@@ -153,12 +153,13 @@ export async function addFollowUpSong(session) {
       type: 'SONG_START',
       id: songWrapper.id,
       songName: songWrapper.songRef.name,
-      time: songWrapper.startTime / 48000,
+      time: songWrapper.startTime,
     });
     session.emitEvent({
       type: 'SONG_DURATION',
       id: songWrapper.id,
       origDuration: songWrapper.totalSampleLength,
+      startTime: songWrapper.startTime,
       endTime: songWrapper.endTime,
       playbackData: songWrapper.playbackData,
     });
@@ -217,7 +218,7 @@ export async function addFirstSong(session, offset = 0) {
     type: 'SONG_START',
     id: songWrapper.id,
     songName: songWrapper.songRef.name,
-    time: songWrapper.startTime / 48000,
+    time: songWrapper.startTime,
   });
   songWrapper.song = await songWrapper.song;
   songWrapper.totalSampleLength = await songWrapper.song.duration;
@@ -235,6 +236,7 @@ export async function addFirstSong(session, offset = 0) {
     type: 'SONG_DURATION',
     id: songWrapper.id,
     origDuration: songWrapper.totalSampleLength,
+    startTime: songWrapper.startTime,
     endTime: songWrapper.endTime,
     playbackData: songWrapper.playbackData,
   });
@@ -256,6 +258,7 @@ export async function addFirstSong(session, offset = 0) {
       type: 'SONG_DURATION',
       id: songWrapper.id,
       origDuration: songWrapper.totalSampleLength,
+      startTime: songWrapper.startTime,
       endTime: songWrapper.endTime,
       playbackData: songWrapper.playbackData,
     });
@@ -279,5 +282,6 @@ export async function addFirstSong(session, offset = 0) {
   await songWrapper.song.thumbnail;
   session.emitEvent({ type: 'THUMBNAIL_READY', id: songWrapper.id });
 
-  setTimeout(addFollowUpSong.bind(null, session), 15000);
+  //Start analysing follow-up song after 5 seconds
+  setTimeout(addFollowUpSong.bind(null, session), 5000);
 }

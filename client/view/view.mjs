@@ -64,7 +64,7 @@ const updateSongs = (newTime, songs = []) => {
         if (state.totalTime >= entry.realTimeStart && state.totalTime < entry.realTimeStart + entry.realTimeLength) {
           return {
             ...song,
-            elapsed: (state.totalTime - entry.realTimeStart) * entry.tempoAdjustment * 48000, //given in samples
+            elapsed: entry.sampleOffset + (state.totalTime - entry.realTimeStart) * entry.tempoAdjustment * 48000, //given in samples
           };
         }
       }

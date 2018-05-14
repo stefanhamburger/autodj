@@ -1,4 +1,5 @@
 import * as consoleColors from './lib/consoleColors.mjs';
+import fixPlaybackData from './lib/fixPlaybackData.mjs';
 
 const sessions = {};
 
@@ -59,13 +60,37 @@ export const newSession = () => {
   const sid = generateSID();
   /** @type {Session} */
   const session = { sid };
-  session.events = [];
   session.kill = killSession.bind(null, session);
+
+  //Event manager - stores events emitted by server and sends them to client when requested
+  session.events = [];
   session.emitEvent = event => session.events.push(event);
   session.flushEvents = () => {
     const eventsCopy = session.events.slice();
     session.events = [];
     return eventsCopy;
+  };
+
+  //Skips the song with the given id
+  session.skipSong = (songId) => {
+    session.currentSongs.filter(song => song.id === songId).forEach((songWrapper) => {
+      console.log(`${consoleColors.magenta(`[${session.sid}]`)} Skipping song ${consoleColors.green(songWrapper.songRef.name)}!`);
+      //Assuming that playbackData has only one entry
+      const firstEntry = songWrapper.playbackData[0];
+      //reduce first entry to end within 3 seconds
+      firstEntry.sampleLength = (session.encoderPosition - firstEntry.realTimeStart + 3 * 48000) * firstEntry.tempoAdjustment;
+
+      //add another entry to cover the end of the song, where the mixing occurs
+      const newEntry = {
+        sampleOffset: songWrapper.totalSampleLength - 20 * 48000,
+        sampleLength: 20 * 48000,
+        tempoAdjustment: firstEntry.tempoAdjustment,
+      };
+      songWrapper.playbackData.push(newEntry);
+      fixPlaybackData(songWrapper);
+
+      //TODO: also need to change start time of follow-up song
+    });
   };
 
   //Do a sanity check on the client-provided audio playback time, and fix it if necessary. (clientTime is given in seconds)

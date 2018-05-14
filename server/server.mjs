@@ -34,6 +34,7 @@ app.get('/init', (req, res) => {
   if (!Number.isInteger(numChannels)) numChannels = 2;
   session.numChannels = Math.min(2, Math.max(1, numChannels));
   session.collection = req.query.collection;
+  res.set('Content-Type', 'application/json');
   res.send(JSON.stringify({ sid }));
 
   audioBuffer.init(session);
@@ -45,9 +46,17 @@ app.get('/part', (req, res) => {
   const session = sessions.getSession(req.query.sid);
   if (session && req.query.id && req.query.id.match(/[0-9]+/)) {
     sessions.lifeSign(session);
+
     let clientBufferLength = Number(req.get('X-Playback-Position'));
     clientBufferLength = Number.isNaN(clientBufferLength) ? 0 : clientBufferLength;
     clientBufferLength = session.verifyClientTime(clientBufferLength);
+
+    //id of the song that should be skipped
+    const skipSongId = req.get('X-Skip-Song');
+    if (skipSongId !== undefined) {
+      session.skipSong(skipSongId);
+    }
+
     res.set('Content-Type', 'audio/webm');
 
     //Get metadata

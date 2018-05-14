@@ -9,11 +9,20 @@ const initAudio = async ({
   let curIndex = -1;
   const GetNextMediaSegment = async () => {
     curIndex += 1;
+    const headers = { 'X-Playback-Position': audioEle.currentTime };
+
+    const skipSong = model.getSkipSong();
+    if (skipSong !== false) {
+      headers['X-Skip-Song'] = skipSong;
+      //since we sent the skip command, no need to send it a second time
+      model.setSkipSong(false);
+    }
+
     const response = await fetch(
       `part?sid=${encodeURIComponent(sid)}&id=${curIndex}`,
       {
         cache: 'no-store',
-        headers: { 'X-Playback-Position': audioEle.currentTime },
+        headers,
       },
     );
 

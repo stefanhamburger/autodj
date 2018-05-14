@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import spectrogram from './spectrogram.mjs';
 import PlaybackContainer from '../components/PlaybackContainer.mjs';
+import model from '../model.mjs';
 
 let container;
 
@@ -37,7 +38,6 @@ const init = (volumeChangeCallback, onPause) => {
   state.currentSongs = [];
   state.nextSong = undefined;
   state.canSkip = false;
-  state.skipCallback = () => {};
 
   container = document.createElement('div');
   rootEle.appendChild(container);
@@ -74,6 +74,13 @@ const updateSongs = (newTime, songs = []) => {
     const lastSong = state.currentSongs[state.currentSongs.length - 1];
     document.title = `${lastSong.name.replace(/ - /g, ' – ')} – AutoDJ`;
     if (state.nextSong === lastSong.name) state.nextSong = undefined;
+
+    //If a song can be skipped, remember the function to skip it in the state
+    state.canSkip = false;
+    state.currentSongs.filter(song => song.canSkip).forEach((song) => {
+      state.canSkip = model.setSkipSong.bind(null, song.id);
+    });
+
     rerender();
   }
 };

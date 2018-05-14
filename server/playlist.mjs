@@ -1,9 +1,7 @@
 import * as fileManager from './fileManager.mjs';
-//import startTempoRecognition from './startTempoRecognition.mjs';
 import * as consoleColors from './lib/consoleColors.mjs';
-//import * as audioManager from './audioManager.mjs';
-import calculateDuration from '../shared/calculateDuration.mjs';
 import { analyseSong } from './launchProcessWrapper.mjs';
+import fixPlaybackData from './lib/fixPlaybackData.mjs';
 
 const SONG_ID_LENGTH = 16;
 const alphabet = '0123456789abcdefghijklmnopqrstuvwxyz';
@@ -27,26 +25,6 @@ const generateId = (session) => {
   return innerGenerate();
 };
 
-/**
- * After duration or tempo adjustment was changed, this function will recalculate various values to simplify calculations in audio buffer
- */
-const fixPlaybackData = (songWrapper) => {
-  let curTime = songWrapper.startTime;
-
-  //go through entries in playback data
-  for (let i = 0, il = songWrapper.playbackData.length; i < il; i += 1) {
-    //calculate real-time values of this entry post-tempo adjustment
-    const entry = songWrapper.playbackData[i];
-    entry.realTimeStart = curTime;
-    entry.realTimeLength = calculateDuration(entry.sampleLength, entry.tempoAdjustment);
-
-    //change time to end of this entry
-    curTime += entry.realTimeLength;
-  }
-
-  //set endTime based on playbackData
-  songWrapper.endTime = curTime;
-};
 
 /**
  * If tempo recognition has failed in first song, immediately revoke it
@@ -191,6 +169,13 @@ export async function addFollowUpSong(session) {
       bpmEnd: songWrapper.tempo.bpmEnd,
       beats: songWrapper.tempo.beats,
     });
+
+    //Notify client that previous song can now be skipped
+    session.emitEvent({
+      type: 'CAN_SKIP',
+      id: previousSong.id,
+    });
+
     //Notify client that waveform data is ready
     songWrapper.song.thumbnail.then(() => {
       session.emitEvent({ type: 'THUMBNAIL_READY', id: songWrapper.id });

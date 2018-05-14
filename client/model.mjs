@@ -1,5 +1,4 @@
 import view from './view/view.mjs';
-import calculateDuration from '../shared/calculateDuration.mjs';
 
 const externals = {};
 const songPlaylist = [];
@@ -9,6 +8,8 @@ const currentSongs = [];
 const init = (sidIn) => {
   //session id as fetched in init.js
   externals.sid = sidIn;
+  //whether to skip a song: don't skip if false, otherwise skip the song with the given id
+  externals.skipSong = false;
 };
 
 const processEvents = events => events && events.forEach(async (event) => {
@@ -19,6 +20,7 @@ const processEvents = events => events && events.forEach(async (event) => {
         name: event.songName,
         startTime: event.time, //given in seconds
         origDuration: 0,
+        canSkip: false,
       };
       songPlaylist.push(song);
       upcomingSongs.push(song);
@@ -27,7 +29,7 @@ const processEvents = events => events && events.forEach(async (event) => {
     case 'SONG_DURATION': {
       songPlaylist.filter(song => song.id === event.id).forEach((song) => {
         song.origDuration = event.origDuration;
-        song.endTime = event.endTime / 48000;
+        song.endTime = event.endTime / 48000;//in seconds
         song.playbackData = event.playbackData.map(entry => ({ ...entry, realTimeStart: entry.realTimeStart / 48000, realTimeLength: entry.realTimeLength / 48000 }));
       });
       break;
@@ -54,6 +56,13 @@ const processEvents = events => events && events.forEach(async (event) => {
       });
       break;
     }
+    case 'CAN_SKIP': {
+      const { id } = event;
+      songPlaylist.filter(song => song.id === id).forEach((song) => {
+        song.canSkip = true;
+      });
+      break;
+    }
     case 'NEXT_SONG': {
       const { songName } = event;
       view.setUpcoming(songName);
@@ -68,7 +77,7 @@ const heartbeat = (time) => {
   //Move all songs that have started playing from upcomingSongs to currentSongs
   for (let i = upcomingSongs.length - 1; i >= 0; i -= 1) {
     const song = upcomingSongs[i];
-    if (time >= song.startTime) {
+    if (time >= song.startTime && song.origDuration > 0) {
       upcomingSongs.splice(i, 1);
       currentSongs.push(song);
     }
@@ -77,7 +86,7 @@ const heartbeat = (time) => {
   //Remove all songs from currentSongs that have finished playing
   for (let i = currentSongs.length - 1; i >= 0; i -= 1) {
     const song = currentSongs[i];
-    if (song.origDuration > 0 && time > song.endTime) {
+    if (time > song.endTime) {
       currentSongs.splice(i, 1);
     }
   }
@@ -88,9 +97,22 @@ const heartbeat = (time) => {
 
 const getCurrentSongs = () => currentSongs;
 
+const getSkipSong = () => externals.skipSong;
+const setSkipSong = (newSkipSong) => {
+  externals.skipSong = newSkipSong;
+  //We have skipped this song, so disable skipping so user won't skip it a second time
+  if (newSkipSong !== false) {
+    songPlaylist.filter(song => song.id === newSkipSong).forEach((song) => {
+      song.canSkip = false;
+    });
+  }
+};
+
 export default {
   init,
   processEvents,
   heartbeat,
   getCurrentSongs,
+  getSkipSong,
+  setSkipSong,
 };

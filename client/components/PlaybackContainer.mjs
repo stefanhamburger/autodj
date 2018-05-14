@@ -17,7 +17,7 @@ export default function PlaybackContainer({ state }) {
       <div>
         <TotalDuration time={state.totalTime} />
         <ButtonPause isPaused={state.isPaused} pauseCallback={state.onPause} />
-        <ButtonSkip canSkip={state.canSkip} skipCallback={state.onSkip} />
+        <ButtonSkip canSkip={state.canSkip} />
         <VolumeControl muted={state.muted} volume={state.volume} mutedCallback={state.onMuted} volumeChangeCallback={state.onVolumeChange} />
       </div>
       <div style={{ fontWeight: 'bold' }}>Currently playing:</div>

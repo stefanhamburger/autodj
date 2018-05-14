@@ -63,15 +63,18 @@ export default class SongWaveform extends React.Component {
     ctx.fillRect(position, 0, 1, CANVAS_HEIGHT);
 
     //show tempo adjustment next to current position (either to the left or right of white line)
-    if (songInfo.tempoAdjustment !== undefined && songInfo.elapsed > 0) {
-      const tempoSign = (songInfo.tempoAdjustment < 1) ? '−' : '+';
-      const tempoChange = `${tempoSign}${Math.round(Math.abs(songInfo.tempoAdjustment - 1) * 1000) / 10}%`;
-      if (position < CANVAS_WIDTH / 2) {
-        ctx.textAlign = 'start';
-        ctx.fillText(tempoChange, position + 2, 13);
-      } else {
-        ctx.textAlign = 'end';
-        ctx.fillText(tempoChange, position - 2, 13);
+    if (songInfo.elapsed > 0) {
+      const entry = songInfo.playbackData.filter(innerEntry => songInfo.elapsed >= innerEntry.sampleOffset && songInfo.elapsed < innerEntry.sampleOffset + innerEntry.sampleLength)[0];
+      if (entry !== undefined) {
+        const tempoSign = (entry.tempoAdjustment < 1) ? '−' : '+';
+        const tempoChange = `${tempoSign}${Math.round(Math.abs(entry.tempoAdjustment - 1) * 1000) / 10}%`;
+        if (position < CANVAS_WIDTH / 2) {
+          ctx.textAlign = 'start';
+          ctx.fillText(tempoChange, position + 2, 13);
+        } else {
+          ctx.textAlign = 'end';
+          ctx.fillText(tempoChange, position - 2, 13);
+        }
       }
     }
 

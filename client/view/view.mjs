@@ -72,7 +72,12 @@ const updateSongs = (newTime, songs = []) => {
     }).filter(song => song !== undefined);
 
     const lastSong = state.currentSongs[state.currentSongs.length - 1];
-    document.title = `${lastSong.name.replace(/ - /g, ' – ')} – AutoDJ`;
+
+    const title = `${lastSong.name.replace(/ - /g, ' – ')} – AutoDJ`;
+    if (title !== document.title) {
+      document.title = title;
+    }
+
     if (state.nextSong === lastSong.name) state.nextSong = undefined;
 
     //If a song can be skipped, remember the function to skip it in the state

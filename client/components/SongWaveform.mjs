@@ -47,9 +47,16 @@ export default class SongWaveform extends React.Component {
 
     //draw waveform
     if (songInfo.thumbnailMin !== undefined && songInfo.thumbnailMax !== undefined) {
+      //as long as song was already played, use yellow background color
+      let fgColorSwitched = false;
+      ctx.fillStyle = COLOR_FOREGROUND_PLAYED;
+
       for (let i = 0; i < CANVAS_WIDTH; i += 1) {
-        //grey if this pixel was already played, otherwise black
-        ctx.fillStyle = (i <= position) ? COLOR_FOREGROUND_PLAYED : COLOR_FOREGROUND;
+        //once song is no longer played, switch to dark blue background color
+        if (!fgColorSwitched && i > position) {
+          ctx.fillStyle = COLOR_FOREGROUND;
+          fgColorSwitched = true;
+        }
 
         //need to lerp from [-1, 1] to [0, 40]
         const minValue = (songInfo.thumbnailMin[i] + 1) / 2 * CANVAS_HEIGHT;

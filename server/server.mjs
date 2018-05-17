@@ -22,7 +22,7 @@ app.get('/', (req, res) => {
       return;
     }
     const collectionsString = Object.keys(getSettings().collections).map(key => `<option>${key}</option>`).join('');
-    res.send(fileContents.toString().replace(/__INSERT_COLLECTIONS__/, collectionsString));
+    res.send(fileContents.toString().replace(/__INSERT_COLLECTIONS__/u, collectionsString));
   });
 });
 
@@ -44,7 +44,7 @@ app.get('/init', (req, res) => {
 /** Send a part of the audio buffer to MSE */
 app.get('/part', (req, res) => {
   const session = sessions.getSession(req.query.sid);
-  if (session && req.query.id && req.query.id.match(/[0-9]+/)) {
+  if (session && req.query.id && req.query.id.match(/\d+/u)) {
     sessions.lifeSign(session);
 
     let clientBufferLength = Number(req.get('X-Playback-Position'));

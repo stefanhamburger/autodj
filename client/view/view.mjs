@@ -73,7 +73,7 @@ const updateSongs = (newTime, songs = []) => {
 
     const lastSong = state.currentSongs[state.currentSongs.length - 1];
 
-    const title = `${lastSong.name.replace(/ - /g, ' – ')} – AutoDJ`;
+    const title = `${lastSong.name.replace(/ - /gu, ' – ')} – AutoDJ`;
     if (title !== document.title) {
       document.title = title;
     }

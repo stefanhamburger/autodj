@@ -109,7 +109,7 @@ export default class SongWaveform extends React.Component {
 
         //calculate bpm at current position to display it next to % tempo adjustment
         const tempoAtCurPosition = getTempoAtCurrentPos(songInfo, entry);
-        const currentBpm = (tempoAtCurPosition !== 0) ? ` = ${Math.round(tempoAtCurPosition * 1000) / 1000} bpm` : '';
+        const currentBpm = (tempoAtCurPosition !== 0) ? ` = ${tempoAtCurPosition.toFixed(3)} bpm` : '';
 
         const tempoChangeText = `${tempoSign}${Math.round(Math.abs(entry.tempoAdjustment - 1) * 1000) / 10}%${currentBpm}`;
         if (position < CANVAS_WIDTH / 2) {
@@ -127,11 +127,11 @@ export default class SongWaveform extends React.Component {
     ctx.font = '12px sans-serif';
     if (songInfo.bpmStart !== undefined) {
       ctx.textAlign = 'start';
-      ctx.fillText(`${(Math.round(songInfo.bpmStart * 1000) / 1000).toString()} bpm`, 3, CANVAS_HEIGHT - 6);
+      ctx.fillText(`${songInfo.bpmStart.toFixed(3)} bpm`, 3, CANVAS_HEIGHT - 6);
     }
     if (songInfo.bpmEnd !== undefined) {
       ctx.textAlign = 'end';
-      ctx.fillText(`${(Math.round(songInfo.bpmEnd * 1000) / 1000).toString()} bpm`, CANVAS_WIDTH - 3, CANVAS_HEIGHT - 6);
+      ctx.fillText(`${songInfo.bpmEnd.toFixed(3)} bpm`, CANVAS_WIDTH - 3, CANVAS_HEIGHT - 6);
     }
   }
   render() {

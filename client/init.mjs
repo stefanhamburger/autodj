@@ -66,12 +66,12 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     document.addEventListener('keydown', (event) => {
       switch (event.key) {
-        case 'MediaPlayPause':
+        case 'MediaPlayPause': //pause playback
           onPause();
           //try to not send the pause keypress to other audio players running on the user's device
           event.preventDefault();
           break;
-        case 'MediaTrackNext':
+        case 'MediaTrackNext': //skip to end of current song
           view.skipSong();
           break;
         default: //do nothing

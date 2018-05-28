@@ -6,6 +6,7 @@ import * as audioBuffer from './audioBuffer.mjs';
 import { getThumbnail } from './launchProcessWrapper.mjs';
 import * as sessions from './sessions.mjs';
 import { get as getSettings } from './settings.mjs';
+import skipSong from './playlistSkipSong.mjs';
 
 const app = express();
 
@@ -54,7 +55,7 @@ app.get('/part', (req, res) => {
     //id of the song that should be skipped
     const skipSongId = req.get('X-Skip-Song');
     if (skipSongId !== undefined) {
-      session.skipSong(skipSongId);
+      skipSong(session, skipSongId);
     }
 
     res.set('Content-Type', 'audio/webm');

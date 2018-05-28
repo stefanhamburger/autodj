@@ -36,9 +36,9 @@ const revokeSong = (songWrapper, encoderPosition) => {
     const entry = songWrapper.playbackData[i];
 
     //if we are currently in this entry
-    if (encoderPosition < entry.realTimeStart + entry.realTimeLength) {
+    if (encoderPosition >= entry.realTimeStart && encoderPosition < entry.realTimeStart + entry.realTimeLength) {
       //calculate current sample
-      const currentSample = 345435345;
+      const currentSample = (encoderPosition - entry.realTimeStart) * entry.tempoAdjustment;
 
       //shorten entry by current position + 5 seconds
       entry.sampleLength = currentSample + Math.round(5 * 48000 * entry.tempoAdjustment);

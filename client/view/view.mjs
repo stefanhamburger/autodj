@@ -99,9 +99,12 @@ const setIsPaused = (isPaused) => {
   rerender();
 };
 
+const skipSong = () => { if (state.canSkip !== false) state.canSkip(); };
+
 export default {
   init,
   updateSongs,
   setUpcoming,
   setIsPaused,
+  skipSong,
 };

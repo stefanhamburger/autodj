@@ -65,11 +65,16 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     };
     document.addEventListener('keydown', (event) => {
-      //TODO: we can also add the volume change buttons
-      if (event.key === 'MediaPlayPause') {
-        onPause();
-        //try to not send the pause keypress to other audio players running on the user's device
-        event.preventDefault();
+      switch (event.key) {
+        case 'MediaPlayPause':
+          onPause();
+          //try to not send the pause keypress to other audio players running on the user's device
+          event.preventDefault();
+          break;
+        case 'MediaTrackNext':
+          view.skipSong();
+          break;
+        default: //do nothing
       }
     });
 

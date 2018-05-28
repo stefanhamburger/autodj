@@ -13,6 +13,38 @@ const COLOR_FOREGROUND_PLAYED = getViridisColor(1.0).replace(/^rgb\((.+)\)$/u, '
 const COLOR_TRACK_LINE = '#fff';
 const COLOR_BPM_TEXT = '#fff';
 
+
+/**
+ * Calculate bpm at current position to display it next to % tempo adjustment
+ */
+const getTempoAtCurrentPos = (songInfo, entry) => {
+  const elapsedTime = songInfo.elapsed / 48000;//calculate from samples to seconds for easier calculations
+
+  let tempoAtCurPosition = 0;
+  //do nothing if tempo has not yet been detected
+  if (songInfo.bpmEnd !== undefined) {
+    //if this is the first song, we only detected the tempo at the end and don't need to interpolate
+    if (songInfo.bpmStart === undefined) {
+      tempoAtCurPosition = songInfo.bpmEnd;
+    } else {
+      const duration = songInfo.endTime - songInfo.startTime;
+      //if we are at the beginning, use bpmStart
+      if (elapsedTime <= 60) {
+        tempoAtCurPosition = songInfo.bpmStart;
+      } else if (elapsedTime >= duration - 60) { //if we are at the end, use bpmEnd
+        tempoAtCurPosition = songInfo.bpmEnd;
+      } else { //otherwise, lerp between bpmStart and bpmEnd
+        const lerpFactor = (elapsedTime - 60) / (duration - 60);
+        tempoAtCurPosition = (1.0 - lerpFactor) * songInfo.bpmStart + lerpFactor * songInfo.bpmEnd;
+      }
+    }
+    //update bpm based on tempo adjustment
+    tempoAtCurPosition *= entry.tempoAdjustment;
+  }
+  return tempoAtCurPosition;
+};
+
+
 export default class SongWaveform extends React.Component {
   constructor(props) {
     super(props);
@@ -70,43 +102,22 @@ export default class SongWaveform extends React.Component {
     ctx.fillRect(position, 0, 1, CANVAS_HEIGHT);
 
     //show tempo adjustment next to current position (either to the left or right of white line)
-    const elapsedTime = songInfo.elapsed / 48000;//calculate from samples to seonds for easier calculations
-    if (elapsedTime > 0) {
-      const entry = songInfo.playbackData.filter(innerEntry => elapsedTime >= innerEntry.sampleOffset && elapsedTime < innerEntry.sampleOffset + innerEntry.sampleLength)[0];
+    if (songInfo.elapsed > 0) {
+      const entry = songInfo.playbackData.filter(innerEntry => songInfo.elapsed >= innerEntry.sampleOffset && songInfo.elapsed < innerEntry.sampleOffset + innerEntry.sampleLength)[0];
       if (entry !== undefined) {
         const tempoSign = (entry.tempoAdjustment < 1) ? '−' : '+';
 
         //calculate bpm at current position to display it next to % tempo adjustment
-        let tempoAtCurPosition = 0;
-        //do nothing if tempo has not yet been detected
-        if (songInfo.bpmEnd !== undefined) {
-          //if this is the first song, we only detected the tempo at the end and don't need to interpolate
-          if (songInfo.bpmStart === undefined) {
-            tempoAtCurPosition = songInfo.bpmEnd;
-          } else {
-            const duration = songInfo.endTime - songInfo.startTime;
-            //if we are at the beginning, use bpmStart
-            if (elapsedTime <= 60) {
-              tempoAtCurPosition = songInfo.bpmStart;
-            } else if (elapsedTime >= duration - 60) { //if we are at the end, use bpmEnd
-              tempoAtCurPosition = songInfo.bpmEnd;
-            } else { //otherwise, lerp between bpmStart and bpmEnd
-              const lerpFactor = (elapsedTime - 60) / (duration - 60);
-              tempoAtCurPosition = (1.0 - lerpFactor) * songInfo.bpmStart + lerpFactor * songInfo.bpmEnd;
-            }
-          }
-          //update bpm based on tempo adjustment
-          tempoAtCurPosition *= entry.tempoAdjustment;
-        }
+        const tempoAtCurPosition = getTempoAtCurrentPos(songInfo, entry);
         const currentBpm = (tempoAtCurPosition !== 0) ? ` = ${Math.round(tempoAtCurPosition * 1000) / 1000} bpm` : '';
 
-        const tempoChange = `${tempoSign}${Math.round(Math.abs(entry.tempoAdjustment - 1) * 1000) / 10}%${currentBpm}`;
+        const tempoChangeText = `${tempoSign}${Math.round(Math.abs(entry.tempoAdjustment - 1) * 1000) / 10}%${currentBpm}`;
         if (position < CANVAS_WIDTH / 2) {
           ctx.textAlign = 'start';
-          ctx.fillText(tempoChange, position + 2, 13);
+          ctx.fillText(tempoChangeText, position + 2, 13);
         } else {
           ctx.textAlign = 'end';
-          ctx.fillText(tempoChange, position - 2, 13);
+          ctx.fillText(tempoChangeText, position - 2, 13);
         }
       }
     }

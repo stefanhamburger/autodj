@@ -140,7 +140,7 @@ const addData = ({
         if (beatAbsTime <= prevTime + SPECTROGRAM_SAMPLES_PER_PIXEL) { //if end of pixel is after this beat
           if (prevTime <= beatAbsTime) { //if beginning of pixel is before this beat
             //If yes, draw a line (white at beginning, red at end of song)
-            ctx.fillStyle = (j === 0) ? '#f00' : '#fff';
+            ctx.fillStyle = ((newTime / 48000 - song.startTime) / (song.endTime - song.startTime) >= 0.5) ? '#f00' : '#fff';
             ctx.fillRect(oldWidth - pixelsToMove + i, 0, 1, oldHeight);
           }
           //Increase beats position so we know in the next loop we need to check the next beat

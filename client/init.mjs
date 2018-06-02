@@ -4,6 +4,9 @@ import view from './view/view.mjs';
 import spectrogram from './view/spectrogram.mjs';
 import fftDataManager from './fftDataManager.mjs';
 
+/** Due to Opus codec, we use a 48,000 Hz sample rate. */
+const SAMPLE_RATE = 48000;
+
 document.addEventListener('DOMContentLoaded', () => {
   const startLink = document.getElementById('startLink');
   startLink.addEventListener('click', async () => {
@@ -127,13 +130,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
       updateModelView();
 
-      //For beat positions, we expect a sample rate of 48000
-      const sampleRate = 48000;//const { sampleRate } = audioCtx;
-
-      const bufferHi = fftManagerHi.getNewBuffer(audioEle.currentTime * sampleRate);
+      const bufferHi = fftManagerHi.getNewBuffer(audioEle.currentTime * SAMPLE_RATE);
       analyserNodeHi.getByteFrequencyData(bufferHi);//TODO: need to use getFloatFrequencyData
 
-      const bufferLo = fftManagerLo.getNewBuffer(audioEle.currentTime * sampleRate);
+      const bufferLo = fftManagerLo.getNewBuffer(audioEle.currentTime * SAMPLE_RATE);
       analyserNodeLo.getByteFrequencyData(bufferLo);
 
       spectrogram.addData({
@@ -141,12 +141,12 @@ document.addEventListener('DOMContentLoaded', () => {
         binSizeHi,
         fftManagerLo,
         binSizeLo,
-        newTime: audioEle.currentTime * sampleRate,
-        sampleRate,
+        newTime: audioEle.currentTime * SAMPLE_RATE,
+        sampleRate: SAMPLE_RATE,
       });
 
-      fftManagerHi.garbageCollection(audioEle.currentTime * sampleRate, sampleRate);
-      fftManagerLo.garbageCollection(audioEle.currentTime * sampleRate, sampleRate);
+      fftManagerHi.garbageCollection(audioEle.currentTime * SAMPLE_RATE, SAMPLE_RATE);
+      fftManagerLo.garbageCollection(audioEle.currentTime * SAMPLE_RATE, SAMPLE_RATE);
     };
     requestAnimationFrame(redrawSpectrogram);
   });

@@ -127,7 +127,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
       updateModelView();
 
-      const { sampleRate } = audioCtx;
+      //For beat positions, we expect a sample rate of 48000
+      const sampleRate = 48000;//const { sampleRate } = audioCtx;
 
       const bufferHi = fftManagerHi.getNewBuffer(audioEle.currentTime * sampleRate);
       analyserNodeHi.getByteFrequencyData(bufferHi);//TODO: need to use getFloatFrequencyData

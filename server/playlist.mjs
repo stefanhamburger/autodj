@@ -98,31 +98,31 @@ export async function addFollowUpSong(session) {
       return accumulator;
     }
   }, { startTime: Number.NEGATIVE_INFINITY });
-  const previousBpm = previousSong.tempo.bpmEnd * previousSong.playbackData[0].tempoAdjustment;
+  const previousBpm = previousSong.tempo.bpmEnd * previousSong.playbackData[previousSong.playbackData.length - 1].tempoAdjustment;
 
-  let bestChoice;
-  let bestChoiceTempo = Number.POSITIVE_INFINITY;
+  let followUpSong;
+  let followUpTempo = Number.POSITIVE_INFINITY;
   //Continue finding follow-up songs, as long as:
-  while (bestChoice === undefined || (
-    //- We still haven't found a song within 10 bpm of the current song
-    bestChoiceTempo > 10 &&
+  while (followUpSong === undefined || (
+    //- We still haven't found a song within 5% bpm of the current song
+    followUpTempo > 0.05 &&
     //- There is more than 90 seconds left in the current song
     previousSong.endTime - session.encoderPosition > 90 * 48000
   )) {
     try {
-      const songWrapper = await testFollowUpSong(session);//eslint-disable-line no-await-in-loop
-      const tempo = Math.abs(previousBpm - songWrapper.tempo.bpmStart);
-      if (tempo < bestChoiceTempo) {
+      const tempSong = await testFollowUpSong(session);//eslint-disable-line no-await-in-loop
+      const tempTempo = Math.abs(previousBpm / tempSong.tempo.bpmStart - 1.0);
+      if (tempTempo < followUpTempo) {
         //we have found a new best follow-up song, kill previous choice
-        if (bestChoice !== undefined) {
-          bestChoice.song.destroy();
+        if (followUpSong !== undefined) {
+          followUpSong.song.destroy();
         }
         //store new best choice
-        bestChoice = songWrapper;
-        bestChoiceTempo = tempo;
+        followUpSong = tempSong;
+        followUpTempo = tempTempo;
       } else {
         //song is not picked, kill process
-        songWrapper.song.destroy();
+        tempSong.song.destroy();
       }
     } catch (error) {
       //tempo detection failed, ignore this song
@@ -131,53 +131,51 @@ export async function addFollowUpSong(session) {
 
   //Pick the song with the least tempo adjustment, and add it to the list
   {
-    const songWrapper = bestChoice;
-
     //by how much to adjust the tempo of this song so it matches the previous song
-    const tempoAdjustment = previousBpm / songWrapper.tempo.bpmStart;
+    const tempoAdjustment = previousBpm / followUpSong.tempo.bpmStart;
     //the time in samples at which to start adding this song to the stream - TODO: need to beatmatch
-    songWrapper.startTime = previousSong.endTime - 15 * 48000;
+    followUpSong.startTime = previousSong.endTime - 15 * 48000;
 
-    session.currentSongs.push(songWrapper);
-    console.log(`${consoleColors.magenta(`[${session.sid}]`)} Adding to playlist: ${consoleColors.green(songWrapper.songRef.name)}.`);
+    session.currentSongs.push(followUpSong);
+    console.log(`${consoleColors.magenta(`[${session.sid}]`)} Adding to playlist: ${consoleColors.green(followUpSong.songRef.name)}.`);
 
     //Set playback data based on calculated tempo adjustment
-    songWrapper.playbackData = [
+    followUpSong.playbackData = [
       {
         sampleOffset: 0,
-        sampleLength: songWrapper.totalSampleLength,
+        sampleLength: followUpSong.totalSampleLength,
         tempoAdjustment,
       },
     ];
-    fixPlaybackData(songWrapper);
+    fixPlaybackData(followUpSong);
 
     //Inform client that we decided on this follow-up song
     session.emitEvent({
       type: 'NEXT_SONG',
-      songName: songWrapper.songRef.name,
+      songName: followUpSong.songRef.name,
     });
 
     //Send full song information to client
     session.emitEvent({
       type: 'SONG_START',
-      id: songWrapper.id,
-      songName: songWrapper.songRef.name,
-      time: songWrapper.startTime,
+      id: followUpSong.id,
+      songName: followUpSong.songRef.name,
+      time: followUpSong.startTime,
     });
     session.emitEvent({
       type: 'SONG_DURATION',
-      id: songWrapper.id,
-      origDuration: songWrapper.totalSampleLength,
-      startTime: songWrapper.startTime,
-      endTime: songWrapper.endTime,
-      playbackData: songWrapper.playbackData,
+      id: followUpSong.id,
+      origDuration: followUpSong.totalSampleLength,
+      startTime: followUpSong.startTime,
+      endTime: followUpSong.endTime,
+      playbackData: followUpSong.playbackData,
     });
     session.emitEvent({
       type: 'TEMPO_INFO',
-      id: songWrapper.id,
-      bpmStart: songWrapper.tempo.bpmStart,
-      bpmEnd: songWrapper.tempo.bpmEnd,
-      beats: songWrapper.tempo.beats,
+      id: followUpSong.id,
+      bpmStart: followUpSong.tempo.bpmStart,
+      bpmEnd: followUpSong.tempo.bpmEnd,
+      beats: followUpSong.tempo.beats,
     });
 
     //Notify client that previous song can now be skipped
@@ -187,8 +185,8 @@ export async function addFollowUpSong(session) {
     });
 
     //Notify client that waveform data is ready
-    songWrapper.song.thumbnail.then(() => {
-      session.emitEvent({ type: 'THUMBNAIL_READY', id: songWrapper.id });
+    followUpSong.song.thumbnail.then(() => {
+      session.emitEvent({ type: 'THUMBNAIL_READY', id: followUpSong.id });
     });
   }
 }

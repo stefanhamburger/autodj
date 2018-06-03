@@ -100,13 +100,30 @@ export async function addFollowUpSong(session) {
   }, { startTime: Number.NEGATIVE_INFINITY });
   const previousBpm = previousSong.tempo.bpmEnd * previousSong.playbackData[0].tempoAdjustment;
 
-
-  //Find at least three follow-up songs
-  const songs = [];
-  while (songs.length < 3) {
+  let bestChoice;
+  let bestChoiceTempo = Number.POSITIVE_INFINITY;
+  //Continue finding follow-up songs, as long as:
+  while (bestChoice === undefined || (
+    //- We still haven't found a song within 10 bpm of the current song
+    bestChoiceTempo > 10 &&
+    //- There is more than 90 seconds left in the current song
+    previousSong.endTime - session.encoderPosition > 90 * 48000
+  )) {
     try {
       const songWrapper = await testFollowUpSong(session);//eslint-disable-line no-await-in-loop
-      songs.push(songWrapper);
+      const tempo = Math.abs(previousBpm - songWrapper.tempo.bpmStart);
+      if (tempo < bestChoiceTempo) {
+        //we have found a new best follow-up song, kill previous choice
+        if (bestChoice !== undefined) {
+          bestChoice.song.destroy();
+        }
+        //store new best choice
+        bestChoice = songWrapper;
+        bestChoiceTempo = tempo;
+      } else {
+        //song is not picked, kill process
+        songWrapper.song.destroy();
+      }
     } catch (error) {
       //tempo detection failed, ignore this song
     }
@@ -114,20 +131,7 @@ export async function addFollowUpSong(session) {
 
   //Pick the song with the least tempo adjustment, and add it to the list
   {
-    //find the song with least tempo adjustment (closest to 1.0)
-    const songWrapper = songs.reduce((accumulator, curSong) => {
-      const tempo = Math.abs(previousBpm - curSong.tempo.bpmStart);
-      if (tempo < accumulator.tempo) {
-        return { tempo, song: curSong };
-      } else {
-        return accumulator;
-      }
-    }, { tempo: Number.POSITIVE_INFINITY }).song;
-
-    //Kill processes of other songs that were not picked
-    songs.filter(song => song.id !== songWrapper.id).forEach((song) => {
-      song.song.destroy();
-    });
+    const songWrapper = bestChoice;
 
     //by how much to adjust the tempo of this song so it matches the previous song
     const tempoAdjustment = previousBpm / songWrapper.tempo.bpmStart;

@@ -87,6 +87,7 @@ export const init = (session) => {
   session.encoderInput = inputStream;
   session.getEncoderOutput = getOutputBuffer;
   session.killCommand = () => {
+    session.killed = true;
     //remove audio buffer from memory
     for (let i = 0; i < session.currentSongs.length; i += 1) {
       try {

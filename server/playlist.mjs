@@ -103,12 +103,12 @@ export async function addFollowUpSong(session) {
   let followUpSong;
   let followUpTempo = Number.POSITIVE_INFINITY;
   //Continue finding follow-up songs, as long as:
-  while (followUpSong === undefined || (
+  while (session.killed !== true && (followUpSong === undefined || (
     //- We still haven't found a song within 5% bpm of the current song
     followUpTempo > 0.05 &&
     //- There is more than 90 seconds left in the current song
     previousSong.endTime - session.encoderPosition > 90 * 48000
-  )) {
+  ))) {
     try {
       const tempSong = await testFollowUpSong(session);//eslint-disable-line no-await-in-loop
       const tempTempo = Math.abs(previousBpm / tempSong.tempo.bpmStart - 1.0);
@@ -127,6 +127,12 @@ export async function addFollowUpSong(session) {
     } catch (error) {
       //tempo detection failed, ignore this song
     }
+  }
+
+  //If session timed out while we were searching for a follow-up song, exit early
+  if (session.killed === true) {
+    followUpSong.song.destroy();
+    return;
   }
 
   //Pick the song with the least tempo adjustment, and add it to the list

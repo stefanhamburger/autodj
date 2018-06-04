@@ -70,7 +70,8 @@ const addToBuffer = async (session) => {
             const outBufferOffset = Math.max(0, entry.realTimeStart - session.encoderPosition);
 
             //Create new function to calculate volume, with constants already pre-defined for higher performance
-            const getVolume = genericGetVolume.bind(null, offsetIntoPiece, song.fadeIn, entry.realTimeLength - song.fadeOut, song.fadeOut);
+            const offsetFromSongStart = (entry.realTimeStart - song.startTime) + offsetIntoPiece;
+            const getVolume = genericGetVolume.bind(null, offsetFromSongStart, song.fadeIn, (song.endTime - song.startTime) - song.fadeOut, song.fadeOut);
 
             //Loop through numSamplesToWrite, add both channels to buffer
             for (let j = 0; j < songPieceLength; j += 1) {

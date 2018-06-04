@@ -139,8 +139,14 @@ export async function addFollowUpSong(session) {
   {
     //by how much to adjust the tempo of this song so it matches the previous song
     const tempoAdjustment = previousBpm / followUpSong.tempo.bpmStart;
-    //the time in samples at which to start adding this song to the stream - TODO: need to beatmatch
-    followUpSong.startTime = previousSong.endTime - 15 * 48000;
+    //How many samples this song overlaps into the previous song, after tempo adjustment - TODO: need to beatmatch
+    const overlap = 15 * 48000;
+    //the time in samples at which to start adding this song to the stream
+    followUpSong.startTime = previousSong.endTime - overlap;
+    //Add fade-in and fade-out information to allow for volume change
+    previousSong.fadeOut = overlap;
+    followUpSong.fadeIn = overlap;
+    followUpSong.fadeOut = 0;
 
     session.currentSongs.push(followUpSong);
     console.log(`${consoleColors.magenta(`[${session.sid}]`)} Adding to playlist: ${consoleColors.green(followUpSong.songRef.name)}.`);
@@ -218,6 +224,8 @@ export async function addFirstSong(session, offset = 0) {
 
   songWrapper.startTime = offset;
   songWrapper.totalSampleLength = 30 * 48000;//we assume the song is at least 30 seconds long, this will be overwritten as soon as we have the correct duration
+  songWrapper.fadeIn = 0;
+  songWrapper.fadeOut = 0;
   songWrapper.playbackData = [
     {
       sampleOffset: 0,

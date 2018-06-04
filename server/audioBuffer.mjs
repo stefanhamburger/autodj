@@ -10,22 +10,24 @@ const MAX_SAMPLES_PER_LOOP = 2 * 48000;
 /** A function to calculate the volume of each sample, based on its position in the song */
 const genericGetVolume = (offsetIntoPiece, fadeInLength, fadeOutStart, fadeOutLength, position) => {
   const curSample = offsetIntoPiece + position;
-  //start: linear fade-in from 0 to 1
-  if (curSample < fadeInLength) {
+  //Calculate volume based on position in song:
+  if (curSample < fadeInLength) { //start = linear fade-in from 0 to 1
     return curSample / fadeInLength;
-  } else if (curSample > fadeOutStart) { //end: linear fade-out from 1 to 0
+  } else if (curSample > fadeOutStart) { //end = linear fade-out from 1 to 0
     return 1.0 - (curSample - fadeOutStart) / fadeOutLength;
-  } else { //middle of the song, always at full volume
+  } else { //middle of the song = always at full volume
     return 1.0;
   }
 };
 
 
 /**
- * Applys a pseudo-Sigmoid function to the input parameter in [0, 1] and returns a number in [0, 1].
+ * Applys a pseudo-sigmoid function to the input parameter in [0, 1] and returns a number in [0, 1].
  * This creates a smoother transition than via lerping.
  * The default sigmoid function only approaches its asymptotes at ±∞, therefore use a third-order polynomial
  * (derived using f(0)=0, f(1)=1, f'(0)=0, f'(1)=0), which is also faster to compute.
+ * ⚠️ This function does not check that input is within [0, 1]. Input outside of this range will
+ *    result in erroneous output.
  * @param x A number in [0, 1].
  */
 const applySigmoid = x => -2 * x ** 3 + 3 * x ** 2;

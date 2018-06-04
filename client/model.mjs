@@ -102,6 +102,7 @@ const heartbeat = (time) => {
   view.updateSongs(time, currentSongs);
 };
 
+const getPlaylist = () => songPlaylist;
 const getCurrentSongs = () => currentSongs;
 
 const getSkipSong = () => externals.skipSong;
@@ -119,6 +120,7 @@ export default {
   init,
   processEvents,
   heartbeat,
+  getPlaylist,
   getCurrentSongs,
   getSkipSong,
   setSkipSong,

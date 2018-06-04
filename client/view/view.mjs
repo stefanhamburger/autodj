@@ -35,6 +35,7 @@ const init = (volumeChangeCallback, onPause) => {
   state.onPause = onPause;
   state.isPaused = false;
   state.totalTime = 0; //in seconds
+  state.playlist = [];
   state.currentSongs = [];
   state.nextSong = undefined;
   state.canSkip = false;
@@ -85,6 +86,8 @@ const updateSongs = (newTime, songs = []) => {
     state.currentSongs.filter(song => song.canSkip).forEach((song) => {
       state.canSkip = model.setSkipSong.bind(null, song.id);
     });
+
+    state.playlist = model.getPlaylist().map(({ id, name }) => ({ id, name, current: state.currentSongs.filter(song => song.id === id).length !== 0 })).reverse();
 
     rerender();
   }

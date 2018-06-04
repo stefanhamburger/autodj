@@ -17,7 +17,7 @@ export default function PlaybackContainer({ state }) {
     <React.Fragment>
       <div>
         <TotalDuration time={state.totalTime} />
-        <Playlist songs={state.currentSongs} />
+        <Playlist songs={state.playlist} />
         <ButtonPause isPaused={state.isPaused} pauseCallback={state.onPause} />
         <ButtonSkip canSkip={state.canSkip} />
         <VolumeControl muted={state.muted} volume={state.volume} mutedCallback={state.onMuted} volumeChangeCallback={state.onVolumeChange} />

@@ -59,9 +59,10 @@ const revokeSong = (songWrapper, encoderPosition) => {
  * Throws an error if the tempo detection fails.
  * @param session
  */
-async function testFollowUpSong(session) {
-  //get random audio file
-  const files = fileManager.getFiles(session.collection);
+async function testFollowUpSong(session, previousSongPath) {
+  //Get random audio file
+  //Do not pick currently playing audio file, unless there is only one song in the collection
+  const files = fileManager.getFiles(session.collection).filter((file, index, arr) => file.path !== previousSongPath || arr.length === 1);
   const randomFile = files[Math.floor(Math.random() * files.length)];
 
   const id = generateId(session);
@@ -110,7 +111,7 @@ export async function addFollowUpSong(session) {
     previousSong.endTime - session.encoderPosition > 90 * 48000
   ))) {
     try {
-      const tempSong = await testFollowUpSong(session);//eslint-disable-line no-await-in-loop
+      const tempSong = await testFollowUpSong(session, previousSong.songWrapper.path);//eslint-disable-line no-await-in-loop
       const tempTempo = Math.abs(previousBpm / tempSong.tempo.bpmStart - 1.0);
       if (tempTempo < followUpTempo) {
         //we have found a new best follow-up song, kill previous choice

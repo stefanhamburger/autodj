@@ -10,13 +10,13 @@ const Container = styled.default.div`
   background: #eee;
   padding: 0 3px;
   border: 1px solid #777;
-  & > ul {
+  & > ol {
     visibility: hidden;
     opacity: 0;
     transition: opacity 0.5s linear, visibility 0.5s linear;
 
     position: absolute;
-    max-height: 300px;
+    max-height: 200px;
     margin-top: 18px;
     padding: 5px 5px 5px 20px;
     overflow-y: auto;
@@ -25,7 +25,7 @@ const Container = styled.default.div`
     background-color: rgba(255, 255, 255, 0.95);
     border: 1px solid black;
   }
-  &:hover > ul {
+  &:hover > ol {
     visibility: visible;
     opacity: 1;
     transition: none;
@@ -35,9 +35,15 @@ const Container = styled.default.div`
 export default function Playlist({ songs = [] }) {
   return (
     <Container>
-      <ul>
-        {songs.map(song => <li key={song.id} style={song.current === true ? { backgroundColor: currentSongBgColor } : {}}>{sanitizeSongName(song.name)}</li>)}
-      </ul>
+      <ol reversed>
+        {songs.length === 0 ?
+          <li>TBD</li> :
+          songs.map(song => (
+            <li key={song.id} style={song.current === true ? { backgroundColor: currentSongBgColor } : {}}>
+              {sanitizeSongName(song.name)}
+            </li>
+          ))}
+      </ol>
       Playlist&nbsp;▼
     </Container>
   );

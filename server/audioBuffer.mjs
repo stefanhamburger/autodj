@@ -21,6 +21,16 @@ const genericGetVolume = (offsetIntoPiece, fadeInLength, fadeOutStart, fadeOutLe
 };
 
 
+/**
+ * Applys a pseudo-Sigmoid function to the input parameter in [0, 1] and returns a number in [0, 1].
+ * This creates a smoother transition than via lerp.
+ * The default sigmoid function only approaches its asymptotes at ±∞, therefore use a third-order polynomial
+ * (derived using f(0)=0, f(1)=1, f'(0)=0, f'(1)=0), which is also faster to compute.
+ * @param x A number in [0, 1].
+ */
+const applySigmoid = x => -2 * x ** 3 + 3 * x ** 2;
+
+
 /** Write a certain number of samples to the FFmpeg input stream so that they are encoded */
 const addToBuffer = async (session) => {
   if (session.samplesToAdd > 0) {
@@ -64,8 +74,8 @@ const addToBuffer = async (session) => {
 
             //Loop through numSamplesToWrite, add both channels to buffer
             for (let j = 0; j < songPieceLength; j += 1) {
-              outBuffer[(outBufferOffset + j) * 2] += getVolume(j) * waveform[j * 2];
-              outBuffer[(outBufferOffset + j) * 2 + 1] += getVolume(j) * waveform[j * 2 + 1];
+              outBuffer[(outBufferOffset + j) * 2] += applySigmoid(getVolume(j)) * waveform[j * 2];
+              outBuffer[(outBufferOffset + j) * 2 + 1] += applySigmoid(getVolume(j)) * waveform[j * 2 + 1];
             }
           }));
 

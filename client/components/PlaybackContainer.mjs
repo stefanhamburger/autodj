@@ -2,9 +2,10 @@ import React from 'react';
 import ButtonPause from './ButtonPause.mjs';
 import ButtonSkip from './ButtonSkip.mjs';
 import CurrentSong from './CurrentSong.mjs';
+import Playlist from './Playlist.mjs';
 import TotalDuration from './TotalDuration.mjs';
-import VolumeControl from './VolumeControl.mjs';
 import UpcomingSong from './UpcomingSong.mjs';
+import VolumeControl from './VolumeControl.mjs';
 
 export default function PlaybackContainer({ state }) {
   //show total time (for long we have been playing audio)
@@ -16,6 +17,7 @@ export default function PlaybackContainer({ state }) {
     <React.Fragment>
       <div>
         <TotalDuration time={state.totalTime} />
+        <Playlist songs={state.currentSongs} />
         <ButtonPause isPaused={state.isPaused} pauseCallback={state.onPause} />
         <ButtonSkip canSkip={state.canSkip} />
         <VolumeControl muted={state.muted} volume={state.volume} mutedCallback={state.onMuted} volumeChangeCallback={state.onVolumeChange} />

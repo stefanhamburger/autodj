@@ -10,6 +10,7 @@ const Container = styled.default.div`
   background: #eee;
   padding: 0 3px;
   border: 1px solid #777;
+
   & > ol {
     visibility: hidden;
     opacity: 0;
@@ -25,6 +26,7 @@ const Container = styled.default.div`
     background-color: rgba(255, 255, 255, 0.95);
     border: 1px solid black;
   }
+
   &:hover > ol {
     visibility: visible;
     opacity: 1;

@@ -8,7 +8,7 @@ const MAX_SAMPLES_PER_LOOP = 2 * 48000;
 
 
 /** A function to calculate the volume of each sample, based on its position in the song */
-const volumeFunctionGeneric = (offsetIntoPiece, fadeInLength, fadeOutStart, fadeOutLength, position) => {
+const genericGetVolume = (offsetIntoPiece, fadeInLength, fadeOutStart, fadeOutLength, position) => {
   const curSample = offsetIntoPiece + position;
   //start: linear fade-in from 0 to 1
   if (curSample < fadeInLength) {
@@ -60,12 +60,12 @@ const addToBuffer = async (session) => {
             const outBufferOffset = Math.max(0, entry.realTimeStart - session.encoderPosition);
 
             //Create new function to calculate volume, with constants already pre-defined for higher performance
-            const volumeFunction = volumeFunctionGeneric.bind(null, offsetIntoPiece, song.fadeIn, entry.realTimeLength - song.fadeOut, song.fadeOut);
+            const getVolume = genericGetVolume.bind(null, offsetIntoPiece, song.fadeIn, entry.realTimeLength - song.fadeOut, song.fadeOut);
 
             //Loop through numSamplesToWrite, add both channels to buffer
             for (let j = 0; j < songPieceLength; j += 1) {
-              outBuffer[(outBufferOffset + j) * 2] += volumeFunction(j) * waveform[j * 2];
-              outBuffer[(outBufferOffset + j) * 2 + 1] += volumeFunction(j) * waveform[j * 2 + 1];
+              outBuffer[(outBufferOffset + j) * 2] += getVolume(j) * waveform[j * 2];
+              outBuffer[(outBufferOffset + j) * 2 + 1] += getVolume(j) * waveform[j * 2 + 1];
             }
           }));
 

@@ -13,12 +13,17 @@ const Container = styled.default.div`
   & > ul {
     visibility: hidden;
     opacity: 0;
+    transition: opacity 0.5s linear, visibility 0.5s linear;
+
     position: absolute;
-    background-color: rgba(255, 255, 255, 0.9);
-    border: 1px solid black;
+    max-height: 300px;
     margin-top: 18px;
     padding: 5px 5px 5px 20px;
-    transition: opacity 0.5s linear, visibility 0.5s linear;
+    overflow-y: auto;
+    z-index: 1;
+
+    background-color: rgba(255, 255, 255, 0.95);
+    border: 1px solid black;
   }
   &:hover > ul {
     visibility: visible;

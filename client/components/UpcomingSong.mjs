@@ -1,4 +1,5 @@
 import React from 'react';
+import sanitizeSongName from '../view/sanitizeSongName.mjs';
 
 export default function UpcomingSong({
   name,
@@ -6,7 +7,7 @@ export default function UpcomingSong({
   return (
     <React.Fragment>
       <b style={{ marginRight: '5px' }}>Upcoming:</b>
-      {name === undefined ? 'TBD' : name.replace(/ - /gu, ' – ')}
+      {name === undefined ? 'TBD' : sanitizeSongName(name)}
     </React.Fragment>
   );
 }

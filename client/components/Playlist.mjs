@@ -18,7 +18,7 @@ const Container = styled.default.div`
     position: absolute;
     max-height: 200px;
     margin-top: 18px;
-    padding: 5px 5px 5px 20px;
+    padding: 5px 5px 5px 30px;
     overflow-y: auto;
     z-index: 1;
 

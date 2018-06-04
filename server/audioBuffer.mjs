@@ -23,7 +23,7 @@ const genericGetVolume = (offsetIntoPiece, fadeInLength, fadeOutStart, fadeOutLe
 
 /**
  * Applys a pseudo-Sigmoid function to the input parameter in [0, 1] and returns a number in [0, 1].
- * This creates a smoother transition than via lerp.
+ * This creates a smoother transition than via lerping.
  * The default sigmoid function only approaches its asymptotes at ±∞, therefore use a third-order polynomial
  * (derived using f(0)=0, f(1)=1, f'(0)=0, f'(1)=0), which is also faster to compute.
  * @param x A number in [0, 1].

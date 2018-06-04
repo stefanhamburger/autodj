@@ -99,6 +99,7 @@ export async function addFollowUpSong(session) {
       return accumulator;
     }
   }, { startTime: Number.NEGATIVE_INFINITY });
+  const previousSongPath = previousSong.songRef.path;
   const previousBpm = previousSong.tempo.bpmEnd * previousSong.playbackData[previousSong.playbackData.length - 1].tempoAdjustment;
 
   let followUpSong;
@@ -111,7 +112,7 @@ export async function addFollowUpSong(session) {
     previousSong.endTime - session.encoderPosition > 90 * 48000
   ))) {
     try {
-      const tempSong = await testFollowUpSong(session, previousSong.songWrapper.path);//eslint-disable-line no-await-in-loop
+      const tempSong = await testFollowUpSong(session, previousSongPath);//eslint-disable-line no-await-in-loop
       const tempTempo = Math.abs(previousBpm / tempSong.tempo.bpmStart - 1.0);
       if (tempTempo < followUpTempo) {
         //we have found a new best follow-up song, kill previous choice
@@ -127,6 +128,7 @@ export async function addFollowUpSong(session) {
       }
     } catch (error) {
       //tempo detection failed, ignore this song
+      console.log(error);
     }
   }
 

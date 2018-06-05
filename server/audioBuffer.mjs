@@ -24,13 +24,13 @@ const genericGetVolume = (offsetIntoPiece, fadeInLength, fadeOutStart, fadeOutLe
 /**
  * Applys a pseudo-sigmoid function to the input parameter in [0, 1] and returns a number in [0, 1].
  * This creates a smoother transition than via lerping.
- * The default sigmoid function only approaches its asymptotes at ±∞, therefore use a third-order polynomial
- * (derived using f(0)=0, f(1)=1, f'(0)=0, f'(1)=0), which is also faster to compute.
+ * The default sigmoid function only approaches its asymptotes at ±∞, therefore use a fifth-order polynomial
+ * (derived using f(0)=0, f(0.5)=0.5, f(1)=1, f'(0)=0, f'(0.5)=0, f'(1)=0), which is also faster to compute.
  * ⚠️ This function does not check that input is within [0, 1]. Input outside of this range will
  *    result in erroneous output.
  * @param x A number in [0, 1].
  */
-const applySigmoid = x => -2 * x ** 3 + 3 * x ** 2;
+const applySigmoid = x => -24 * x ** 5 + 60 * x ** 4 - 50 * x ** 3 + 15 * x ** 2;
 
 
 /** Write a certain number of samples to the FFmpeg input stream so that they are encoded */

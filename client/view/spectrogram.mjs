@@ -136,11 +136,11 @@ const addData = ({
       //Ignore this song if beats have not yet been detected, or all beat lines were already drawn
       if (song.beatsAbs !== undefined && song.beatsPos < song.beatsAbs.length) {
         //Check that a beat occurs on this pixel
-        const beatAbsTime = song.beatsAbs[song.beatsPos];//in samples
+        const [beatAbsTime, beatAbsColor] = song.beatsAbs[song.beatsPos];//in samples
         if (beatAbsTime <= prevTime + SPECTROGRAM_SAMPLES_PER_PIXEL) { //if end of pixel is after this beat
           if (prevTime <= beatAbsTime) { //if beginning of pixel is before this beat
             //If yes, draw a line (white at beginning, red at end of song)
-            ctx.fillStyle = ((newTime / sampleRate - song.startTime) / (song.endTime - song.startTime) >= 0.5) ? '#f00' : '#fff';
+            ctx.fillStyle = beatAbsColor ? '#fff' : '#f00';
             ctx.fillRect(oldWidth - pixelsToMove + i, 0, 1, oldHeight);
           }
           //Increase beats position so we know in the next loop we need to check the next beat

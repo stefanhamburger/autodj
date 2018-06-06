@@ -35,7 +35,7 @@ export default function tempoDetection(waveformArray, isFirstSong) {
 
   //if song is too short, we detect tempo across the whole song
   if (waveformArray.length < SONG_MIN_LENGTH) {
-    const { bpm, beats } = detectTempo(waveformArray);
+    const { beats } = detectTempo(waveformArray);
     if (beats.length < 82) {
       throw new Error('Not enough beats for mixing.');
     }
@@ -47,7 +47,7 @@ export default function tempoDetection(waveformArray, isFirstSong) {
     //if this is the first song we are playing, tempo at beginning doesn't matter
     if (!isFirstSong) {
       //tempo at beginning of song
-      const { bpm: bpmStart, beats: beatsStart } = detectTempo(waveformArray.slice(0, SONG_START_LENGTH));
+      const { beats: beatsStart } = detectTempo(waveformArray.slice(0, SONG_START_LENGTH));
       if (beatsStart.length < 41) {
         throw new Error('Not enough beats for mixing.');
       }
@@ -59,7 +59,7 @@ export default function tempoDetection(waveformArray, isFirstSong) {
     //tempo at end of song
     {
       const endPos = waveformArray.length - SONG_END_LENGTH;
-      const { bpm: bpmEnd, beats: beatsResult } = detectTempo(waveformArray.slice(endPos));
+      const { beats: beatsResult } = detectTempo(waveformArray.slice(endPos));
       if (beatsResult.length < 41) {
         throw new Error('Not enough beats for mixing.');
       }

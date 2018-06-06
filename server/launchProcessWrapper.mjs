@@ -60,6 +60,7 @@ export async function analyseSong(session, songWrapper, isFirstSong) {
   const onErrorCallback = (error) => {
     const errorName = String(error).trim();
     console.error('Error in child process', errorName);
+    return;
 
     //reject promises
     promise.reject('duration', error);

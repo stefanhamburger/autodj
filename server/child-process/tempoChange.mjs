@@ -39,7 +39,7 @@ const timeStretch = (inputData, stretchFactor) => {
   return completed;
 };
 
-export default function startTempoChange(waveform, stretchFactor) {
+export default function startTempoChange(waveform, stretchFactor, invMaxLoudness) {
   const dataLength = waveform.length;
   const leftChannel = new Float32Array(dataLength / 2);
   const rightChannel = new Float32Array(dataLength / 2);
@@ -47,9 +47,9 @@ export default function startTempoChange(waveform, stretchFactor) {
   //We need to convert stereo audio to two mono channels because Kali is bugged with multi-channel audio
   for (let i = 0; i < waveform.length; i += 1) {
     if (i % 2 === 0) {
-      leftChannel[i >>> 1] = waveform[i];
+      leftChannel[i >>> 1] = waveform[i] * invMaxLoudness;
     } else {
-      rightChannel[i >>> 1] = waveform[i];
+      rightChannel[i >>> 1] = waveform[i] * invMaxLoudness;
     }
   }
 

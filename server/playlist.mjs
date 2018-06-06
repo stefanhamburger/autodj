@@ -144,22 +144,30 @@ export async function addFollowUpSong(session) {
     //by how much to adjust the tempo of this song so it matches the previous song
     const tempoAdjustment = previousBpm / followUpSong.tempo.bpmStart;
 
-    /** We overlap for 41 beats = 10 bars */
+    /** We overlap for 41 beats = 10 bars, but we only beatmatch starting at 2nd bar = 9th beat */
     const BEAT_OVERLAP = 41;
+    const BEAT_GAP = 8;
     /** We use a 48k Hz sampling rate due to Opus audio codec */
     const SAMPLE_RATE = 48000;
 
-    //For beat matching, we overlap the last 41 beats of the previous song with the first 41 beats of the follow-up song
+    /**
+     * For beat matching, we overlap the last 41 beats of the previous song with the first 41 beats of the follow-up song
+     * Frequently, songs will change tempo at the beginning or end, so ignore first/last 2 bars. Perfect beatmatching
+     * therefore only happens across 6 beats = 25 beats.
+     */
+
     //Fade-out timing of previous song, in seconds pre-tempo adjustment.
     const fadeOutStartSecPre = previousSong.tempo.beats[previousSong.tempo.beats.length - BEAT_OVERLAP];
-    const fadeOutLastBeatSecPre = previousSong.tempo.beats[previousSong.tempo.beats.length - 1];
+    const fadeOutFirstBeatSecPre = previousSong.tempo.beats[previousSong.tempo.beats.length - (BEAT_OVERLAP - BEAT_GAP)];
+    const fadeOutLastBeatSecPre = previousSong.tempo.beats[previousSong.tempo.beats.length - 1 - BEAT_GAP];
     //Fade-out timing of previous song, in samples pre-tempo adjustment.
     const fadeOutStartSampPre = Math.round(fadeOutStartSecPre * SAMPLE_RATE);
+    const fadeOutFirstBeatSampPre = Math.round(fadeOutFirstBeatSecPre * SAMPLE_RATE);
     const fadeOutLastBeatSampPre = Math.round(fadeOutLastBeatSecPre * SAMPLE_RATE);
-    const fadeOutEndSampPre = previousSong.totalSampleLength;
+    //const fadeOutEndSampPre = previousSong.totalSampleLength;
 
     //Fade-in timing of follow-up song, in seconds pre-tempo adjustment.
-    const fadeInFirstBeatSecPre = followUpSong.tempo.beats[0];
+    const fadeInFirstBeatSecPre = followUpSong.tempo.beats[8];
     //const fadeInEndSecPre = followUpSong.tempo.beats[BEAT_OVERLAP - 1];
     //Fade-in timing of follow-up song, in samples pre-tempo adjustment.
     //const fadeInStartSampPre = 0;
@@ -167,21 +175,23 @@ export async function addFollowUpSong(session) {
     //const fadeInEndSampPre = Math.round(fadeInEndSecPre * SAMPLE_RATE);
 
     //Calculate fade-out duration of previous song post-tempo adjustment
-    const fadeOutLengthSampPre = fadeOutEndSampPre - fadeOutStartSampPre;
-    const fadeOutLengthSampPost = Math.round(fadeOutLengthSampPre / previousSongTempoAdj);
-    const fadeOutStartSampPost = (previousSong.endTime - previousSong.startTime) - Math.round((previousSong.totalSampleLength - fadeOutStartSampPre) / previousSongTempoAdj);
-    const fadeOutLastBeatSampPost = (previousSong.endTime - previousSong.startTime) - Math.round((previousSong.totalSampleLength - fadeOutLastBeatSampPre) / previousSongTempoAdj);
+    //const fadeOutLengthSampPre = fadeOutEndSampPre - fadeOutStartSampPre;
+    //const fadeOutLengthSampPost = Math.round(fadeOutLengthSampPre / previousSongTempoAdj);
+    const fadeOutEndSampPost = previousSong.endTime - previousSong.startTime;
+    const fadeOutStartSampPost = fadeOutEndSampPost - Math.round((previousSong.totalSampleLength - fadeOutStartSampPre) / previousSongTempoAdj);
+    const fadeOutFirstBeatSampPost = fadeOutEndSampPost - Math.round((previousSong.totalSampleLength - fadeOutFirstBeatSampPre) / previousSongTempoAdj);
+    const fadeOutLastBeatSampPost = fadeOutEndSampPost - Math.round((previousSong.totalSampleLength - fadeOutLastBeatSampPre) / previousSongTempoAdj);
 
     //Calculate position where follow-up song starts playing (note: first beat can occur a few seconds later than this)
     const fadeInFirstBeatSampPost = Math.round(fadeInFirstBeatSampPre / tempoAdjustment);
-    const followUpStartPosition = previousSong.endTime - fadeOutLengthSampPost - fadeInFirstBeatSampPost;
+    const followUpStartPosition = previousSong.endTime - (fadeOutEndSampPost - fadeOutFirstBeatSampPost) - fadeInFirstBeatSampPost;
     const fadeInEndSampPost = fadeInFirstBeatSampPost + (fadeOutLastBeatSampPost - fadeOutStartSampPost);
 
 
     //the time in samples at which to start adding this song to the stream
     followUpSong.startTime = followUpStartPosition;
     //Add fade-in and fade-out information to allow for volume change
-    previousSong.fadeOut = fadeOutLengthSampPost;
+    previousSong.fadeOut = fadeOutEndSampPost - fadeOutStartSampPost;
     followUpSong.fadeIn = fadeInEndSampPost;
     followUpSong.fadeOut = 0;
 

@@ -129,7 +129,7 @@ export async function addFollowUpSong(session) {
       }
     } catch (error) {
       //tempo detection failed, ignore this song
-      console.log(error);
+      console.log('Tempo detection failed', error);
     }
   }
 

@@ -39,8 +39,8 @@ export default function tempoDetection(waveformArray, isFirstSong) {
     if (beats.length < 82) {
       throw new Error('Not enough beats for mixing.');
     }
-    out.bpmStart = calculateBpm(beats, 0, 41);
-    out.bpmEnd = calculateBpm(beats, beats.length - 41, 41);
+    out.bpmStart = calculateBpm(beats, 8, 25);
+    out.bpmEnd = calculateBpm(beats, beats.length - 33, 25);
     //  console.error('short song', bpm, out.bpmStart, out.bpmEnd);
     out.beats = beats;
   } else { //otherwise, we only detect the beginning and end of the song
@@ -51,7 +51,7 @@ export default function tempoDetection(waveformArray, isFirstSong) {
       if (beatsStart.length < 41) {
         throw new Error('Not enough beats for mixing.');
       }
-      out.bpmStart = calculateBpm(beatsStart, 0, 41);
+      out.bpmStart = calculateBpm(beatsStart, 8, 25);
       //console.error('start', bpmStart, out.bpmStart);
       out.beats = beatsStart;
     }
@@ -63,7 +63,7 @@ export default function tempoDetection(waveformArray, isFirstSong) {
       if (beatsResult.length < 41) {
         throw new Error('Not enough beats for mixing.');
       }
-      out.bpmEnd = calculateBpm(beatsResult, beatsResult.length - 41, 41);
+      out.bpmEnd = calculateBpm(beatsResult, beatsResult.length - 33, 25);
       //console.error('end', bpmEnd, out.bpmEnd);
       //the beat times are relative to the last minute, so add offset to get correct time
       const beatsEnd = beatsResult.map(time => endPos / SAMPLE_RATE + time);

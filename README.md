@@ -1,6 +1,6 @@
 # Installation
 
-1. Download and install [Node.js](https://nodejs.org/en/download/current/). Version 10.3.0 is recommended; other versions might also work.
+1. Download and install [Node.js](https://nodejs.org/en/download/current/). Version 10.4.0 is recommended; other versions might also work.
 2. Download [FFmpeg](https://ffmpeg.org/download.html) (must have libopus included) and make sure it is included in PATH (so that it can be called from any directory)
 3. Download this Git repository (`git pull https://github.com/stefanhamburger/autodj.git`)
 4. Install dependencies by running `npm install`

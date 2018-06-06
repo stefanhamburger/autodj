@@ -6,7 +6,7 @@ import fixPlaybackData from './lib/fixPlaybackData.mjs';
  */
 export default function skipSong(session, songId) {
   session.currentSongs.filter(song => song.id === songId).forEach((songWrapper) => {
-    if (songWrapper.endTime - session.encoderPosition < 60 * 48000) {
+    if (songWrapper.endTime - session.encoderPosition < 40 * 48000) {
       console.log(`${consoleColors.magenta(`[${session.sid}]`)} Ignoring skip request since song ${consoleColors.green(songWrapper.songRef.name)} is near the end.`);
       return;
     }

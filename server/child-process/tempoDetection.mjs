@@ -24,8 +24,28 @@ function detectTempo(audioBuffer) {
   });
   return {
     bpm: 60 / mt.beatInterval,
-    beats: mt.beats.map(time => Math.round(time * 10000) / 10000),
+    beats: mt.beats,
   };
+}
+
+function calculateBpm(beats, startIndex, count) {
+  //Transform 41 beat positions to 40 beat distances
+  const beatDistances = [];
+  for (let i = startIndex + 1; i < startIndex + count; i += 1) {
+    beatDistances.push(beats[i] - beats[i - 1]);
+  }
+
+  //Sort by distance, then take median 20 values and calculate their average
+  beatDistances.sort();
+  const medianLength = (count - 1) >>> 1;
+  const medianStart = medianLength >>> 1;
+  const medianBeatDistances = beatDistances.slice(medianStart, medianStart + medianLength - 1);
+  const averageBeatDistance = medianBeatDistances.reduce((accum, value) => accum + value, 0) / medianBeatDistances.length;
+
+  //Calculate bpm
+  const bpm = 60 / averageBeatDistance;
+
+  return bpm;
 }
 
 export default function tempoDetection(waveformArray, isFirstSong) {
@@ -34,15 +54,23 @@ export default function tempoDetection(waveformArray, isFirstSong) {
   //if song is too short, we detect tempo across the whole song
   if (waveformArray.length < SONG_MIN_LENGTH) {
     const { bpm, beats } = detectTempo(waveformArray);
-    out.bpmStart = bpm;
-    out.bpmEnd = bpm;
+    if (beats.length < 82) {
+      throw new Error('Not enough beats for mixing.');
+    }
+    out.bpmStart = calculateBpm(beats, 0, 41);
+    out.bpmEnd = calculateBpm(beats, beats.length - 41, 41);
+    //  console.error('short song', bpm, out.bpmStart, out.bpmEnd);
     out.beats = beats;
   } else { //otherwise, we only detect the beginning and end of the song
     //if this is the first song we are playing, tempo at beginning doesn't matter
     if (!isFirstSong) {
       //tempo at beginning of song
       const { bpm: bpmStart, beats: beatsStart } = detectTempo(waveformArray.slice(0, SONG_START_LENGTH));
-      out.bpmStart = bpmStart;
+      if (beatsStart.length < 41) {
+        throw new Error('Not enough beats for mixing.');
+      }
+      out.bpmStart = calculateBpm(beatsStart, 0, 41);
+      //console.error('start', bpmStart, out.bpmStart);
       out.beats = beatsStart;
     }
 
@@ -50,9 +78,13 @@ export default function tempoDetection(waveformArray, isFirstSong) {
     {
       const endPos = waveformArray.length - SONG_END_LENGTH;
       const { bpm: bpmEnd, beats: beatsResult } = detectTempo(waveformArray.slice(endPos));
-      out.bpmEnd = bpmEnd;
+      if (beatsResult.length < 41) {
+        throw new Error('Not enough beats for mixing.');
+      }
+      out.bpmEnd = calculateBpm(beatsResult, beatsResult.length - 41, 41);
+      //console.error('end', bpmEnd, out.bpmEnd);
       //the beat times are relative to the last minute, so add offset to get correct time
-      const beatsEnd = beatsResult.map(time => Math.round((endPos / SAMPLE_RATE + time) * 10000) / 10000);
+      const beatsEnd = beatsResult.map(time => endPos / SAMPLE_RATE + time);
       //append to array if beginning was already detected
       if (out.beats !== undefined) {
         out.beats.push(...beatsEnd);

@@ -42,7 +42,6 @@ let processMessages;
     const absValue = Math.abs(monoBuffer[i >>> 1]);
     if (absValue > maxLoudness) maxLoudness = absValue;
   }
-  console.error(maxLoudness);
   const invMaxLoudness = 1.0 / maxLoudness;
   try {
     const tempoInfo = tempoDetection(monoBuffer, isFirstSong);

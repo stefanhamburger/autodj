@@ -37,7 +37,7 @@ const applySigmoid = x => -24 * x ** 5 + 60 * x ** 4 - 50 * x ** 3 + 15 * x ** 2
 const addToBuffer = async (session) => {
   if (session.samplesToAdd > 0) {
     let numSamplesToWrite = Math.min(session.samplesToAdd, MAX_SAMPLES_PER_LOOP);
-    const endTime = session.encoderPosition + numSamplesToWrite;
+    let endTime = session.encoderPosition + numSamplesToWrite;
     //Only use songs that are 1. ready for processing 2. have already started playing 3. have not yet finished playing
     const songs = session.currentSongs.filter(song => endTime > song.startTime && session.encoderPosition < song.endTime);
 
@@ -45,8 +45,10 @@ const addToBuffer = async (session) => {
     if (songs.length > 0) {
       //ensure that songs don't end prematurely: If there isn't at least one song to cover till endTime, reduce numSamplesToWrite accordingly
       numSamplesToWrite = Math.min(numSamplesToWrite, ...songs.map(song => song.endTime - session.encoderPosition));
+      //If numSamplesToWrite changed, also update endTime
+      endTime = session.encoderPosition + numSamplesToWrite;
 
-      const outBuffer = new Float32Array(numSamplesToWrite * 2);//input is always stereo (two channels)
+      const outBuffer = new Float32Array(numSamplesToWrite * 2);//input to our encoder is always stereo (two channels)
 
       //Get an array of songs that should be written to the current stream, and the offset into their waveform
       await Promise.all(songs.map(async (song) => {

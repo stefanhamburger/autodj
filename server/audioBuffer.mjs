@@ -30,7 +30,7 @@ const genericGetVolume = (offsetIntoPiece, fadeInLength, fadeOutStart, fadeOutLe
  *    result in erroneous output.
  * @param x A number in [0, 1].
  */
-const applySigmoid = x => -24 * x ** 5 + 60 * x ** 4 - 50 * x ** 3 + 15 * x ** 2;
+const applySigmoid = x => (x === 1.0 ? 1.0 : -24 * x ** 5 + 60 * x ** 4 - 50 * x ** 3 + 15 * x ** 2);
 
 
 /** Write a certain number of samples to the FFmpeg input stream so that they are encoded */

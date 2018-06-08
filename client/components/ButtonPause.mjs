@@ -5,7 +5,7 @@ export default function ButtonPause({ isPaused, pauseCallback }) {
     //alternatively, we could use ▶/⏸ but they have a box around them
     <button
       onClick={pauseCallback}
-      title="Pause or continue playback."
+      title="Pause or resume playback."
     >
       {isPaused ? '►' : '❚❚'}
     </button>

@@ -1,6 +1,5 @@
 import React from 'react';
 import styled from 'styled-components';
-import getViridisColor from '../view/viridis.mjs';
 
 const Container = styled.default.label`
   & > button {
@@ -8,8 +7,8 @@ const Container = styled.default.label`
     width: 24px;
     height: 24px;
     padding: 0;
-    background-color: #ddb6e6;
-    border: 1px solid ${getViridisColor(0)};
+    background-color: #eee;
+    border: 1px solid #777;
     border-radius: 5px;
     text-align: center;
   }

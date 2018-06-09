@@ -89,9 +89,9 @@ const addToBuffer = async (session) => {
           session.currentSongs.splice(session.currentSongs.findIndex(ele => ele === song), 1);
           session.finishedSongs.push(song);
           song.song.destroy();
-          //need to start encoding another song if we don't have any current songs left
+          //Need to start encoding another song if we don't have any current songs left
+          //If first song could not be tempo detected, a follow-up song is automatically added and we don't need to do it here. Otherwise, add follow-up song.
           if (song.hadTempoFailure !== true) {
-            //only add follow-up song if this was not the first song, since first songs automatically have a follow-up song
             addFollowUpSong(session);
           }
         }

@@ -84,7 +84,7 @@ const addToBuffer = async (session) => {
             }
           }));
 
-        if (endTime > song.endTime) {
+        if (endTime >= song.endTime) {
           //need to move song from currentSongs into finshedSongs if we reached its end
           session.currentSongs.splice(session.currentSongs.findIndex(ele => ele === song), 1);
           session.finishedSongs.push(song);

@@ -114,11 +114,6 @@ export async function addFollowUpSong(session) {
   ))) {
     try {
       const tempSong = await testFollowUpSong(session, previousSongPath);//eslint-disable-line no-await-in-loop
-      //exit early if skip request came while we were waiting for analysis to finish
-      if (session.prematureSkip === true) {
-        tempSong.song.destroy();
-        break;
-      }
 
       const tempTempo = Math.abs(previousBpm / tempSong.tempo.bpmStart - 1.0);
       if (tempTempo < followUpTempo) {

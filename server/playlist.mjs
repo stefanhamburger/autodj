@@ -66,7 +66,7 @@ async function testFollowUpSong(session, previousSongPath) {
   const randomFile = files[Math.floor(Math.random() * files.length)];
 
   const id = generateId(session);
-  const songWrapper = { id, songRef: randomFile };
+  const songWrapper = { id, songRef: randomFile, skippable: false };
   songWrapper.song = analyseSong(session, songWrapper, false);
   console.log(`${consoleColors.magenta(`[${session.sid}]`)} Analysing ${consoleColors.green(songWrapper.songRef.name)}...`);
   //inform client that we are considering this follow-up song - subject to successful tempo detection etc.
@@ -106,7 +106,7 @@ export async function addFollowUpSong(session) {
   let followUpSong;
   let followUpTempo = Number.POSITIVE_INFINITY;
   //Continue finding follow-up songs, as long as:
-  while (session.killed !== true && (followUpSong === undefined || (
+  while (session.killed !== true && session.prematureSkip !== true && (followUpSong === undefined || (
     //- We still haven't found a song within 5% bpm of the current song
     followUpTempo > 0.05 &&
     //- There is more than 90 seconds left in the current song
@@ -114,6 +114,12 @@ export async function addFollowUpSong(session) {
   ))) {
     try {
       const tempSong = await testFollowUpSong(session, previousSongPath);//eslint-disable-line no-await-in-loop
+      //exit early if skip request came while we were waiting for analysis to finish
+      if (session.prematureSkip === true) {
+        tempSong.song.destroy();
+        break;
+      }
+
       const tempTempo = Math.abs(previousBpm / tempSong.tempo.bpmStart - 1.0);
       if (tempTempo < followUpTempo) {
         //we have found a new best follow-up song, kill previous choice
@@ -123,6 +129,16 @@ export async function addFollowUpSong(session) {
         //store new best choice
         followUpSong = tempSong;
         followUpTempo = tempTempo;
+
+        //If we found a song within 10% bpm, already allow skipping even though we have not yet found an optimal follow-up song
+        if (followUpTempo < 0.10 && previousSong.skippable === false) {
+          //Notify client that previous song can now be skipped
+          previousSong.skippable = true;
+          session.emitEvent({
+            type: 'CAN_SKIP',
+            id: previousSong.id,
+          });
+        }
       } else {
         //song is not picked, kill process
         tempSong.song.destroy();
@@ -237,12 +253,6 @@ export async function addFollowUpSong(session) {
       beats: followUpSong.tempo.beats,
     });
 
-    //Notify client that previous song can now be skipped
-    session.emitEvent({
-      type: 'CAN_SKIP',
-      id: previousSong.id,
-    });
-
     //Notify client that waveform data is ready
     followUpSong.song.thumbnail.then(() => {
       session.emitEvent({ type: 'THUMBNAIL_READY', id: followUpSong.id });
@@ -264,7 +274,7 @@ export async function addFirstSong(session, offset = 0) {
   const randomFile = files[Math.floor(Math.random() * files.length)];
 
   const id = generateId(session);
-  const songWrapper = { id, songRef: randomFile };
+  const songWrapper = { id, songRef: randomFile, skippable: false };
 
   songWrapper.song = analyseSong(session, songWrapper, true);
   console.log(`${consoleColors.magenta(`[${session.sid}]`)} Adding to playlist: ${consoleColors.green(songWrapper.songRef.name)}...`);

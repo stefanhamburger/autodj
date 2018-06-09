@@ -139,6 +139,7 @@ export const init = (session) => {
   session.currentSongs = [];//the list of current and upcoming songs. We look at this list when getting songs for mixing
   session.encoderPosition = 0;//the current position where we are encoding audio data
   session.samplesToAdd = PRELOAD_BUFFER_LENGTH;//how many samples we need to feed to FFmpeg
+  session.prematureSkip = false;//whether to skip to end before an optimal song has been found
 
   //Encoder
   {

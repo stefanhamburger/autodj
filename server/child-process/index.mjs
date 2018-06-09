@@ -57,7 +57,7 @@ let processMessages;
       //calculate correct timing values based on tempo adjustment
       const convertedTiming = calculateTiming(msg.offset, msg.length, msg.tempoChange);
       //adjust tempo based on msg.tempoChange
-      const inputBuffer = audioBuffer.slice((msg.pieceStart + convertedTiming.startingSample) * NUM_CHANNELS, (msg.pieceStart + convertedTiming.endingSample - 1) * NUM_CHANNELS + 1);
+      const inputBuffer = audioBuffer.slice((msg.pieceStart + convertedTiming.startingSample) * NUM_CHANNELS, (msg.pieceStart + convertedTiming.endingSample + 1) * NUM_CHANNELS);
       const tempoAdjustedBuffer = startTempoChange(inputBuffer, msg.tempoChange, invMaxLoudness);
       sendBuffer(msg.id, tempoAdjustedBuffer.buffer, convertedTiming.offsetAfterAdj * BYTES_PER_SAMPLE, msg.length * BYTES_PER_SAMPLE);
     });

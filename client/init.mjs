@@ -150,6 +150,6 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     requestAnimationFrame(redrawSpectrogram);
   });
-  startLink.innerHTML = 'Start stream';
+  startLink.innerHTML = 'Start playback';
   startLink.disabled = false;
 });

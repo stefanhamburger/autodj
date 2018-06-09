@@ -131,7 +131,7 @@ export async function addFollowUpSong(session) {
         followUpTempo = tempTempo;
 
         //If we found a song within 10% bpm, already allow skipping even though we have not yet found an optimal follow-up song
-        if (followUpTempo < 0.10 && previousSong.skippable === false) {
+        if (followUpTempo < 0.20 && previousSong.skippable === false) {
           //Notify client that previous song can now be skipped
           previousSong.skippable = true;
           session.emitEvent({

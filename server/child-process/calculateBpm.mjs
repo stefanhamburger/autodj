@@ -1,11 +1,11 @@
 export default function calculateBpm(beats, startIndex, count) {
-  //Transform 41 beat positions to 40 beat distances
+  //Transform 25 beat positions to 24 beat distances
   const beatDistances = [];
   for (let i = startIndex + 1; i < startIndex + count; i += 1) {
     beatDistances.push(beats[i] - beats[i - 1]);
   }
 
-  //Sort by distance, then take median 20 values and calculate their average
+  //Sort by distance, then take median 12 values and calculate their average
   beatDistances.sort();
   const medianLength = (count - 1) >>> 1;
   const medianStart = medianLength >>> 1;
